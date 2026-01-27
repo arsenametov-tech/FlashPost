@@ -27,6 +27,11 @@ class FlashPostApp {
             this.addHapticToButtons();
             this.adaptToTelegramTheme();
             
+            // Проверяем состояние UI после инициализации
+            setTimeout(() => {
+                this.checkAndRestoreUI();
+            }, 500);
+            
             console.log('✅ Приложение успешно инициализировано');
             this.showToast('🎉 FlashPost AI готов к работе!', 'success');
         } catch (error) {
@@ -4407,6 +4412,37 @@ class FlashPostApp {
         }, 3000);
     }
 
+    // Проверка и восстановление состояния UI
+    checkAndRestoreUI() {
+        console.log('🔧 Проверка состояния UI...');
+        
+        // Проверяем кнопку шаблонов
+        const templateBtn = document.getElementById('templateBtn');
+        if (templateBtn) {
+            // Проверяем, есть ли обработчик событий
+            if (!templateBtn._hasEventListener) {
+                console.log('🔧 Восстанавливаем обработчик кнопки шаблонов');
+                templateBtn.addEventListener('click', () => this.openTemplatesModal());
+                templateBtn._hasEventListener = true;
+            }
+            
+            // Убеждаемся что кнопка видима
+            if (templateBtn.style.display === 'none') {
+                templateBtn.style.display = '';
+                console.log('🔧 Восстановлена видимость кнопки шаблонов');
+            }
+        }
+        
+        // Проверяем другие важные элементы
+        const generateBtn = document.getElementById('generateBtn');
+        if (generateBtn && !generateBtn._hasEventListener) {
+            generateBtn.addEventListener('click', () => this.handleGenerate());
+            generateBtn._hasEventListener = true;
+        }
+        
+        console.log('✅ Проверка UI завершена');
+    }
+
     // Setup touch navigation for mobile devices
     setupTouchNavigation() {
         const carouselContainer = document.getElementById('carouselTrack');
@@ -4731,10 +4767,27 @@ class FlashPostApp {
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        window.app = new FlashPostApp();
-        console.log('✅ FlashPost App успешно инициализирован');
+        // Проверяем, не существует ли уже экземпляр приложения
+        if (!window.app) {
+            window.app = new FlashPostApp();
+            console.log('✅ FlashPost App успешно инициализирован');
+        } else {
+            console.log('ℹ️ FlashPost App уже существует');
+        }
     } catch (error) {
         console.error('❌ Критическая ошибка инициализации:', error);
+        
+        // Попытка повторной инициализации через секунду
+        setTimeout(() => {
+            try {
+                if (!window.app) {
+                    window.app = new FlashPostApp();
+                    console.log('✅ FlashPost App инициализирован при повторной попытке');
+                }
+            } catch (retryError) {
+                console.error('❌ Повторная ошибка инициализации:', retryError);
+            }
+        }, 1000);
         
         // Показываем ошибку пользователю
         const errorDiv = document.createElement('div');
@@ -4761,7 +4814,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Handle page visibility for Telegram WebApp
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && window.app) {
+    if (document.visibilityState === 'visible') {
         console.log('📱 Приложение стало видимым');
+        
+        // Проверяем и восстанавливаем состояние приложения
+        if (!window.app) {
+            console.log('🔧 Восстанавливаем приложение после закрытия мини-приложения');
+            try {
+                window.app = new FlashPostApp();
+                console.log('✅ Приложение восстановлено');
+            } catch (error) {
+                console.error('❌ Ошибка восстановления приложения:', error);
+            }
+        } else {
+            // Проверяем и восстанавливаем состояние UI
+            window.app.checkAndRestoreUI();
+        }
     }
 });

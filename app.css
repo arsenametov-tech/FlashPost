@@ -1,4 +1,4 @@
-/* ===== TELEGRAM MINI APP STYLES - ОПТИМИЗИРОВАННАЯ ВЕРСИЯ ===== */
+/* ===== FLASHPOST AI - МИНИ-ПРИЛОЖЕНИЕ ===== */
 
 :root {
     /* Telegram цвета */
@@ -10,12 +10,12 @@
     --tg-secondary: var(--tg-theme-secondary-bg-color, #f0f0f0);
     
     /* Основные цвета */
-    --primary-color: #833ab4;
+    --primary: #833ab4;
     --primary-light: rgba(131, 58, 180, 0.1);
-    --border-color: rgba(131, 58, 180, 0.2);
+    --border: rgba(131, 58, 180, 0.2);
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --border-radius: 12px;
-    --transition: all 0.2s ease; /* Быстрые переходы */
+    --radius: 12px;
+    --transition: all 0.2s ease;
 }
 
 /* Темная тема */
@@ -25,56 +25,70 @@
     --tg-hint: var(--tg-theme-hint-color, #666666);
     --tg-secondary: var(--tg-theme-secondary-bg-color, #2a2a2a);
     --primary-light: rgba(255, 255, 255, 0.1);
-    --border-color: rgba(255, 255, 255, 0.2);
+    --border: rgba(255, 255, 255, 0.2);
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Основные стили */
-.app-container {
+.app {
     background: var(--tg-bg);
     color: var(--tg-text);
     min-height: 100vh;
     min-height: 100dvh;
     padding: 16px;
     transition: opacity 0.3s ease;
-    opacity: 0;
 }
 
-/* Быстрый старт */
-.quick-start-section {
+/* Секции */
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== ГЛАВНЫЙ ЭКРАН ===== */
+.start-section {
     display: flex;
     flex-direction: column;
     gap: 20px;
     max-width: 100%;
 }
 
-.header-mini {
+.header {
     text-align: center;
     margin-bottom: 8px;
 }
 
-.app-title {
+.title {
     font-size: 24px;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--primary);
     margin-bottom: 4px;
 }
 
-.app-subtitle {
+.subtitle {
     font-size: 14px;
     color: var(--tg-hint);
     font-weight: 500;
 }
 
 /* Быстрые идеи */
-.quick-ideas {
+.ideas {
     background: var(--primary-light);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     padding: 16px;
 }
 
-.quick-ideas h3 {
+.ideas h3 {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 12px;
@@ -87,9 +101,9 @@
     gap: 8px;
 }
 
-.idea-item-mini {
+.idea {
     background: var(--tg-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 12px;
     font-size: 13px;
@@ -98,19 +112,20 @@
     cursor: pointer;
     transition: var(--transition);
     color: var(--tg-text);
+    touch-action: manipulation;
 }
 
-.idea-item-mini:active {
-    background: var(--primary-color);
+.idea:active {
+    background: var(--primary);
     color: white;
     transform: scale(0.95);
 }
 
 /* Ввод темы */
-.topic-input-section {
+.input-section {
     background: var(--primary-light);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     padding: 16px;
 }
 
@@ -126,10 +141,10 @@
     position: relative;
 }
 
-.topic-input-mini {
+.topic-input {
     width: 100%;
     background: var(--tg-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 12px;
     font-size: 16px;
@@ -142,12 +157,12 @@
     line-height: 1.4;
 }
 
-.topic-input-mini:focus {
-    border-color: var(--primary-color);
+.topic-input:focus {
+    border-color: var(--primary);
     background: var(--tg-bg);
 }
 
-.topic-input-mini::placeholder {
+.topic-input::placeholder {
     color: var(--tg-hint);
 }
 
@@ -160,18 +175,17 @@
     font-weight: 500;
 }
 
-/* Кнопки действий */
-.action-buttons-mini {
+/* Кнопки */
+.actions {
     display: flex;
     gap: 12px;
 }
 
-.btn-secondary,
-.btn-primary {
+.btn {
     flex: 1;
     padding: 14px 16px;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -181,13 +195,14 @@
     justify-content: center;
     gap: 6px;
     font-family: inherit;
+    touch-action: manipulation;
     position: relative;
 }
 
 .btn-secondary {
     background: var(--tg-secondary);
     color: var(--tg-text);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
 }
 
 .btn-secondary:active {
@@ -196,7 +211,7 @@
 }
 
 .btn-primary {
-    background: var(--primary-color);
+    background: var(--primary);
     color: white;
 }
 
@@ -205,13 +220,12 @@
     transform: scale(0.95);
 }
 
-.btn-primary:disabled {
+.btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
-/* Загрузчик кнопки */
 .btn-loader {
     position: absolute;
     top: 50%;
@@ -233,9 +247,9 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Карусель */
+/* ===== КАРУСЕЛЬ ===== */
 .carousel-section {
-    padding: 16px;
+    padding: 0;
     max-width: 100%;
 }
 
@@ -259,8 +273,8 @@
 
 .carousel-container {
     background: var(--primary-light);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     padding: 16px;
     margin-bottom: 20px;
 }
@@ -271,10 +285,10 @@
     overflow: hidden;
     border-radius: 8px;
     margin-bottom: 16px;
-    background: var(--primary-color);
+    background: var(--primary);
 }
 
-.carousel-slide {
+.slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -288,17 +302,12 @@
     transform: translateX(100%);
     transition: all 0.3s ease;
     padding: 20px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, #fd1d1d 50%, #fcb045 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, #fd1d1d 50%, #fcb045 100%);
 }
 
-.carousel-slide.active {
+.slide.active {
     opacity: 1;
     transform: translateX(0);
-}
-
-.slide-content {
-    text-align: center;
-    width: 100%;
 }
 
 .slide-text {
@@ -306,6 +315,7 @@
     font-weight: 600;
     color: white;
     line-height: 1.4;
+    text-align: center;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -321,21 +331,36 @@
     font-weight: 600;
 }
 
-/* Навигация карусели */
-.carousel-navigation {
+.slide-instagram {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+}
+
+/* Навигация */
+.carousel-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
 }
 
-/* Кнопки навигации карусели */
 .nav-btn {
     width: 44px;
     height: 44px;
     border: none;
     border-radius: 50%;
-    background: var(--primary-color);
+    background: var(--primary);
     color: white;
     font-size: 18px;
     font-weight: 700;
@@ -345,7 +370,6 @@
     align-items: center;
     justify-content: center;
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
 }
 
 .nav-btn:active {
@@ -360,8 +384,7 @@
     background: var(--tg-hint);
 }
 
-/* Индикаторы слайдов */
-.slide-indicators {
+.indicators {
     display: flex;
     gap: 8px;
     flex: 1;
@@ -378,7 +401,6 @@
     cursor: pointer;
     transition: var(--transition);
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
     position: relative;
 }
 
@@ -393,7 +415,7 @@
 }
 
 .indicator.active {
-    background: var(--primary-color);
+    background: var(--primary);
     transform: scale(1.4);
 }
 
@@ -401,13 +423,7 @@
     transform: scale(1.6);
 }
 
-/* Действия карусели */
-.carousel-actions {
-    display: flex;
-    gap: 12px;
-}
-
-/* Редактор в стиле Canva - минимализм */
+/* ===== РЕДАКТОР ===== */
 .editor-section {
     padding: 0;
     max-width: 100%;
@@ -417,7 +433,6 @@
     flex-direction: column;
 }
 
-/* Хедер редактора - чистый и минималистичный */
 .editor-header {
     display: flex;
     justify-content: space-between;
@@ -434,10 +449,9 @@
     font-size: 16px;
     font-weight: 600;
     color: var(--tg-text);
-    margin: 0;
 }
 
-.editor-slide-nav {
+.editor-nav {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -459,18 +473,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
     touch-action: manipulation;
-}
-
-.editor-nav-btn::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border-radius: 50%;
 }
 
 .editor-nav-btn:hover:not(:disabled) {
@@ -489,7 +492,7 @@
     cursor: not-allowed;
 }
 
-.editor-slide-counter {
+.editor-counter {
     font-size: 11px;
     color: #666;
     font-weight: 500;
@@ -498,7 +501,6 @@
     padding: 0 4px;
 }
 
-/* Основной контент редактора */
 .editor-content {
     flex: 1;
     display: flex;
@@ -507,28 +509,28 @@
     gap: 20px;
 }
 
-/* Превью слайда - как в Canva */
+/* Превью */
 .editor-preview {
     background: #ffffff;
     border-radius: 8px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow);
     border: 1px solid #e5e5e5;
 }
 
-.editor-preview-container {
+.preview-container {
     display: flex;
     align-items: center;
     gap: 12px;
     justify-content: center;
 }
 
-.editor-preview-nav {
+.preview-nav {
     width: 36px;
     height: 36px;
     border: none;
     border-radius: 50%;
-    background: var(--primary-color);
+    background: var(--primary);
     color: white;
     font-size: 16px;
     font-weight: 700;
@@ -538,39 +540,30 @@
     align-items: center;
     justify-content: center;
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
     flex-shrink: 0;
 }
 
-.editor-preview-nav:hover:not(:disabled) {
+.preview-nav:hover:not(:disabled) {
     background: #6d2d96;
     transform: scale(1.05);
 }
 
-.editor-preview-nav:active:not(:disabled) {
+.preview-nav:active:not(:disabled) {
     transform: scale(0.95);
 }
 
-.editor-preview-nav:disabled {
+.preview-nav:disabled {
     opacity: 0.3;
     cursor: not-allowed;
     background: var(--tg-hint);
     transform: none;
 }
 
-.editor-preview-nav.prev {
-    order: -1;
-}
-
-.editor-preview-nav.next {
-    order: 1;
-}
-
-.slide-preview-mini {
+.slide-preview {
     width: 100%;
     max-width: 280px;
     height: 200px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, #fd1d1d 50%, #fcb045 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, #fd1d1d 50%, #fcb045 100%);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -579,27 +572,88 @@
     position: relative;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
+    transition: all 0.3s ease;
 }
 
-.slide-preview-text {
+.slide-preview.updating {
+    transform: scale(0.95);
+    opacity: 0.7;
+}
+
+.preview-text {
     color: white;
     font-size: 14px;
     font-weight: 600;
     line-height: 1.4;
     text-align: center;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
 }
 
-/* Панель инструментов - минималистичная */
+.preview-instagram {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+
+.editor-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 8px;
+}
+
+.editor-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e5e5e5;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    position: relative;
+}
+
+.editor-indicator::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 50%;
+}
+
+.editor-indicator.active {
+    background: var(--primary);
+    transform: scale(1.3);
+}
+
+.editor-indicator:active {
+    transform: scale(1.5);
+}
+
+/* Инструменты */
 .editor-tools {
     background: #ffffff;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow);
     border: 1px solid #e5e5e5;
     overflow: hidden;
 }
 
-/* Секции инструментов */
 .tool-section {
     padding: 16px;
     border-bottom: 1px solid #f1f3f4;
@@ -619,8 +673,7 @@
     display: block;
 }
 
-/* Текстовый редактор */
-.text-editor-canva {
+.text-editor {
     width: 100%;
     background: #f8f9fa;
     border: 1px solid #e5e5e5;
@@ -636,62 +689,50 @@
     line-height: 1.4;
 }
 
-.text-editor-canva:focus {
-    border-color: var(--primary-color);
+.text-editor:focus {
+    border-color: var(--primary);
     background: #ffffff;
     box-shadow: 0 0 0 2px rgba(131, 58, 180, 0.1);
 }
 
-.text-editor-canva::placeholder {
-    color: #9aa0a6;
+.text-editor.updating {
+    opacity: 0.7;
+    transform: translateY(-2px);
 }
 
-/* Слайдер в стиле Canva */
-.slider-canva {
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider {
     width: 100%;
     height: 4px;
     border-radius: 2px;
     background: #e8eaed;
     outline: none;
     appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     cursor: pointer;
 }
 
-.slider-canva::-webkit-slider-thumb {
+.slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--primary-color);
+    background: var(--primary);
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: all 0.15s ease;
 }
 
-.slider-canva::-webkit-slider-thumb:hover {
+.slider::-webkit-slider-thumb:hover {
     transform: scale(1.1);
     box-shadow: 0 2px 8px rgba(131, 58, 180, 0.3);
 }
 
-.slider-canva::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.slider-container-canva {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.slider-value-canva {
+.slider-value {
     font-size: 12px;
     color: #5f6368;
     font-weight: 500;
@@ -702,14 +743,13 @@
     border-radius: 12px;
 }
 
-/* Кнопки опций в стиле Canva */
-.option-buttons-canva {
+.option-buttons {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-.option-btn-canva {
+.option-btn {
     padding: 8px 12px;
     border: 1px solid #e5e5e5;
     border-radius: 6px;
@@ -721,26 +761,26 @@
     transition: all 0.15s ease;
     min-width: 60px;
     text-align: center;
+    touch-action: manipulation;
 }
 
-.option-btn-canva:hover {
+.option-btn:hover {
     border-color: #dadce0;
     background: #f8f9fa;
 }
 
-.option-btn-canva.active {
-    background: var(--primary-color);
+.option-btn.active {
+    background: var(--primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--primary);
     box-shadow: 0 1px 3px rgba(131, 58, 180, 0.3);
 }
 
-.option-btn-canva:active {
+.option-btn:active {
     transform: scale(0.98);
 }
 
-/* Цветовые кнопки */
-.color-btn-canva {
+.color-btn {
     width: 32px;
     height: 32px;
     border: 2px solid #e5e5e5;
@@ -748,19 +788,20 @@
     cursor: pointer;
     transition: all 0.15s ease;
     position: relative;
+    touch-action: manipulation;
 }
 
-.color-btn-canva:hover {
+.color-btn:hover {
     transform: scale(1.05);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.color-btn-canva.active {
+.color-btn.active {
     border-color: #333;
     box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.2);
 }
 
-.color-btn-canva.active::after {
+.color-btn.active::after {
     content: '✓';
     position: absolute;
     top: 50%;
@@ -772,8 +813,8 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Нижняя панель действий */
-.editor-actions-canva {
+/* Действия редактора */
+.editor-actions {
     padding: 16px;
     background: var(--tg-bg);
     border-top: 1px solid #e5e5e5;
@@ -783,7 +824,7 @@
     bottom: 0;
 }
 
-.editor-btn-canva {
+.editor-btn {
     flex: 1;
     padding: 12px 16px;
     border: none;
@@ -797,101 +838,50 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    touch-action: manipulation;
 }
 
-.editor-btn-canva.secondary {
+.editor-btn.secondary {
     background: #f8f9fa;
     color: #5f6368;
     border: 1px solid #e5e5e5;
 }
 
-.editor-btn-canva.secondary:hover {
+.editor-btn.secondary:hover {
     background: #e8f0fe;
     color: #1a73e8;
     border-color: #dadce0;
 }
 
-.editor-btn-canva.primary {
-    background: var(--primary-color);
+.editor-btn.primary {
+    background: var(--primary);
     color: white;
     box-shadow: 0 1px 3px rgba(131, 58, 180, 0.3);
 }
 
-.editor-btn-canva.primary:hover {
+.editor-btn.primary:hover {
     background: #6d2d96;
     box-shadow: 0 2px 6px rgba(131, 58, 180, 0.4);
 }
 
-.editor-btn-canva.success {
+.editor-btn.success {
     background: #34a853;
     color: white;
     box-shadow: 0 1px 3px rgba(52, 168, 83, 0.3);
 }
 
-.editor-btn-canva.success:hover {
+.editor-btn.success:hover {
     background: #2d8f47;
     box-shadow: 0 2px 6px rgba(52, 168, 83, 0.4);
 }
 
-.editor-btn-canva:active {
+.editor-btn:active {
     transform: scale(0.98);
-}
-
-/* Адаптивность для редактора */
-@media (max-width: 480px) {
-    .editor-content {
-        padding: 12px;
-        gap: 16px;
-    }
-    
-    .slide-preview-mini {
-        height: 180px;
-        max-width: 240px;
-    }
-    
-    .editor-preview-nav {
-        width: 32px;
-        height: 32px;
-        font-size: 14px;
-    }
-    
-    .editor-preview-container {
-        gap: 8px;
-    }
-    
-    .tool-section {
-        padding: 12px;
-    }
-    
-    .editor-actions-canva {
-        padding: 12px;
-        flex-direction: column;
-    }
-    
-    .option-buttons-canva {
-        justify-content: center;
-    }
-}
-
-/* Анимации для плавности */
-.editor-section {
-    animation: slideInFromRight 0.3s ease-out;
-}
-
-@keyframes slideInFromRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
 }
 
 /* Адаптивность */
 @media (max-width: 480px) {
-    .app-container {
+    .app {
         padding: 12px;
     }
     
@@ -903,7 +893,32 @@
         font-size: 14px;
     }
     
+    .editor-content {
+        padding: 12px;
+        gap: 16px;
+    }
+    
+    .slide-preview {
+        height: 180px;
+        max-width: 240px;
+    }
+    
+    .preview-nav {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .preview-container {
+        gap: 8px;
+    }
+    
+    .tool-section {
+        padding: 12px;
+    }
+    
     .editor-actions {
+        padding: 12px;
         flex-direction: column;
     }
     
@@ -912,35 +927,17 @@
     }
 }
 
-/* Анимации */
-.app-container {
-    animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Улучшения для touch устройств */
+/* Touch устройства */
 @media (hover: none) and (pointer: coarse) {
-    .idea-item-mini:active,
-    .btn-secondary:active,
-    .btn-primary:active,
+    .idea:active,
+    .btn:active,
     .nav-btn:active,
     .editor-nav-btn:active,
-    .option-btn-canva:active,
-    .editor-btn-canva:active {
+    .option-btn:active,
+    .editor-btn:active {
         transform: scale(0.95);
     }
     
-    /* Увеличиваем область касания для мелких элементов */
     .indicator,
     .editor-nav-btn,
     .nav-btn {
@@ -948,11 +945,10 @@
         min-height: 44px;
     }
     
-    /* Убираем hover эффекты на touch устройствах */
     .editor-nav-btn:hover,
-    .option-btn-canva:hover,
-    .color-btn-canva:hover,
-    .editor-btn-canva:hover {
+    .option-btn:hover,
+    .color-btn:hover,
+    .editor-btn:hover {
         transform: none;
         background: initial;
         border-color: initial;
