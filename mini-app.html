@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FlashPost AI</title>
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Preload критичные шрифты -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Критичные стили для быстрой загрузки */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            height: 100vh;
+            height: 100dvh;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--tg-theme-bg-color, #ffffff);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .loading-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #000000);
+            margin-bottom: 10px;
+        }
+        
+        .loading-subtitle {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        .app-container {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран загрузки -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">
+            <svg width="40" height="40" viewBox="0 0 32 32" fill="white">
+                <path d="M8 6 L10 6 L10 12 L11 12 L9 16 L8 14 L8 20 L6 20 L6 6 Z"/>
+                <rect x="8" y="6" width="16" height="3" rx="1.5" opacity="0.9"/>
+                <rect x="8" y="12" width="14" height="2.5" rx="1.25" opacity="0.7"/>
+            </svg>
+        </div>
+        <div class="loading-text">FlashPost AI</div>
+        <div class="loading-subtitle">Загружаем генератор каруселей...</div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div class="app-container" id="appContainer">
+        <!-- Быстрый старт -->
+        <div class="quick-start-section" id="quickStartSection">
+            <div class="header-mini">
+                <h1 class="app-title">⚡ FlashPost AI</h1>
+                <p class="app-subtitle">Создай карусель за 30 секунд</p>
+            </div>
+            
+            <!-- Быстрые идеи -->
+            <div class="quick-ideas" id="quickIdeas">
+                <h3>💡 Популярные темы</h3>
+                <div class="ideas-grid" id="ideasGrid">
+                    <!-- Заполняется JS -->
+                </div>
+            </div>
+            
+            <!-- Ввод темы -->
+            <div class="topic-input-section">
+                <label class="input-label">О чем создать карусель?</label>
+                <div class="input-wrapper">
+                    <textarea 
+                        id="topicInput" 
+                        class="topic-input-mini" 
+                        placeholder="Например: Здоровое питание, Продуктивность, Финансы..."
+                        rows="2"
+                        maxlength="200"
+                    ></textarea>
+                    <div class="input-counter" id="inputCounter">0/200</div>
+                </div>
+            </div>
+            
+            <!-- Кнопки действий -->
+            <div class="action-buttons-mini">
+                <button class="btn-secondary" id="manualBtn">
+                    ✏️ Ручной ввод
+                </button>
+                <button class="btn-primary" id="generateBtn">
+                    <span class="btn-text">🚀 Создать</span>
+                    <div class="btn-loader" style="display: none;">
+                        <div class="spinner"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Карусель -->
+        <div class="carousel-section" id="carouselSection" style="display: none;">
+            <!-- Заполняется JS -->
+        </div>
+        
+        <!-- Редактор -->
+        <div class="editor-section" id="editorSection" style="display: none;">
+            <!-- Заполняется JS -->
+        </div>
+    </div>
+
+    <!-- Подключаем основные стили и скрипты асинхронно -->
+    <link rel="stylesheet" href="mini-app.css">
+    <script src="mini-app.js" defer></script>
+</body>
+</html>

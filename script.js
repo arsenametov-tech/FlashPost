@@ -9,6 +9,7 @@ class FlashPostApp {
         this.slideStyles = [];
         this.downloadEventsInitialized = false; // Флаг для предотвращения дублирования событий
         this.isDownloading = false; // Флаг для предотвращения повторного скачивания
+        this.bubblesInterval = null; // Интервал для пузырьков
         
         console.log('🚀 Инициализация FlashPost App...');
         this.init();
@@ -22,6 +23,10 @@ class FlashPostApp {
             this.setupHapticFeedback();
             this.loadQuickIdeas();
             
+            // Дополнительная настройка для Mini App
+            this.addHapticToButtons();
+            this.adaptToTelegramTheme();
+            
             console.log('✅ Приложение успешно инициализировано');
             this.showToast('🎉 FlashPost AI готов к работе!', 'success');
         } catch (error) {
@@ -34,6 +39,8 @@ class FlashPostApp {
     initTelegramWebApp() {
         if (window.Telegram?.WebApp) {
             const tg = window.Telegram.WebApp;
+            
+            // Основная инициализация
             tg.ready();
             tg.expand();
             
@@ -41,8 +48,109 @@ class FlashPostApp {
             tg.setHeaderColor('#833ab4');
             tg.setBackgroundColor('#833ab4');
             
+            // Настройка главной кнопки
+            this.setupMainButton(tg);
+            
+            // Настройка кнопки назад
+            this.setupBackButton(tg);
+            
+            // Получение данных пользователя
+            this.setupUserData(tg);
+            
+            // Настройка закрытия приложения
+            this.setupCloseConfirmation(tg);
+            
+            // Сохраняем ссылку на Telegram WebApp
+            this.tg = tg;
+            
             console.log('✅ Telegram WebApp инициализирован');
+            console.log('👤 Пользователь:', tg.initDataUnsafe?.user);
+        } else {
+            console.log('ℹ️ Приложение запущено вне Telegram');
         }
+    }
+
+    // Настройка главной кнопки Telegram
+    setupMainButton(tg) {
+        tg.MainButton.text = "🎨 Создать карусель";
+        tg.MainButton.color = "#833ab4";
+        tg.MainButton.textColor = "#ffffff";
+        
+        // Обработчик нажатия главной кнопки
+        tg.MainButton.onClick(() => {
+            const topicInput = document.getElementById('topicInput');
+            if (topicInput && topicInput.value.trim()) {
+                this.handleGenerate();
+            } else {
+                this.showToast('💡 Введите тему для карусели', 'info');
+                topicInput?.focus();
+            }
+        });
+        
+        // Показываем кнопку только когда есть текст
+        const topicInput = document.getElementById('topicInput');
+        if (topicInput) {
+            topicInput.addEventListener('input', () => {
+                if (topicInput.value.trim().length > 2) {
+                    tg.MainButton.show();
+                } else {
+                    tg.MainButton.hide();
+                }
+            });
+        }
+    }
+
+    // Настройка кнопки назад
+    setupBackButton(tg) {
+        tg.BackButton.onClick(() => {
+            const carouselSection = document.getElementById('carouselSection');
+            const editorOverlay = document.getElementById('editorOverlay');
+            
+            if (editorOverlay && editorOverlay.style.display !== 'none') {
+                // Закрываем редактор
+                this.closeEditor();
+            } else if (carouselSection && carouselSection.style.display !== 'none') {
+                // Возвращаемся к главному экрану
+                this.showMainScreen();
+                tg.BackButton.hide();
+                tg.MainButton.text = "🎨 Создать карусель";
+                tg.MainButton.show();
+            }
+        });
+    }
+
+    // Получение данных пользователя Telegram
+    setupUserData(tg) {
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            // Автозаполнение никнейма
+            const nicknameInput = document.getElementById('nicknameInput');
+            if (nicknameInput && !nicknameInput.value) {
+                const displayName = user.first_name + (user.last_name ? ` ${user.last_name}` : '');
+                nicknameInput.value = displayName;
+            }
+            
+            // Автозаполнение Telegram контакта
+            const telegramInput = document.getElementById('telegramInput');
+            if (telegramInput && !telegramInput.value && user.username) {
+                telegramInput.value = user.username;
+            }
+            
+            console.log('👤 Данные пользователя загружены:', {
+                name: user.first_name,
+                username: user.username
+            });
+        }
+    }
+
+    // Настройка подтверждения закрытия
+    setupCloseConfirmation(tg) {
+        tg.enableClosingConfirmation();
+        
+        // Обработчик события закрытия
+        tg.onEvent('viewportChanged', () => {
+            console.log('📱 Viewport изменен:', tg.viewportHeight);
+        });
     }
 
     // Haptic Feedback
@@ -58,9 +166,29 @@ class FlashPostApp {
                     window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
             },
+            warning: () => {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+                }
+            },
+            light: () => {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
+            },
             medium: () => {
                 if (window.Telegram?.WebApp?.HapticFeedback) {
                     window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+                }
+            },
+            heavy: () => {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+                }
+            },
+            selection: () => {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    window.Telegram.WebApp.HapticFeedback.selectionChanged();
                 }
             }
         };
@@ -70,6 +198,11 @@ class FlashPostApp {
     createFloatingBubbles() {
         const bubblesContainer = document.getElementById('bubbles');
         if (!bubblesContainer) return;
+
+        // Очищаем предыдущий интервал если есть
+        if (this.bubblesInterval) {
+            clearInterval(this.bubblesInterval);
+        }
 
         const createBubble = () => {
             const bubble = document.createElement('div');
@@ -94,12 +227,24 @@ class FlashPostApp {
         };
 
         // Создаем пузырьки каждые 2 секунды
-        setInterval(createBubble, 2000);
+        this.bubblesInterval = setInterval(createBubble, 2000);
         
         // Создаем начальные пузырьки
         for (let i = 0; i < 5; i++) {
             setTimeout(createBubble, i * 400);
         }
+    }
+
+    // Cleanup resources
+    cleanup() {
+        // Очищаем интервал пузырьков
+        if (this.bubblesInterval) {
+            clearInterval(this.bubblesInterval);
+            this.bubblesInterval = null;
+        }
+        
+        // Очищаем другие ресурсы при необходимости
+        console.log('🧹 Ресурсы очищены');
     }
 
     // Bind Events
@@ -286,13 +431,17 @@ class FlashPostApp {
             const ideaElement = document.createElement('div');
             ideaElement.className = 'idea-item';
             ideaElement.textContent = idea;
-            ideaElement.addEventListener('click', () => {
+            
+            // Используем именованную функцию для возможности удаления
+            const clickHandler = () => {
                 const topicInput = document.getElementById('topicInput');
                 if (topicInput) {
                     topicInput.value = idea;
                     this.haptic.medium();
                 }
-            });
+            };
+            
+            ideaElement.addEventListener('click', clickHandler);
             ideasContainer.appendChild(ideaElement);
         });
     }
@@ -4402,6 +4551,180 @@ class FlashPostApp {
                 document.body.removeChild(modal);
             }
         };
+    }
+
+    // ===== TELEGRAM MINI APP МЕТОДЫ =====
+
+    // Показать главный экран
+    showMainScreen() {
+        const carouselSection = document.getElementById('carouselSection');
+        const inputSection = document.querySelector('.input-section');
+        const quickIdeasSection = document.querySelector('.quick-ideas-section');
+        
+        if (carouselSection) carouselSection.style.display = 'none';
+        if (inputSection) inputSection.style.display = 'block';
+        if (quickIdeasSection) quickIdeasSection.style.display = 'block';
+        
+        // Обновляем главную кнопку Telegram
+        if (this.tg) {
+            this.tg.MainButton.text = "🎨 Создать карусель";
+            this.tg.MainButton.show();
+            this.tg.BackButton.hide();
+        }
+    }
+
+    // Показать карусель
+    showCarousel() {
+        const carouselSection = document.getElementById('carouselSection');
+        const inputSection = document.querySelector('.input-section');
+        const quickIdeasSection = document.querySelector('.quick-ideas-section');
+        
+        if (carouselSection) carouselSection.style.display = 'block';
+        if (inputSection) inputSection.style.display = 'none';
+        if (quickIdeasSection) quickIdeasSection.style.display = 'none';
+        
+        // Обновляем кнопки Telegram
+        if (this.tg) {
+            this.tg.MainButton.text = "📤 Поделиться";
+            this.tg.MainButton.onClick(() => this.shareCarousel());
+            this.tg.BackButton.show();
+        }
+        
+        this.haptic.success();
+    }
+
+    // Открыть редактор
+    openEditor() {
+        const editorOverlay = document.getElementById('editorOverlay');
+        if (editorOverlay) {
+            editorOverlay.style.display = 'flex';
+            this.updateEditorContent();
+            
+            // Обновляем кнопки Telegram
+            if (this.tg) {
+                this.tg.MainButton.text = "💾 Сохранить";
+                this.tg.MainButton.onClick(() => this.saveCurrentSlide());
+                this.tg.BackButton.show();
+            }
+            
+            this.haptic.medium();
+        }
+    }
+
+    // Закрыть редактор
+    closeEditor() {
+        const editorOverlay = document.getElementById('editorOverlay');
+        if (editorOverlay) {
+            editorOverlay.style.display = 'none';
+            
+            // Возвращаем кнопки карусели
+            if (this.tg) {
+                this.tg.MainButton.text = "📤 Поделиться";
+                this.tg.MainButton.onClick(() => this.shareCarousel());
+            }
+            
+            this.haptic.light();
+        }
+    }
+
+    // Поделиться каруселью через Telegram
+    shareCarousel() {
+        if (!this.slides || this.slides.length === 0) {
+            this.showToast('Нет слайдов для отправки', 'error');
+            this.haptic.error();
+            return;
+        }
+
+        // Создаем текст для отправки
+        const shareText = this.generateShareText();
+        
+        if (this.tg) {
+            // Используем Telegram WebApp API для отправки
+            this.tg.sendData(JSON.stringify({
+                action: 'share_carousel',
+                slides_count: this.slides.length,
+                text: shareText,
+                timestamp: Date.now()
+            }));
+            
+            this.showToast('📤 Карусель отправлена в чат!', 'success');
+            this.haptic.success();
+        } else {
+            // Fallback для браузера
+            this.openShareModal();
+        }
+    }
+
+    // Генерация текста для отправки
+    generateShareText() {
+        const nickname = document.getElementById('nicknameInput')?.value.trim() || 'FlashPost AI';
+        const instagramContact = document.getElementById('instagramInput')?.value.trim();
+        const telegramContact = document.getElementById('telegramInput')?.value.trim();
+        
+        let shareText = `🎨 Карусель создана в FlashPost AI\n\n`;
+        shareText += `📊 Слайдов: ${this.slides.length}\n`;
+        shareText += `👤 Автор: ${nickname}\n\n`;
+        
+        if (instagramContact) {
+            shareText += `📷 Instagram: @${instagramContact}\n`;
+        }
+        if (telegramContact) {
+            shareText += `✈️ Telegram: @${telegramContact}\n`;
+        }
+        
+        shareText += `\n🚀 Создай свою карусель: @FlashPostBot`;
+        
+        return shareText;
+    }
+
+    // Обновление прогресса для Telegram
+    updateTelegramProgress(current, total, action = 'Обработка') {
+        if (this.tg) {
+            this.tg.MainButton.text = `${action} ${current}/${total}`;
+            this.tg.MainButton.showProgress();
+        }
+    }
+
+    // Скрытие прогресса
+    hideTelegramProgress() {
+        if (this.tg) {
+            this.tg.MainButton.hideProgress();
+        }
+    }
+
+    // Вибрация при действиях
+    addHapticToButtons() {
+        // Добавляем вибрацию ко всем кнопкам
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('button, .btn, .action-btn, .idea-item')) {
+                this.haptic.light();
+            }
+        });
+
+        // Специальная вибрация для важных действий
+        const generateBtn = document.getElementById('generateBtn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => this.haptic.medium());
+        }
+    }
+
+    // Адаптация под тему Telegram
+    adaptToTelegramTheme() {
+        if (this.tg) {
+            const themeParams = this.tg.themeParams;
+            
+            if (themeParams.bg_color) {
+                document.documentElement.style.setProperty('--tg-bg-color', themeParams.bg_color);
+            }
+            if (themeParams.text_color) {
+                document.documentElement.style.setProperty('--tg-text-color', themeParams.text_color);
+            }
+            if (themeParams.button_color) {
+                document.documentElement.style.setProperty('--tg-button-color', themeParams.button_color);
+            }
+            
+            console.log('🎨 Тема Telegram применена:', themeParams);
+        }
     }
 }
 
