@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест доступа - FlashPost AI</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #fd1d1d 75%, #833ab4 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(131, 58, 180, 0.3);
+            max-width: 600px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status {
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+        }
+        
+        .links {
+            margin: 30px 0;
+        }
+        
+        .link-btn {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .link-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .link-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-size: 1.1em;
+        }
+        
+        .info {
+            margin-top: 30px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .features {
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FlashPost AI</h1>
+        
+        <div class="status">
+            ✅ Сервер запущен и работает!
+        </div>
+        
+        <div class="links">
+            <a href="/" class="link-btn primary">🎨 Открыть FlashPost AI</a>
+            <a href="/check.html" class="link-btn">🔧 Проверка файлов</a>
+        </div>
+        
+        <div class="features">
+            <h3>🎯 Что можно попробовать:</h3>
+            <ul>
+                <li>Создать карусель с помощью ИИ</li>
+                <li>Ручной ввод текста на любую тему</li>
+                <li>Мини-превью всех слайдов</li>
+                <li>Быстрая навигация по слайдам</li>
+                <li>Полный редактор с drag&drop</li>
+                <li>Экспорт в PNG, JPEG, PDF</li>
+                <li>Система брендинга с логотипом</li>
+                <li>Сохранение шаблонов</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <p><strong>Адрес:</strong> <code>http://localhost:8000</code></p>
+            <p><strong>Время запуска:</strong> <span id="currentTime"></span></p>
+            <p><strong>Статус:</strong> <span id="serverStatus">Проверяем...</span></p>
+        </div>
+    </div>
+    
+    <script>
+        // Показать текущее время
+        document.getElementById('currentTime').textContent = new Date().toLocaleString('ru-RU');
+        
+        // Проверить доступность основного приложения
+        fetch('/')
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('serverStatus').textContent = '🟢 Приложение доступно';
+                    document.getElementById('serverStatus').style.color = '#4ade80';
+                } else {
+                    document.getElementById('serverStatus').textContent = '🟡 Есть проблемы';
+                    document.getElementById('serverStatus').style.color = '#f59e0b';
+                }
+            })
+            .catch(error => {
+                document.getElementById('serverStatus').textContent = '🔴 Недоступно';
+                document.getElementById('serverStatus').style.color = '#ef4444';
+            });
+    </script>
+</body>
+</html>

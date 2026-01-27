@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Открыть FlashPost AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            color: white;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 2.5em; margin-bottom: 20px; }
+        .link {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .status {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FlashPost AI</h1>
+        
+        <div class="status" id="serverStatus">
+            🔍 Проверяем сервер...
+        </div>
+        
+        <div style="margin: 30px 0;">
+            <a href="http://localhost:8000" class="link" target="_blank">
+                🎨 Открыть FlashPost AI
+            </a>
+            <br>
+            <a href="http://localhost:8000/test-access.html" class="link" target="_blank">
+                🧪 Тест доступа
+            </a>
+            <br>
+            <a href="http://localhost:8000/check.html" class="link" target="_blank">
+                🔧 Диагностика
+            </a>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Инструкция по запуску:</h3>
+            <ol>
+                <li><strong>Запустите сервер:</strong> Двойной клик на <code>start-server.bat</code></li>
+                <li><strong>Дождитесь сообщения:</strong> "🚀 FlashPost сервер запущен"</li>
+                <li><strong>Кликните:</strong> "🎨 Открыть FlashPost AI" выше</li>
+                <li><strong>Если не работает:</strong> Скопируйте адрес <code>http://localhost:8000</code> в браузер</li>
+            </ol>
+        </div>
+        
+        <div class="instructions">
+            <h3>🔧 Если не работает:</h3>
+            <ul>
+                <li>Убедитесь, что сервер запущен (окно командной строки открыто)</li>
+                <li>Попробуйте адрес: <code>http://127.0.0.1:8000</code></li>
+                <li>Проверьте, что порт 8000 не заблокирован антивирусом</li>
+                <li>Перезапустите сервер: закройте окно и запустите заново</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Проверяем доступность сервера
+        async function checkServer() {
+            const statusDiv = document.getElementById('serverStatus');
+            
+            try {
+                const response = await fetch('http://localhost:8000');
+                if (response.ok) {
+                    statusDiv.innerHTML = '✅ Сервер работает! Можно открывать приложение';
+                    statusDiv.style.background = 'rgba(74, 222, 128, 0.2)';
+                    statusDiv.style.borderColor = 'rgba(74, 222, 128, 0.5)';
+                } else {
+                    statusDiv.innerHTML = '⚠️ Сервер отвечает, но есть проблемы';
+                    statusDiv.style.background = 'rgba(245, 158, 11, 0.2)';
+                    statusDiv.style.borderColor = 'rgba(245, 158, 11, 0.5)';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '❌ Сервер не запущен. Запустите start-server.bat';
+                statusDiv.style.background = 'rgba(239, 68, 68, 0.2)';
+                statusDiv.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+            }
+        }
+        
+        // Проверяем сервер при загрузке страницы
+        checkServer();
+        
+        // Проверяем каждые 5 секунд
+        setInterval(checkServer, 5000);
+    </script>
+</body>
+</html>
