@@ -815,20 +815,24 @@
 
 /* Действия редактора */
 .editor-actions {
-    padding: 16px;
+    padding: 12px 16px;
     background: var(--tg-bg);
     border-top: 1px solid #e5e5e5;
     display: flex;
-    gap: 12px;
+    gap: 8px;
     position: sticky;
     bottom: 0;
+    z-index: 10;
+    min-height: 56px;
+    justify-content: center;
 }
 
 .editor-btn {
-    flex: 1;
-    padding: 12px 16px;
+    width: 48px;
+    height: 48px;
+    padding: 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 50%;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -837,8 +841,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
     touch-action: manipulation;
+    position: relative;
+}
+
+.editor-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
 }
 
 .editor-btn.secondary {
@@ -939,8 +949,10 @@
     }
     
     .indicator,
+    .editor-indicator,
     .editor-nav-btn,
-    .nav-btn {
+    .nav-btn,
+    .editor-btn {
         min-width: 44px;
         min-height: 44px;
     }
@@ -953,5 +965,14 @@
         background: initial;
         border-color: initial;
         box-shadow: initial;
+    }
+    
+    /* Улучшаем видимость кнопок на мобильных */
+    .editor-btn {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .editor-btn:active {
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     }
 }

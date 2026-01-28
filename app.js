@@ -300,6 +300,8 @@ class FlashPostApp {
             this.tg.BackButton.show();
             this.tg.BackButton.onClick(() => this.goBack());
         }
+        
+        console.log('✅ Карусель отображена, события привязаны');
     }
 
     // Рендер карусели
@@ -363,6 +365,8 @@ class FlashPostApp {
 
     // Привязка событий карусели
     bindCarouselEvents() {
+        console.log('🔗 Привязка событий карусели...');
+        
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const backToStartBtn = document.getElementById('backToStartBtn');
@@ -370,27 +374,44 @@ class FlashPostApp {
         
         if (prevBtn) {
             prevBtn.addEventListener('click', () => this.previousSlide());
+            console.log('✅ Previous button bound');
+        } else {
+            console.warn('⚠️ Previous button not found');
         }
         
         if (nextBtn) {
             nextBtn.addEventListener('click', () => this.nextSlide());
+            console.log('✅ Next button bound');
+        } else {
+            console.warn('⚠️ Next button not found');
         }
 
         if (backToStartBtn) {
             backToStartBtn.addEventListener('click', () => this.goBack());
+            console.log('✅ Back to start button bound');
+        } else {
+            console.warn('⚠️ Back to start button not found');
         }
 
         if (openEditorBtn) {
             openEditorBtn.addEventListener('click', () => this.openEditor());
+            console.log('✅ Open editor button bound');
+        } else {
+            console.warn('⚠️ Open editor button not found');
         }
 
         // Индикаторы
-        document.querySelectorAll('.indicator').forEach((indicator, index) => {
+        const indicators = document.querySelectorAll('.indicator');
+        console.log(`🎯 Found ${indicators.length} indicators`);
+        
+        indicators.forEach((indicator, index) => {
             indicator.addEventListener('click', () => this.goToSlide(index));
         });
 
         // Свайп навигация
         this.setupSwipeNavigation();
+        
+        console.log('✅ Все события карусели привязаны');
     }
 
     // Навигация по слайдам
@@ -572,9 +593,30 @@ class FlashPostApp {
                     </div>
                     
                     <div class="editor-actions">
-                        <button class="editor-btn secondary" id="exitEditorBtn">← Назад</button>
-                        <button class="editor-btn success" id="downloadSlidesBtn">📥 Скачать</button>
-                        <button class="editor-btn primary" id="saveAndExitBtn">✓ Готово</button>
+                        <button class="editor-btn secondary" id="exitEditorBtn" title="Назад">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m15 18-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        <button class="editor-btn success" id="saveTemplateBtn" title="Сохранить шаблон">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                <polyline points="17,21 17,13 7,13 7,21"/>
+                                <polyline points="7,3 7,8 15,8"/>
+                            </svg>
+                        </button>
+                        <button class="editor-btn success" id="downloadSlidesBtn" title="Скачать слайды">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7,10 12,15 17,10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </button>
+                        <button class="editor-btn primary" id="saveAndExitBtn" title="Готово">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20,6 9,17 4,12"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -583,6 +625,8 @@ class FlashPostApp {
 
     // Привязка событий редактора
     bindEditorEvents() {
+        console.log('🔗 Привязка событий редактора...');
+        
         // Навигация в редакторе
         const editorPrevBtn = document.getElementById('editorPrevBtn');
         const editorNextBtn = document.getElementById('editorNextBtn');
@@ -590,36 +634,97 @@ class FlashPostApp {
         const previewNext = document.getElementById('previewNext');
         
         if (editorPrevBtn) {
-            editorPrevBtn.addEventListener('click', () => this.previousEditorSlide());
+            editorPrevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Editor prev clicked');
+                this.previousEditorSlide();
+            });
+            console.log('✅ Editor prev button bound');
         }
         
         if (editorNextBtn) {
-            editorNextBtn.addEventListener('click', () => this.nextEditorSlide());
+            editorNextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Editor next clicked');
+                this.nextEditorSlide();
+            });
+            console.log('✅ Editor next button bound');
         }
 
         if (previewPrev) {
-            previewPrev.addEventListener('click', () => this.previousEditorSlide());
+            previewPrev.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Preview prev clicked');
+                this.previousEditorSlide();
+            });
+            console.log('✅ Preview prev button bound');
         }
         
         if (previewNext) {
-            previewNext.addEventListener('click', () => this.nextEditorSlide());
+            previewNext.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Preview next clicked');
+                this.nextEditorSlide();
+            });
+            console.log('✅ Preview next button bound');
         }
 
         // Кнопки действий
         const exitEditorBtn = document.getElementById('exitEditorBtn');
+        const saveTemplateBtn = document.getElementById('saveTemplateBtn');
         const downloadSlidesBtn = document.getElementById('downloadSlidesBtn');
         const saveAndExitBtn = document.getElementById('saveAndExitBtn');
 
         if (exitEditorBtn) {
-            exitEditorBtn.addEventListener('click', () => this.exitEditor());
+            exitEditorBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Exit editor clicked');
+                this.exitEditor();
+            });
+            console.log('✅ Exit editor button bound');
+        } else {
+            console.warn('⚠️ Exit editor button not found');
+        }
+
+        if (saveTemplateBtn) {
+            saveTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Save template clicked');
+                this.saveTemplate();
+            });
+            console.log('✅ Save template button bound');
+        } else {
+            console.warn('⚠️ Save template button not found');
         }
 
         if (downloadSlidesBtn) {
-            downloadSlidesBtn.addEventListener('click', () => this.downloadSlides());
+            downloadSlidesBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Download slides clicked');
+                this.downloadSlides();
+            });
+            console.log('✅ Download slides button bound');
+        } else {
+            console.warn('⚠️ Download slides button not found');
         }
 
         if (saveAndExitBtn) {
-            saveAndExitBtn.addEventListener('click', () => this.saveAndExit());
+            saveAndExitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Save and exit clicked');
+                this.saveAndExit();
+            });
+            console.log('✅ Save and exit button bound');
+        } else {
+            console.warn('⚠️ Save and exit button not found');
         }
 
         // Текстовый редактор
@@ -676,15 +781,22 @@ class FlashPostApp {
         // Свайп навигация для превью
         this.setupEditorSwipeNavigation();
 
+        // Свайп навигация для всего редактора
+        this.setupFullEditorSwipeNavigation();
+
         // Индикаторы в редакторе
         document.querySelectorAll('.editor-indicator').forEach((indicator, index) => {
-            indicator.addEventListener('click', () => {
+            indicator.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (index !== this.currentEditingSlide) {
                     this.currentEditingSlide = index;
                     this.updateEditorSlide();
                 }
             });
         });
+        
+        console.log('✅ Все события редактора привязаны');
     }
 
     // Настройка свайп навигации для редактора
@@ -717,6 +829,66 @@ class FlashPostApp {
         }, { passive: true });
         
         console.log('✅ Swipe navigation для редактора настроен');
+    }
+
+    // Настройка свайп навигации для всего редактора
+    setupFullEditorSwipeNavigation() {
+        const editorContent = document.getElementById('editorSection');
+        if (!editorContent) return;
+
+        let startX = 0;
+        let startY = 0;
+        let startTime = 0;
+
+        editorContent.addEventListener('touchstart', (e) => {
+            // Игнорируем если касание на кнопках или полях ввода
+            if (e.target.tagName === 'BUTTON' || 
+                e.target.tagName === 'INPUT' || 
+                e.target.tagName === 'TEXTAREA' ||
+                e.target.closest('.editor-actions') ||
+                e.target.closest('.editor-tools')) {
+                return;
+            }
+            
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            startTime = Date.now();
+        }, { passive: true });
+
+        editorContent.addEventListener('touchend', (e) => {
+            // Игнорируем если касание на кнопках или полях ввода
+            if (e.target.tagName === 'BUTTON' || 
+                e.target.tagName === 'INPUT' || 
+                e.target.tagName === 'TEXTAREA' ||
+                e.target.closest('.editor-actions') ||
+                e.target.closest('.editor-tools')) {
+                return;
+            }
+            
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const endTime = Date.now();
+            
+            const deltaX = endX - startX;
+            const deltaY = endY - startY;
+            const deltaTime = endTime - startTime;
+            
+            // Проверяем, что это быстрый горизонтальный свайп
+            if (Math.abs(deltaX) > Math.abs(deltaY) && 
+                Math.abs(deltaX) > 80 && 
+                deltaTime < 400) {
+                
+                console.log('Full editor swipe detected:', deltaX > 0 ? 'right' : 'left');
+                
+                if (deltaX > 0) {
+                    this.previousEditorSlide();
+                } else {
+                    this.nextEditorSlide();
+                }
+            }
+        }, { passive: true });
+        
+        console.log('✅ Full editor swipe navigation настроен');
     }
 
     // Навигация в редакторе
@@ -853,6 +1025,29 @@ class FlashPostApp {
         }
     }
 
+    // Сохранение шаблона
+    saveTemplate() {
+        try {
+            const template = {
+                id: Date.now(),
+                name: `Шаблон ${new Date().toLocaleDateString()}`,
+                slides: this.slides,
+                slideStyles: this.slideStyles,
+                createdAt: new Date().toISOString()
+            };
+            
+            const savedTemplates = JSON.parse(localStorage.getItem('flashpost_templates') || '[]');
+            savedTemplates.push(template);
+            localStorage.setItem('flashpost_templates', JSON.stringify(savedTemplates));
+            
+            this.showToast('✅ Шаблон сохранен!', 'success');
+            this.hapticFeedback();
+        } catch (error) {
+            console.error('❌ Ошибка сохранения шаблона:', error);
+            this.showToast('❌ Ошибка сохранения шаблона', 'error');
+        }
+    }
+
     // Сохранение и выход
     saveAndExit() {
         this.exitEditor();
@@ -863,6 +1058,11 @@ class FlashPostApp {
     exitEditor() {
         this.currentSlide = this.currentEditingSlide;
         this.showCarousel();
+        
+        // Обновляем карусель с новыми данными
+        setTimeout(() => {
+            this.updateCarouselView();
+        }, 100);
     }
 
     // Скачивание слайдов
