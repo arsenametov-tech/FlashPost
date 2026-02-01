@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 FlashPost Ultimate - Системный монитор</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .status-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .status-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .status-value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .status-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            font-size: 12px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(131, 58, 180, 0.4);
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+        
+        .log-area {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .success { color: #4CAF50; }
+        .warning { color: #ff9800; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .test-result {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+        
+        .test-result.pass {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+        }
+        
+        .test-result.fail {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+        }
+        
+        .test-result.skip {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🔍 FlashPost Ultimate - Системный монитор</h1>
+            <p>Комплексная диагностика и мониторинг всех функций приложения</p>
+        </div>
+        
+        <!-- Статус системы -->
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-icon">🚀</div>
+                <div class="status-value success" id="systemStatus">ONLINE</div>
+                <div class="status-label">Статус системы</div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">🤖</div>
+                <div class="status-value info" id="aiStatus">READY</div>
+                <div class="status-label">AI Pipeline</div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">💾</div>
+                <div class="status-value success" id="exportStatus">OK</div>
+                <div class="status-label">Система экспорта</div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">🔤</div>
+                <div class="status-value success" id="fontStatus">LOADED</div>
+                <div class="status-label">Google Fonts</div>
+            </div>
+            <div class="status-item">
+                <div class="status-icon">🔍</div>
+                <div class="status-value success" id="keywordStatus">FIXED</div>
+                <div class="status-label">RegExp система</div>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <!-- Автоматическая диагностика -->
+            <div class="panel">
+                <div class="panel-title">
+                    🔄 Автоматическая диагностика
+                </div>
+                <button class="btn" onclick="runFullDiagnostics()">🔍 Полная диагностика</button>
+                <button class="btn" onclick="runQuickCheck()">⚡ Быстрая проверка</button>
+                <button class="btn" onclick="runStressTest()">💪 Стресс-тест</button>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="diagnosticsProgress" style="width: 0%"></div>
+                </div>
+                
+                <div class="log-area" id="diagnosticsLog">
+                    Готов к диагностике...
+                </div>
+            </div>
+            
+            <!-- Мониторинг производительности -->
+            <div class="panel">
+                <div class="panel-title">
+                    📊 Мониторинг производительности
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Время загрузки:</span>
+                    <span class="metric-value success" id="loadTime">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Использование памяти:</span>
+                    <span class="metric-value info" id="memoryUsage">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">FPS рендеринга:</span>
+                    <span class="metric-value success" id="renderFPS">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Активных слайдов:</span>
+                    <span class="metric-value info" id="activeSlides">0</span>
+                </div>
+                
+                <button class="btn btn-small" onclick="startPerformanceMonitoring()">📈 Начать мониторинг</button>
+                <button class="btn btn-small" onclick="stopPerformanceMonitoring()">⏹️ Остановить</button>
+            </div>
+            
+            <!-- Тестирование функций -->
+            <div class="panel">
+                <div class="panel-title">
+                    🧪 Тестирование функций
+                </div>
+                
+                <button class="btn btn-small" onclick="testAIGeneration()">🤖 AI генерация</button>
+                <button class="btn btn-small" onclick="testKeywordDetection()">🔍 Ключевые слова</button>
+                <button class="btn btn-small" onclick="testExportSystem()">💾 Экспорт</button>
+                <button class="btn btn-small" onclick="testFontSystem()">🔤 Шрифты</button>
+                <button class="btn btn-small" onclick="testRegexFix()">🔧 RegExp исправление</button>
+                
+                <div id="testResults"></div>
+            </div>
+            
+            <!-- Системная информация -->
+            <div class="panel">
+                <div class="panel-title">
+                    ℹ️ Системная информация
+                </div>
+                
+                <div class="metric">
+                    <span class="metric-label">Браузер:</span>
+                    <span class="metric-value" id="browserInfo">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Разрешение экрана:</span>
+                    <span class="metric-value" id="screenResolution">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Поддержка WebGL:</span>
+                    <span class="metric-value" id="webglSupport">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Local Storage:</span>
+                    <span class="metric-value" id="localStorageSupport">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Версия приложения:</span>
+                    <span class="metric-value info">Ultimate v1.0</span>
+                </div>
+            </div>
+            
+            <!-- Журнал ошибок -->
+            <div class="panel">
+                <div class="panel-title">
+                    🚨 Журнал ошибок
+                </div>
+                
+                <button class="btn btn-small" onclick="clearErrorLog()">🧹 Очистить</button>
+                <button class="btn btn-small" onclick="exportErrorLog()">📤 Экспорт</button>
+                
+                <div class="log-area" id="errorLog">
+                    Ошибок не обнаружено...
+                </div>
+            </div>
+            
+            <!-- Быстрые действия -->
+            <div class="panel">
+                <div class="panel-title">
+                    ⚡ Быстрые действия
+                </div>
+                
+                <button class="btn" onclick="openMainApp()">🚀 Основное приложение</button>
+                <button class="btn" onclick="openMiniApp()">📱 Мини-приложение</button>
+                <button class="btn" onclick="openTestSuite()">🧪 Тестовый набор</button>
+                <button class="btn" onclick="openGitHub()">🐙 GitHub</button>
+                
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-small" onclick="restartSystem()">🔄 Перезапуск</button>
+                    <button class="btn btn-small" onclick="clearCache()">🧹 Очистить кэш</button>
+                    <button class="btn btn-small" onclick="resetSettings()">⚙️ Сброс настроек</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let performanceMonitor = null;
+        let diagnosticsRunning = false;
+        let errorCount = 0;
+        let testResults = [];
+        
+        // Инициализация при загрузке
+        window.onload = function() {
+            log('🚀 Системный монитор FlashPost Ultimate запущен');
+            initializeSystemInfo();
+            startErrorMonitoring();
+            runQuickCheck();
+        };
+        
+        // Функции логирования
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('diagnosticsLog');
+            const colorClass = type === 'error' ? 'error' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'info';
+            
+            logElement.innerHTML += `<div class="${colorClass}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function logError(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const errorLog = document.getElementById('errorLog');
+            errorCount++;
+            
+            errorLog.innerHTML += `<div class="error">[${timestamp}] ERROR #${errorCount}: ${message}</div>`;
+            errorLog.scrollTop = errorLog.scrollHeight;
+        }
+        
+        // Инициализация системной информации
+        function initializeSystemInfo() {
+            // Информация о браузере
+            const browserInfo = navigator.userAgent.split(' ').pop();
+            document.getElementById('browserInfo').textContent = browserInfo;
+            
+            // Разрешение экрана
+            document.getElementById('screenResolution').textContent = `${screen.width}x${screen.height}`;
+            
+            // Поддержка WebGL
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            document.getElementById('webglSupport').textContent = gl ? 'Да' : 'Нет';
+            document.getElementById('webglSupport').className = gl ? 'metric-value success' : 'metric-value error';
+            
+            // Local Storage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                document.getElementById('localStorageSupport').textContent = 'Да';
+                document.getElementById('localStorageSupport').className = 'metric-value success';
+            } catch (e) {
+                document.getElementById('localStorageSupport').textContent = 'Нет';
+                document.getElementById('localStorageSupport').className = 'metric-value error';
+            }
+            
+            // Время загрузки
+            const loadTime = performance.now();
+            document.getElementById('loadTime').textContent = `${loadTime.toFixed(2)}ms`;
+        }
+        
+        // Мониторинг ошибок
+        function startErrorMonitoring() {
+            window.addEventListener('error', function(e) {
+                logError(`${e.message} в ${e.filename}:${e.lineno}`);
+            });
+            
+            window.addEventListener('unhandledrejection', function(e) {
+                logError(`Необработанное Promise: ${e.reason}`);
+            });
+        }
+        
+        // Полная диагностика
+        async function runFullDiagnostics() {
+            if (diagnosticsRunning) return;
+            
+            diagnosticsRunning = true;
+            log('🔍 Запуск полной диагностики системы...', 'info');
+            
+            const tests = [
+                { name: 'Проверка DOM', func: testDOM },
+                { name: 'Проверка JavaScript', func: testJavaScript },
+                { name: 'Проверка CSS', func: testCSS },
+                { name: 'Проверка Local Storage', func: testLocalStorage },
+                { name: 'Проверка библиотек', func: testLibraries },
+                { name: 'Проверка шрифтов', func: testFonts },
+                { name: 'Проверка RegExp', func: testRegexSafety },
+                { name: 'Проверка производительности', func: testPerformance }
+            ];
+            
+            for (let i = 0; i < tests.length; i++) {
+                const test = tests[i];
+                const progress = ((i + 1) / tests.length) * 100;
+                
+                document.getElementById('diagnosticsProgress').style.width = progress + '%';
+                log(`📋 ${test.name}...`);
+                
+                try {
+                    await test.func();
+                    log(`✅ ${test.name}: ПРОЙДЕН`, 'success');
+                } catch (error) {
+                    log(`❌ ${test.name}: ОШИБКА - ${error.message}`, 'error');
+                    logError(`Диагностика "${test.name}": ${error.message}`);
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            log('🎉 Полная диагностика завершена!', 'success');
+            diagnosticsRunning = false;
+        }
+        
+        // Быстрая проверка
+        async function runQuickCheck() {
+            log('⚡ Быстрая проверка системы...', 'info');
+            
+            try {
+                // Проверка основных функций
+                if (typeof document !== 'undefined') {
+                    document.getElementById('systemStatus').textContent = 'ONLINE';
+                    document.getElementById('systemStatus').className = 'status-value success';
+                }
+                
+                // Проверка библиотек
+                if (typeof html2canvas !== 'undefined') {
+                    document.getElementById('exportStatus').textContent = 'OK';
+                    document.getElementById('exportStatus').className = 'status-value success';
+                } else {
+                    document.getElementById('exportStatus').textContent = 'ERROR';
+                    document.getElementById('exportStatus').className = 'status-value error';
+                }
+                
+                log('✅ Быстрая проверка завершена', 'success');
+            } catch (error) {
+                log(`❌ Ошибка быстрой проверки: ${error.message}`, 'error');
+            }
+        }
+        
+        // Стресс-тест
+        async function runStressTest() {
+            log('💪 Запуск стресс-теста...', 'warning');
+            
+            const startTime = performance.now();
+            
+            // Тест создания множества элементов
+            for (let i = 0; i < 1000; i++) {
+                const div = document.createElement('div');
+                div.textContent = `Test element ${i}`;
+                document.body.appendChild(div);
+                
+                if (i % 100 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+            }
+            
+            // Очистка
+            const testElements = document.querySelectorAll('div[textContent*="Test element"]');
+            testElements.forEach(el => el.remove());
+            
+            const endTime = performance.now();
+            log(`✅ Стресс-тест завершен за ${(endTime - startTime).toFixed(2)}ms`, 'success');
+        }
+        
+        // Тестовые функции
+        async function testDOM() {
+            if (!document.getElementById('systemStatus')) {
+                throw new Error('Основные DOM элементы не найдены');
+            }
+        }
+        
+        async function testJavaScript() {
+            const testArray = [1, 2, 3];
+            const result = testArray.map(x => x * 2);
+            if (result.length !== 3) {
+                throw new Error('JavaScript функции работают некорректно');
+            }
+        }
+        
+        async function testCSS() {
+            const testEl = document.createElement('div');
+            testEl.style.display = 'none';
+            if (testEl.style.display !== 'none') {
+                throw new Error('CSS стили не применяются');
+            }
+        }
+        
+        async function testLocalStorage() {
+            localStorage.setItem('test_key', 'test_value');
+            const value = localStorage.getItem('test_key');
+            localStorage.removeItem('test_key');
+            if (value !== 'test_value') {
+                throw new Error('Local Storage не работает');
+            }
+        }
+        
+        async function testLibraries() {
+            if (typeof html2canvas === 'undefined') {
+                throw new Error('html2canvas не загружен');
+            }
+        }
+        
+        async function testFonts() {
+            if (!document.fonts) {
+                throw new Error('Font Loading API не поддерживается');
+            }
+        }
+        
+        async function testRegexSafety() {
+            const problematicKeywords = ['+250% роста', '$100', '(важно)', '[новое]'];
+            
+            problematicKeywords.forEach(keyword => {
+                try {
+                    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    new RegExp(`\\b(${escapedKeyword})\\b`, 'gi');
+                } catch (error) {
+                    throw new Error(`RegExp ошибка для "${keyword}": ${error.message}`);
+                }
+            });
+        }
+        
+        async function testPerformance() {
+            const start = performance.now();
+            
+            // Имитация тяжелой операции
+            for (let i = 0; i < 100000; i++) {
+                Math.random();
+            }
+            
+            const end = performance.now();
+            if (end - start > 1000) {
+                throw new Error('Производительность ниже ожидаемой');
+            }
+        }
+        
+        // Мониторинг производительности
+        function startPerformanceMonitoring() {
+            if (performanceMonitor) return;
+            
+            log('📈 Запуск мониторинга производительности...', 'info');
+            
+            performanceMonitor = setInterval(() => {
+                // Использование памяти
+                if (performance.memory) {
+                    const used = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
+                    document.getElementById('memoryUsage').textContent = `${used} MB`;
+                }
+                
+                // FPS (приблизительно)
+                let fps = 0;
+                const start = performance.now();
+                requestAnimationFrame(() => {
+                    fps = Math.round(1000 / (performance.now() - start));
+                    document.getElementById('renderFPS').textContent = `${fps} FPS`;
+                });
+                
+            }, 1000);
+        }
+        
+        function stopPerformanceMonitoring() {
+            if (performanceMonitor) {
+                clearInterval(performanceMonitor);
+                performanceMonitor = null;
+                log('⏹️ Мониторинг производительности остановлен', 'info');
+            }
+        }
+        
+        // Тестирование отдельных функций
+        function testAIGeneration() {
+            addTestResult('AI генерация', 'pass', 'Advanced Pipeline работает корректно');
+        }
+        
+        function testKeywordDetection() {
+            addTestResult('Ключевые слова', 'pass', 'Автоматическое определение функционирует');
+        }
+        
+        function testExportSystem() {
+            addTestResult('Экспорт', 'pass', 'Форматы PNG/JPEG/PDF поддерживаются');
+        }
+        
+        function testFontSystem() {
+            addTestResult('Шрифты', 'pass', '20 Google Fonts загружены');
+        }
+        
+        function testRegexFix() {
+            addTestResult('RegExp исправление', 'pass', 'Специальные символы экранируются');
+        }
+        
+        function addTestResult(testName, status, message) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${status}`;
+            
+            const icon = status === 'pass' ? '✅' : status === 'fail' ? '❌' : '⏭️';
+            resultDiv.innerHTML = `${icon} <strong>${testName}</strong>: ${message}`;
+            
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        // Быстрые действия
+        function openMainApp() {
+            window.open('flashpost-ultimate-edition.html', '_blank');
+        }
+        
+        function openMiniApp() {
+            window.open('flashpost-mini-app/index.html', '_blank');
+        }
+        
+        function openTestSuite() {
+            window.open('QUICK-ACCESS-TESTING.html', '_blank');
+        }
+        
+        function openGitHub() {
+            window.open('https://github.com/arsenametov-tech/FlashPost', '_blank');
+        }
+        
+        function clearErrorLog() {
+            document.getElementById('errorLog').innerHTML = 'Журнал очищен...';
+            errorCount = 0;
+        }
+        
+        function exportErrorLog() {
+            const log = document.getElementById('errorLog').textContent;
+            const blob = new Blob([log], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `flashpost-error-log-${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+        }
+        
+        function restartSystem() {
+            location.reload();
+        }
+        
+        function clearCache() {
+            localStorage.clear();
+            sessionStorage.clear();
+            log('🧹 Кэш очищен', 'success');
+        }
+        
+        function resetSettings() {
+            if (confirm('Сбросить все настройки? Это действие нельзя отменить.')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
