@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost UX Direct Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .test-button {
+            background: #2481cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 FlashPost UX Direct Test</h1>
+        <p>Direct testing of UX polished file elements</p>
+        
+        <div id="testResults">
+            <div class="status status-info">Click "Test UX Elements" to check implementation</div>
+        </div>
+        
+        <button class="test-button" onclick="testUXElements()">🧪 Test UX Elements</button>
+        <button class="test-button" onclick="openUXApp()">🚀 Open UX App</button>
+        
+        <div id="elementsList"></div>
+    </div>
+
+    <script>
+        function testUXElements() {
+            const resultsDiv = document.getElementById('testResults');
+            const elementsDiv = document.getElementById('elementsList');
+            
+            resultsDiv.innerHTML = '<div class="status status-info">🧪 Testing UX elements...</div>';
+            
+            // Test by checking if file exists and can be loaded
+            fetch('flashpost-mvp-ux-polished.html')
+                .then(response => response.text())
+                .then(html => {
+                    const tests = [
+                        {
+                            name: 'Navigation Hints',
+                            test: () => html.includes('nav-hint-left') && html.includes('nav-hint-right') && html.includes('custom-arrow')
+                        },
+                        {
+                            name: 'Instagram Input Field',
+                            test: () => html.includes('instagramInput') && html.includes('instagram-input')
+                        },
+                        {
+                            name: 'Text Width Slider',
+                            test: () => html.includes('widthSlider') && html.includes('width-slider')
+                        },
+                        {
+                            name: 'Background Image Upload',
+                            test: () => html.includes('bg-image-upload') && html.includes('applyToAllCheckbox')
+                        },
+                        {
+                            name: 'Slide Toolbar',
+                            test: () => html.includes('slide-toolbar') && html.includes('toolbar-btn')
+                        },
+                        {
+                            name: 'Controls Panels',
+                            test: () => html.includes('controls-panel') && html.includes('textControls') && html.includes('aiControls')
+                        },
+                        {
+                            name: 'UX Functions',
+                            test: () => html.includes('updateInstagramNickname') && html.includes('handleBackgroundImageUpload')
+                        },
+                        {
+                            name: 'CSS Animations',
+                            test: () => html.includes('pulseHint') && html.includes('slideArrow')
+                        }
+                    ];
+                    
+                    let passedTests = 0;
+                    let results = '<h3>🧪 Test Results:</h3>';
+                    let elementsList = '<h3>📋 Found Elements:</h3><ul>';
+                    
+                    tests.forEach(test => {
+                        const passed = test.test();
+                        if (passed) passedTests++;
+                        
+                        results += `<div class="status ${passed ? 'status-success' : 'status-error'}">
+                            ${passed ? '✅' : '❌'} ${test.name}: ${passed ? 'PASSED' : 'FAILED'}
+                        </div>`;
+                    });
+                    
+                    // List key elements found
+                    const keyElements = [
+                        'nav-hint-left', 'nav-hint-right', 'custom-arrow',
+                        'instagramInput', 'widthSlider', 'applyToAllCheckbox',
+                        'slide-toolbar', 'controls-panel', 'bg-image-upload'
+                    ];
+                    
+                    keyElements.forEach(element => {
+                        const found = html.includes(element);
+                        elementsList += `<li style="color: ${found ? 'green' : 'red'}">${element}: ${found ? '✅' : '❌'}</li>`;
+                    });
+                    
+                    elementsList += '</ul>';
+                    
+                    const overallStatus = passedTests === tests.length ? 'success' : 
+                                       passedTests > tests.length / 2 ? 'info' : 'error';
+                    
+                    results += `<div class="status status-${overallStatus}">
+                        <strong>Overall: ${passedTests}/${tests.length} tests passed</strong>
+                    </div>`;
+                    
+                    resultsDiv.innerHTML = results;
+                    elementsDiv.innerHTML = elementsList;
+                })
+                .catch(error => {
+                    resultsDiv.innerHTML = `<div class="status status-error">❌ Error loading file: ${error.message}</div>`;
+                });
+        }
+        
+        function openUXApp() {
+            window.open('flashpost-mvp-ux-polished.html', '_blank');
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(testUXElements, 1000);
+        });
+    </script>
+</body>
+</html>

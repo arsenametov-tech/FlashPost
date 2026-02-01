@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FlashPost - Google Fonts с кириллицей</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        :root {
+            --tg-bg: #ffffff;
+            --tg-text: #000000;
+            --primary: #833ab4;
+        }
+        
+        .font-test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 200px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .font-sample {
+            margin: 8px 0;
+            padding: 6px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        
+        .font-name {
+            font-weight: bold;
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .font-text {
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        
+        .test-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .test-btn {
+            padding: 8px 16px;
+            background: #833ab4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .test-btn:hover {
+            background: #6d2d96;
+        }
+        
+        .test-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .test-btn.secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="font-test-panel">
+        <h4>🔤 Тест шрифтов</h4>
+        
+        <div class="font-sample">
+            <div class="font-name">Inter</div>
+            <div class="font-text" style="font-family: 'Inter', sans-serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Montserrat</div>
+            <div class="font-text" style="font-family: 'Montserrat', sans-serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Bebas Neue</div>
+            <div class="font-text" style="font-family: 'Bebas Neue', cursive;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Playfair Display</div>
+            <div class="font-text" style="font-family: 'Playfair Display', serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Manrope</div>
+            <div class="font-text" style="font-family: 'Manrope', sans-serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Rubik</div>
+            <div class="font-text" style="font-family: 'Rubik', sans-serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Oswald</div>
+            <div class="font-text" style="font-family: 'Oswald', sans-serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">PT Sans</div>
+            <div class="font-text" style="font-family: 'PT Sans', sans-serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Lora</div>
+            <div class="font-text" style="font-family: 'Lora', serif;">
+                Привет мир! Hello World! 123
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-controls">
+        <button class="test-btn" onclick="testEditor()">Открыть редактор</button>
+        <button class="test-btn secondary" onclick="testFontChange()">Тест смены шрифта</button>
+        <button class="test-btn secondary" onclick="checkFontLoading()">Проверить загрузку</button>
+    </div>
+
+    <div id="app">
+        <div style="padding: 40px; text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+            <h2 style="font-family: 'Montserrat', sans-serif;">Google Fonts Test</h2>
+            <p style="font-family: 'Inter', sans-serif;">Тест шрифтов с поддержкой кириллицы</p>
+            <p style="font-family: 'Playfair Display', serif; font-size: 18px;">Проверяем красивые шрифты для слайдов</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация
+        const app = new FlashPostApp();
+        
+        // Тестовые данные с кириллицей
+        app.slides = [
+            {
+                title: "Заголовок",
+                text: "🔤 Тест Google Fonts\n\nПроверяем работу шрифтов с кириллицей: Привет мир! Красивые шрифты для слайдов."
+            },
+            {
+                title: "Кириллица", 
+                text: "🇷🇺 Русский текст\n\nПроверяем поддержку кириллицы во всех шрифтах: АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+            },
+            {
+                title: "Латиница",
+                text: "🇺🇸 English Text\n\nTesting Latin characters support: ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz"
+            }
+        ];
+        
+        app.initializeSlideStyles();
+        
+        // Добавляем Instagram для тестирования
+        const instagramInput = document.createElement('input');
+        instagramInput.id = 'instagramInput';
+        instagramInput.value = '@fonts_test';
+        instagramInput.style.display = 'none';
+        document.body.appendChild(instagramInput);
+        
+        // Список всех шрифтов для тестирования
+        const fonts = [
+            'Inter', 'Montserrat', 'Bebas Neue', 'Playfair Display', 
+            'Manrope', 'Rubik', 'Oswald', 'PT Sans', 'Lora'
+        ];
+        let currentFontIndex = 0;
+        
+        function testEditor() {
+            console.log('🧪 Открываем редактор для тестирования шрифтов...');
+            app.openEditor();
+        }
+        
+        function testFontChange() {
+            console.log('🧪 Тестируем смену шрифтов...');
+            
+            // Открываем редактор если не открыт
+            if (!document.querySelector('.editor-section')) {
+                app.openEditor();
+                setTimeout(testFontChange, 500);
+                return;
+            }
+            
+            // Находим кнопки шрифтов
+            const fontButtons = document.querySelectorAll('[data-font]');
+            if (fontButtons.length === 0) {
+                console.error('❌ Кнопки шрифтов не найдены');
+                return;
+            }
+            
+            // Циклически переключаем шрифты
+            const currentFont = fonts[currentFontIndex];
+            const fontButton = Array.from(fontButtons).find(btn => 
+                btn.getAttribute('data-font') === currentFont
+            );
+            
+            if (fontButton) {
+                console.log(`🔤 Переключаем на шрифт: ${currentFont}`);
+                fontButton.click();
+                
+                // Проверяем что шрифт применился к текстовым блокам
+                setTimeout(() => {
+                    const textBlocks = document.querySelectorAll('.preview-text-block');
+                    if (textBlocks.length > 0) {
+                        const appliedFont = window.getComputedStyle(textBlocks[0]).fontFamily;
+                        console.log(`✅ Применен шрифт: ${appliedFont}`);
+                    }
+                }, 200);
+                
+                currentFontIndex = (currentFontIndex + 1) % fonts.length;
+            } else {
+                console.error(`❌ Кнопка для шрифта ${currentFont} не найдена`);
+            }
+        }
+        
+        function checkFontLoading() {
+            console.log('🧪 Проверяем загрузку Google Fonts...');
+            
+            // Проверяем доступность шрифтов
+            fonts.forEach(fontName => {
+                // Создаем тестовый элемент
+                const testEl = document.createElement('div');
+                testEl.style.fontFamily = fontName;
+                testEl.style.position = 'absolute';
+                testEl.style.visibility = 'hidden';
+                testEl.textContent = 'Test';
+                document.body.appendChild(testEl);
+                
+                // Проверяем применился ли шрифт
+                const computedFont = window.getComputedStyle(testEl).fontFamily;
+                const isLoaded = computedFont.includes(fontName) || computedFont.includes(fontName.replace(' ', ''));
+                
+                console.log(`${isLoaded ? '✅' : '❌'} ${fontName}: ${computedFont}`);
+                
+                document.body.removeChild(testEl);
+            });
+        }
+        
+        // Автоматически открываем редактор
+        setTimeout(() => {
+            console.log('🚀 Автоматически открываем редактор...');
+            testEditor();
+        }, 1000);
+        
+        // Автоматически проверяем загрузку шрифтов
+        setTimeout(() => {
+            checkFontLoading();
+        }, 2000);
+        
+        console.log(`
+🔤 GOOGLE FONTS С КИРИЛЛИЦЕЙ
+
+Подключенные шрифты:
+✅ Inter - современный sans-serif
+✅ Montserrat - популярный sans-serif  
+✅ Bebas Neue - жирный display шрифт
+✅ Playfair Display - элегантный serif
+✅ Manrope - современный sans-serif
+✅ Rubik - округлый sans-serif
+✅ Oswald - узкий sans-serif
+✅ PT Sans - русский sans-serif
+✅ Lora - читаемый serif
+
+Все шрифты поддерживают кириллицу!
+        `);
+        
+        console.log('✅ Google Fonts тест готов');
+    </script>
+</body>
+</html>

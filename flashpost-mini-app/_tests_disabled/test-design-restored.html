@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Design Restored Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%); color: #fff; font-family: Arial, sans-serif; }
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .test-card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px); }
+        .btn { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin: 10px; font-size: 16px; font-weight: 600; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Design Restored Test</h1>
+        <p>Проверка восстановления дизайна FlashPost приложения</p>
+        
+        <div id="testStatus" class="status info">🔄 Готов к тестированию...</div>
+        
+        <div class="test-card">
+            <h2>🚀 Быстрые действия</h2>
+            <button class="btn" onclick="testMainApp()">📱 Тест основного приложения</button>
+            <button class="btn" onclick="openMainApp()">🌐 Открыть основное приложение</button>
+            <button class="btn" onclick="testDesignElements()">🎨 Тест элементов дизайна</button>
+        </div>
+
+        <div class="test-card">
+            <h2>📋 Результаты тестирования</h2>
+            <div id="testResults" class="log">Результаты будут здесь...</div>
+        </div>
+    </div>
+
+    <script>
+        let logElement;
+        
+        function log(message, type = 'info') {
+            if (!logElement) logElement = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logElement.innerHTML += `<div style="color: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#74c0fc'}">[${timestamp}] ${icon} ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('testStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        async function testMainApp() {
+            log('📱 Тестирование основного приложения...', 'info');
+            updateStatus('🔄 Тестирование...', 'info');
+            
+            try {
+                // Проверяем доступность основного приложения
+                const response = await fetch('/index.html');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const html = await response.text();
+                
+                // Проверяем ключевые элементы
+                const checks = [
+                    { name: '#app элемент', test: html.includes('id="app"') },
+                    { name: '#loading элемент', test: html.includes('id="loading"') },
+                    { name: 'CSS подключен', test: html.includes('app.css') },
+                    { name: 'Модули подключены', test: html.includes('src/app.js') },
+                    { name: 'Принудительное исправление', test: html.includes('forceShowApp') },
+                    { name: 'Экстренное восстановление', test: html.includes('emergency-design-fix') }
+                ];
+                
+                let passed = 0;
+                checks.forEach(check => {
+                    if (check.test) {
+                        log(`✅ ${check.name}: найден`, 'success');
+                        passed++;
+                    } else {
+                        log(`❌ ${check.name}: не найден`, 'error');
+                    }
+                });
+                
+                const success = passed >= 4;
+                updateStatus(
+                    success ? '✅ Основное приложение исправлено' : '❌ Проблемы с приложением',
+                    success ? 'success' : 'error'
+                );
+                
+                log(`📊 Результат: ${passed}/${checks.length} проверок пройдено`, success ? 'success' : 'error');
+                
+                return success;
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования: ${error.message}`, 'error');
+                updateStatus('❌ Ошибка тестирования', 'error');
+                return false;
+            }
+        }
+
+        async function testDesignElements() {
+            log('🎨 Тестирование элементов дизайна...', 'info');
+            
+            try {
+                // Проверяем CSS файл
+                const cssResponse = await fetch('/app.css');
+                if (cssResponse.ok) {
+                    const css = await cssResponse.text();
+                    
+                    const cssChecks = [
+                        { name: 'Instagram градиент', test: css.includes('--instagram-gradient') },
+                        { name: 'Стили приложения', test: css.includes('.app') },
+                        { name: 'Стили кнопок', test: css.includes('.btn') },
+                        { name: 'Стили генерации', test: css.includes('.generation-buttons') },
+                        { name: 'Стеклянные карточки', test: css.includes('.glass-card') }
+                    ];
+                    
+                    let cssPassed = 0;
+                    cssChecks.forEach(check => {
+                        if (check.test) {
+                            log(`✅ CSS ${check.name}: найден`, 'success');
+                            cssPassed++;
+                        } else {
+                            log(`❌ CSS ${check.name}: не найден`, 'error');
+                        }
+                    });
+                    
+                    log(`📊 CSS: ${cssPassed}/${cssChecks.length} стилей найдено`, cssPassed >= 4 ? 'success' : 'error');
+                } else {
+                    log('❌ CSS файл недоступен', 'error');
+                }
+                
+                // Проверяем модули
+                const modules = ['state.js', 'renderer.js', 'app.js', 'ai.js'];
+                let modulesPassed = 0;
+                
+                for (const module of modules) {
+                    try {
+                        const moduleResponse = await fetch(`/src/${module}`);
+                        if (moduleResponse.ok) {
+                            log(`✅ Модуль ${module}: доступен`, 'success');
+                            modulesPassed++;
+                        } else {
+                            log(`❌ Модуль ${module}: недоступен`, 'error');
+                        }
+                    } catch (error) {
+                        log(`❌ Модуль ${module}: ошибка`, 'error');
+                    }
+                }
+                
+                log(`📊 Модули: ${modulesPassed}/${modules.length} доступно`, modulesPassed >= 3 ? 'success' : 'error');
+                
+                const overallSuccess = modulesPassed >= 3;
+                log(`🎯 Общий результат: ${overallSuccess ? 'Дизайн восстановлен' : 'Есть проблемы'}`, overallSuccess ? 'success' : 'error');
+                
+            } catch (error) {
+                log(`❌ Ошибка проверки дизайна: ${error.message}`, 'error');
+            }
+        }
+
+        function openMainApp() {
+            log('🌐 Открытие основного приложения...', 'info');
+            window.open('/index.html', '_blank');
+        }
+
+        // Автозапуск тестов
+        window.addEventListener('load', () => {
+            log('✅ Design Restored Test загружен', 'info');
+            setTimeout(() => {
+                testMainApp();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

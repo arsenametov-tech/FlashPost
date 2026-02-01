@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FlashPost - Независимые текстовые блоки</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        :root {
+            --tg-bg: #ffffff;
+            --tg-text: #000000;
+            --primary: #833ab4;
+        }
+        
+        .test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 250px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .test-item {
+            margin: 6px 0;
+            padding: 4px 6px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .test-item.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .test-item.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .test-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .test-btn {
+            padding: 8px 16px;
+            background: #833ab4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .test-btn:hover {
+            background: #6d2d96;
+        }
+        
+        .test-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .test-btn.secondary:hover {
+            background: #5a6268;
+        }
+        
+        .test-btn.danger {
+            background: #dc3545;
+        }
+        
+        .test-btn.danger:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-panel">
+        <h4>🧩 Тест блоков</h4>
+        <div class="test-item" id="blocksCount">Блоков: 0</div>
+        <div class="test-item" id="selectedBlock">Выбран: нет</div>
+        <div class="test-item" id="addButton">Кнопка +: не найдена</div>
+        <div class="test-item" id="deleteButton">Кнопка -: не найдена</div>
+        <div class="test-item" id="dataStructure">Структура: проверка...</div>
+    </div>
+    
+    <div class="test-controls">
+        <button class="test-btn" onclick="openEditor()">Открыть редактор</button>
+        <button class="test-btn secondary" onclick="testAddBlock()">Добавить блок</button>
+        <button class="test-btn secondary" onclick="testSelectBlock()">Выбрать блок</button>
+        <button class="test-btn danger" onclick="testDeleteBlock()">Удалить блок</button>
+        <button class="test-btn secondary" onclick="checkStructure()">Проверить структуру</button>
+    </div>
+
+    <div id="app">
+        <div style="padding: 40px; text-align: center; height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+            <h2>Независимые текстовые блоки</h2>
+            <p>Тест системы создания и управления текстовыми блоками</p>
+            <p style="font-size: 12px; color: #666;">Каждый блок имеет собственные параметры: текст, шрифт, размер, позицию</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация
+        const app = new FlashPostApp();
+        
+        // Тестовые данные
+        app.slides = [
+            {
+                title: "Блоки",
+                text: "🧩 Тест независимых блоков\n\nПроверяем создание, редактирование и удаление текстовых блоков."
+            },
+            {
+                title: "Управление", 
+                text: "⚙️ Управление блоками\n\nКаждый блок имеет собственные параметры: шрифт, размер, цвет, позицию."
+            },
+            {
+                title: "Структура",
+                text: "📊 Структура данных\n\nslide = {id, background, textBlocks: [{id, text, x, y, font, size, weight, glow, color}]}"
+            }
+        ];
+        
+        app.initializeSlideStyles();
+        
+        // Добавляем Instagram для тестирования
+        const instagramInput = document.createElement('input');
+        instagramInput.id = 'instagramInput';
+        instagramInput.value = '@blocks_test';
+        instagramInput.style.display = 'none';
+        document.body.appendChild(instagramInput);
+        
+        function updateTestInfo() {
+            const blocksCountEl = document.getElementById('blocksCount');
+            const selectedBlockEl = document.getElementById('selectedBlock');
+            const addButtonEl = document.getElementById('addButton');
+            const deleteButtonEl = document.getElementById('deleteButton');
+            const dataStructureEl = document.getElementById('dataStructure');
+            
+            // Проверяем количество блоков
+            const currentSlide = app.slides[app.currentEditingSlide];
+            if (currentSlide && currentSlide.textBlocks) {
+                blocksCountEl.textContent = `Блоков: ${currentSlide.textBlocks.length}`;
+                blocksCountEl.className = 'test-item success';
+            } else {
+                blocksCountEl.textContent = 'Блоков: 0';
+                blocksCountEl.className = 'test-item error';
+            }
+            
+            // Проверяем выбранный блок
+            if (app.selectedTextBlockId) {
+                const selectedBlock = currentSlide.textBlocks.find(b => b.id === app.selectedTextBlockId);
+                selectedBlockEl.textContent = `Выбран: ${selectedBlock ? selectedBlock.text.substring(0, 20) + '...' : 'не найден'}`;
+                selectedBlockEl.className = selectedBlock ? 'test-item success' : 'test-item error';
+            } else {
+                selectedBlockEl.textContent = 'Выбран: нет';
+                selectedBlockEl.className = 'test-item';
+            }
+            
+            // Проверяем кнопки
+            const addBtn = document.getElementById('addTextBlockBtn');
+            addButtonEl.textContent = `Кнопка +: ${addBtn ? 'найдена' : 'не найдена'}`;
+            addButtonEl.className = `test-item ${addBtn ? 'success' : 'error'}`;
+            
+            const deleteBtn = document.getElementById('deleteTextBlockBtn');
+            deleteButtonEl.textContent = `Кнопка -: ${deleteBtn ? 'найдена' : 'не найдена'}`;
+            deleteButtonEl.className = `test-item ${deleteBtn ? 'success' : 'error'}`;
+            
+            // Проверяем структуру данных
+            const hasCorrectStructure = currentSlide && 
+                currentSlide.id && 
+                currentSlide.background && 
+                Array.isArray(currentSlide.textBlocks);
+            
+            dataStructureEl.textContent = `Структура: ${hasCorrectStructure ? 'корректная' : 'некорректная'}`;
+            dataStructureEl.className = `test-item ${hasCorrectStructure ? 'success' : 'error'}`;
+        }
+        
+        function openEditor() {
+            console.log('🧪 Открываем редактор...');
+            app.openEditor();
+            setTimeout(updateTestInfo, 500);
+        }
+        
+        function testAddBlock() {
+            console.log('🧪 Тестируем добавление блока...');
+            
+            if (!document.querySelector('.editor-section')) {
+                app.openEditor();
+                setTimeout(testAddBlock, 500);
+                return;
+            }
+            
+            const addBtn = document.getElementById('addTextBlockBtn');
+            if (addBtn) {
+                const beforeCount = app.slides[app.currentEditingSlide].textBlocks.length;
+                addBtn.click();
+                
+                setTimeout(() => {
+                    const afterCount = app.slides[app.currentEditingSlide].textBlocks.length;
+                    console.log(`${afterCount > beforeCount ? '✅' : '❌'} Блоков было: ${beforeCount}, стало: ${afterCount}`);
+                    updateTestInfo();
+                }, 200);
+            } else {
+                console.error('❌ Кнопка добавления не найдена');
+            }
+        }
+        
+        function testSelectBlock() {
+            console.log('🧪 Тестируем выбор блока...');
+            
+            const currentSlide = app.slides[app.currentEditingSlide];
+            if (currentSlide.textBlocks.length > 0) {
+                const randomBlock = currentSlide.textBlocks[Math.floor(Math.random() * currentSlide.textBlocks.length)];
+                app.selectedTextBlockId = randomBlock.id;
+                app.updateTextBlockControls();
+                console.log(`✅ Выбран блок: ${randomBlock.id}`);
+                updateTestInfo();
+            } else {
+                console.error('❌ Нет блоков для выбора');
+            }
+        }
+        
+        function testDeleteBlock() {
+            console.log('🧪 Тестируем удаление блока...');
+            
+            if (!app.selectedTextBlockId) {
+                console.error('❌ Нет выбранного блока');
+                return;
+            }
+            
+            const beforeCount = app.slides[app.currentEditingSlide].textBlocks.length;
+            const deleteBtn = document.getElementById('deleteTextBlockBtn');
+            
+            if (deleteBtn) {
+                deleteBtn.click();
+                
+                setTimeout(() => {
+                    const afterCount = app.slides[app.currentEditingSlide].textBlocks.length;
+                    console.log(`${afterCount < beforeCount ? '✅' : '❌'} Блоков было: ${beforeCount}, стало: ${afterCount}`);
+                    updateTestInfo();
+                }, 200);
+            } else {
+                console.error('❌ Кнопка удаления не найдена');
+            }
+        }
+        
+        function checkStructure() {
+            console.log('🧪 Проверяем структуру данных...');
+            
+            const currentSlide = app.slides[app.currentEditingSlide];
+            console.log('📊 Структура слайда:', {
+                id: currentSlide.id,
+                background: currentSlide.background,
+                textBlocksCount: currentSlide.textBlocks.length,
+                textBlocks: currentSlide.textBlocks.map(block => ({
+                    id: block.id,
+                    text: block.text.substring(0, 30) + '...',
+                    x: block.x,
+                    y: block.y,
+                    font: block.font,
+                    size: block.size,
+                    weight: block.weight,
+                    color: block.color,
+                    glow: block.glow
+                }))
+            });
+            
+            updateTestInfo();
+        }
+        
+        // Автоматически открываем редактор
+        setTimeout(() => {
+            console.log('🚀 Автоматически открываем редактор...');
+            openEditor();
+        }, 1000);
+        
+        // Обновляем информацию каждые 3 секунды
+        setInterval(updateTestInfo, 3000);
+        
+        console.log(`
+🧩 ТЕСТ НЕЗАВИСИМЫХ ТЕКСТОВЫХ БЛОКОВ
+
+Проверяем:
+✅ Кнопку "Добавить текст" - создает новый textBlock
+✅ Независимые параметры каждого блока
+✅ Редактирование отдельно: текст, шрифт, размер, позиция
+✅ Структуру данных: slide = {id, background, textBlocks: [...]}
+✅ Кнопку удаления блока
+✅ Выбор и управление блоками
+
+Используйте кнопки слева для тестирования!
+        `);
+        
+        console.log('✅ Тест независимых блоков готов');
+    </script>
+</body>
+</html>

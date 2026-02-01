@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Module Test</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; color: #fff; font-family: Arial; }
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; margin: 10px 0; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Simple Module Test</h1>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const className = type === 'error' ? 'error' : (type === 'success' ? 'success' : (type === 'warning' ? 'warning' : ''));
+            logElement.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        // Перехват ошибок
+        window.addEventListener('error', (e) => {
+            log(`❌ JavaScript Error: ${e.message} в ${e.filename}:${e.lineno}`, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            log(`❌ Unhandled Promise Rejection: ${e.reason}`, 'error');
+        });
+
+        // Проверка загрузки модулей
+        function checkModules() {
+            log('🔍 Проверка загрузки модулей...');
+            
+            const modules = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager',
+                'FlashPostApp'
+            ];
+            
+            let loadedCount = 0;
+            let missingModules = [];
+            
+            modules.forEach(moduleName => {
+                if (typeof window[moduleName] !== 'undefined') {
+                    log(`✅ ${moduleName}: загружен`, 'success');
+                    loadedCount++;
+                } else {
+                    log(`❌ ${moduleName}: НЕ найден`, 'error');
+                    missingModules.push(moduleName);
+                }
+            });
+            
+            log(`📊 Итого: ${loadedCount}/${modules.length} модулей загружено`);
+            
+            if (missingModules.length === 0) {
+                log('✅ Все модули загружены успешно!', 'success');
+                testFlashPostApp();
+            } else {
+                log(`❌ Отсутствуют модули: ${missingModules.join(', ')}`, 'error');
+            }
+        }
+
+        function testFlashPostApp() {
+            log('🧪 Тестирование FlashPostApp...');
+            
+            try {
+                log('📦 Создаем экземпляр FlashPostApp...');
+                const app = new FlashPostApp();
+                log('✅ FlashPostApp создан успешно!', 'success');
+                
+                // Проверяем методы
+                if (typeof app.generateManualSlides === 'function') {
+                    log('✅ Метод generateManualSlides найден', 'success');
+                    
+                    // Тестируем генерацию
+                    const slides = app.generateManualSlides('Тестовая тема');
+                    log(`✅ Сгенерировано ${slides.length} слайдов`, 'success');
+                    
+                } else {
+                    log('❌ Метод generateManualSlides НЕ найден', 'error');
+                }
+                
+                if (typeof app.handleGenerate === 'function') {
+                    log('✅ Метод handleGenerate найден', 'success');
+                } else {
+                    log('❌ Метод handleGenerate НЕ найден', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка создания FlashPostApp: ${error.message}`, 'error');
+                log(`❌ Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Проверка после загрузки всех скриптов
+        let scriptsLoaded = 0;
+        const totalScripts = 8; // количество модулей
+
+        function onScriptLoad() {
+            scriptsLoaded++;
+            log(`📦 Загружен скрипт ${scriptsLoaded}/${totalScripts}`);
+            
+            if (scriptsLoaded === totalScripts) {
+                log('📦 Все скрипты загружены, начинаем проверку...', 'success');
+                setTimeout(checkModules, 100);
+            }
+        }
+
+        function onScriptError(scriptName) {
+            log(`❌ Ошибка загрузки скрипта: ${scriptName}`, 'error');
+        }
+
+        // Загружаем модули с отслеживанием
+        const scripts = [
+            'src/state.js',
+            'src/renderer.js',
+            'src/editor.js',
+            'src/drag.js',
+            'src/export.js',
+            'src/ai.js',
+            'src/template-manager.js',
+            'src/app.js'
+        ];
+
+        log('🚀 Начинаем загрузку модулей...');
+
+        scripts.forEach((scriptPath, index) => {
+            const script = document.createElement('script');
+            script.src = scriptPath;
+            script.onload = () => {
+                log(`✅ Загружен: ${scriptPath}`, 'success');
+                onScriptLoad();
+            };
+            script.onerror = () => {
+                log(`❌ Ошибка загрузки: ${scriptPath}`, 'error');
+                onScriptError(scriptPath);
+            };
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>

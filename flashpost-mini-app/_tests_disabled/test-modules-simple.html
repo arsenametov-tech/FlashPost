@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modules Simple - FlashPost</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .module {
+            background: #2a2a2a;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #666;
+        }
+        .loaded { border-left-color: #00ff00; }
+        .error { border-left-color: #ff0000; color: #ff6666; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test Modules Simple</h1>
+    <div id="results"></div>
+
+    <!-- Загружаем модули по одному и проверяем каждый -->
+    <script>
+        const results = document.getElementById('results');
+        
+        function addResult(module, status, error = null) {
+            const div = document.createElement('div');
+            div.className = `module ${status}`;
+            div.innerHTML = `
+                <strong>${module}:</strong> ${status.toUpperCase()}
+                ${error ? `<br><small>Error: ${error}</small>` : ''}
+            `;
+            results.appendChild(div);
+        }
+
+        function checkModule(name) {
+            try {
+                if (typeof window[name] !== 'undefined') {
+                    addResult(name, 'loaded');
+                    console.log(`✅ ${name} loaded`);
+                    return true;
+                } else {
+                    addResult(name, 'error', 'Module not found');
+                    console.error(`❌ ${name} not found`);
+                    return false;
+                }
+            } catch (error) {
+                addResult(name, 'error', error.message);
+                console.error(`❌ ${name} error:`, error);
+                return false;
+            }
+        }
+
+        // Проверяем модули после загрузки каждого скрипта
+        let moduleCount = 0;
+        
+        function checkAfterLoad(moduleName) {
+            moduleCount++;
+            console.log(`📦 Загружен скрипт ${moduleCount}: ${moduleName}`);
+            checkModule(moduleName);
+        }
+    </script>
+
+    <script src="src/state.js" onload="checkAfterLoad('StateManager')" onerror="addResult('StateManager', 'error', 'Script load failed')"></script>
+    <script src="src/renderer.js" onload="checkAfterLoad('Renderer')" onerror="addResult('Renderer', 'error', 'Script load failed')"></script>
+    <script src="src/editor.js" onload="checkAfterLoad('Editor')" onerror="addResult('Editor', 'error', 'Script load failed')"></script>
+    <script src="src/drag.js" onload="checkAfterLoad('DragManager')" onerror="addResult('DragManager', 'error', 'Script load failed')"></script>
+    <script src="src/export.js" onload="checkAfterLoad('ExportManager')" onerror="addResult('ExportManager', 'error', 'Script load failed')"></script>
+    <script src="src/ai.js" onload="checkAfterLoad('AIManager')" onerror="addResult('AIManager', 'error', 'Script load failed')"></script>
+    <script src="src/template-manager.js" onload="checkAfterLoad('TemplateManager')" onerror="addResult('TemplateManager', 'error', 'Script load failed')"></script>
+    <script src="src/app.js" onload="checkAfterLoad('FlashPostApp')" onerror="addResult('FlashPostApp', 'error', 'Script load failed')"></script>
+
+    <script>
+        // Финальная проверка через 2 секунды
+        setTimeout(() => {
+            console.log('🔍 Финальная проверка...');
+            
+            const div = document.createElement('div');
+            div.className = 'module';
+            div.innerHTML = '<h3>📊 Финальная проверка:</h3>';
+            results.appendChild(div);
+            
+            if (typeof window.flashPostApp !== 'undefined') {
+                addResult('window.flashPostApp', 'loaded', 'App instance created');
+            } else {
+                addResult('window.flashPostApp', 'error', 'App instance NOT created');
+                
+                // Попробуем создать вручную
+                if (typeof FlashPostApp !== 'undefined') {
+                    try {
+                        window.flashPostApp = new FlashPostApp();
+                        addResult('Manual Init', 'loaded', 'Manual initialization successful');
+                    } catch (error) {
+                        addResult('Manual Init', 'error', error.message);
+                    }
+                } else {
+                    addResult('FlashPostApp Class', 'error', 'Class not available');
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

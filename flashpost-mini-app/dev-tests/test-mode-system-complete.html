@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Mode System Test - FlashPost</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .mode-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-edit { background: #833ab4; color: white; }
+        .btn-preview { background: #28a745; color: white; }
+        .btn-export { background: #dc3545; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        
+        .btn:hover { transform: translateY(-2px); }
+        
+        .current-mode {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .app-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 600px;
+        }
+        
+        /* Режимы */
+        .mode-edit { border-left: 4px solid #833ab4; }
+        .mode-preview { border-left: 4px solid #28a745; }
+        .mode-export { border-left: 4px solid #dc3545; }
+        
+        /* Стили для редактора */
+        .section { width: 100%; height: 100%; }
+        .editor-section { display: flex; flex-direction: column; height: 100%; }
+        .editor-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 16px; 
+            background: white; 
+            border-radius: 12px; 
+            margin-bottom: 16px; 
+        }
+        .editor-title { font-size: 18px; font-weight: 700; color: #333; }
+        .editor-content { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; flex: 1; }
+        .editor-preview { background: white; border-radius: 12px; padding: 16px; }
+        .slide-preview { 
+            position: relative; 
+            width: 100%; 
+            height: 400px; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            border: 2px solid #dee2e6; 
+        }
+        
+        /* Стили для превью */
+        .carousel-section { padding: 20px; }
+        .carousel-header { text-align: center; margin-bottom: 20px; padding: 20px; }
+        .carousel-container { background: white; border-radius: 12px; padding: 20px; }
+        .carousel-track { display: flex; gap: 20px; overflow-x: auto; }
+        .slide { 
+            min-width: 300px; 
+            height: 200px; 
+            border-radius: 12px; 
+            position: relative; 
+            border: 2px solid #dee2e6; 
+        }
+        .slide.active { border-color: #28a745; }
+        
+        /* Стили для экспорта */
+        .export-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .export-slide { 
+            width: 200px; 
+            height: 200px; 
+            border-radius: 8px; 
+            border: 2px solid #dc3545; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        
+        /* Текстовые блоки */
+        .slide-text-block, .slide-text-block-static, .export-text-block {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #333;
+            text-align: center;
+            transform: translate(-50%, -50%);
+        }
+        
+        .slide-text-block {
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .slide-text-block:hover { border-color: #833ab4; }
+        .slide-text-block.active { border-color: #833ab4; box-shadow: 0 0 8px rgba(131, 58, 180, 0.3); }
+        
+        /* Ключевые слова */
+        .auto-keyword {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 1px 3px;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+        
+        .performance-info {
+            background: #e9ecef;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔧 Complete Mode System Test</h1>
+        
+        <div class="mode-controls">
+            <button class="btn btn-edit" onclick="testApp.enterEditMode()">✏️ Edit Mode</button>
+            <button class="btn btn-preview" onclick="testApp.enterPreviewMode()">👁️ Preview Mode</button>
+            <button class="btn btn-export" onclick="testApp.enterExportMode()">📥 Export Mode</button>
+            <button class="btn btn-info" onclick="testApp.testExportSequence()">🧪 Test Export</button>
+        </div>
+        
+        <div class="current-mode" id="currentMode">
+            Current Mode: start
+        </div>
+        
+        <div class="app-container" id="app">
+            <!-- Здесь будет рендериться приложение -->
+        </div>
+        
+        <div class="performance-info" id="performanceInfo">
+            <!-- Информация о производительности -->
+        </div>
+    </div>
+
+    <script>
+        // Тестовое приложение для демонстрации системы режимов
+        class TestModeApp {
+            constructor() {
+                this.project = {
+                    slides: [],
+                    activeSlideId: null,
+                    activeTextBlockId: null,
+                    mode: 'start'
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.createTestData();
+                this.render();
+                this.updateModeDisplay();
+            }
+            
+            createTestData() {
+                const slides = [
+                    {
+                        id: 'slide_1',
+                        background: { type: 'color', color: '#ff6b6b' },
+                        textBlocks: [
+                            {
+                                id: 'block_1_1',
+                                text: 'Заголовок с рынком и инвестициями',
+                                x: 50, y: 30, width: 80,
+                                font: 'Inter', size: 16, weight: 700, color: '#ffffff'
+                            }
+                        ],
+                        autoKeywords: ['рынок', 'инвестиции']
+                    },
+                    {
+                        id: 'slide_2',
+                        background: { type: 'color', color: '#4ecdc4' },
+                        textBlocks: [
+                            {
+                                id: 'block_2_1',
+                                text: 'Второй слайд о прибыли',
+                                x: 50, y: 50, width: 70,
+                                font: 'Inter', size: 14, weight: 600, color: '#ffffff'
+                            }
+                        ],
+                        autoKeywords: ['прибыль']
+                    }
+                ];
+                
+                this.project.slides = slides;
+                this.project.activeSlideId = 'slide_1';
+                this.project.activeTextBlockId = 'block_1_1';
+            }
+            
+            // ===== СИСТЕМА РЕЖИМОВ =====
+            
+            async setMode(newMode) {
+                const validModes = ["start", "edit", "preview", "export"];
+                
+                if (!validModes.includes(newMode)) {
+                    console.error(`❌ Недопустимый режим: ${newMode}`);
+                    return false;
+                }
+                
+                const oldMode = this.project.mode;
+                this.project.mode = newMode;
+                
+                console.log(`🔄 Режим изменен: ${oldMode} → ${newMode}`);
+                
+                // Для режима экспорта ждем обновления DOM
+                if (newMode === 'export') {
+                    await this.nextTick();
+                }
+                
+                this.updateModeDisplay();
+                return true;
+            }
+            
+            nextTick() {
+                return new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(resolve);
+                    });
+                });
+            }
+            
+            async enterEditMode() {
+                await this.setMode('edit');
+                this.render();
+            }
+            
+            async enterPreviewMode() {
+                await this.setMode('preview');
+                this.render();
+            }
+            
+            async enterExportMode() {
+                await this.setMode('export');
+                this.render();
+            }
+            
+            // ===== РЕНДЕРИНГ =====
+            
+            render() {
+                const app = document.getElementById('app');
+                app.innerHTML = '';
+                app.className = `mode-${this.project.mode}`;
+                
+                if (this.project.mode === 'edit') {
+                    this.renderEditor();
+                } else if (this.project.mode === 'preview') {
+                    this.renderPreview();
+                } else if (this.project.mode === 'export') {
+                    this.renderExport();
+                }
+                
+                console.log(`✅ Рендер завершен для режима: ${this.project.mode}`);
+            }
+            
+            renderEditor() {
+                const app = document.getElementById('app');
+                const editorElement = this.createEditorDOM();
+                app.appendChild(editorElement);
+            }
+            
+            renderPreview() {
+                const app = document.getElementById('app');
+                const previewElement = this.createPreviewDOM();
+                app.appendChild(previewElement);
+            }
+            
+            renderExport() {
+                const app = document.getElementById('app');
+                const exportElement = this.createExportDOM();
+                app.appendChild(exportElement);
+            }
+            
+            // ===== DOM CREATION =====
+            
+            createEditorDOM() {
+                const section = document.createElement('div');
+                section.className = 'section active';
+                
+                const editorSection = document.createElement('div');
+                editorSection.className = 'editor-section';
+                
+                const header = document.createElement('div');
+                header.className = 'editor-header';
+                header.innerHTML = '<div class="editor-title">✏️ Edit Mode - DOM Rendering</div>';
+                
+                const content = document.createElement('div');
+                content.className = 'editor-content';
+                
+                const preview = document.createElement('div');
+                preview.className = 'editor-preview';
+                
+                const slide = this.createSlideElement(this.getActiveSlide(), true);
+                preview.appendChild(slide);
+                content.appendChild(preview);
+                
+                const tools = document.createElement('div');
+                tools.innerHTML = '<p>🔧 Editor Tools Panel</p>';
+                content.appendChild(tools);
+                
+                editorSection.appendChild(header);
+                editorSection.appendChild(content);
+                section.appendChild(editorSection);
+                
+                return section;
+            }
+            
+            createPreviewDOM() {
+                const section = document.createElement('div');
+                section.className = 'section active';
+                
+                const carouselSection = document.createElement('div');
+                carouselSection.className = 'carousel-section';
+                
+                const header = document.createElement('div');
+                header.className = 'carousel-header';
+                header.innerHTML = '<h2>👁️ Preview Mode - Interactive Carousel</h2>';
+                
+                const container = document.createElement('div');
+                container.className = 'carousel-container';
+                
+                const track = document.createElement('div');
+                track.className = 'carousel-track';
+                
+                this.project.slides.forEach((slide, index) => {
+                    const slideElement = this.createSlideElement(slide, false);
+                    slideElement.classList.add(index === 0 ? 'active' : '');
+                    track.appendChild(slideElement);
+                });
+                
+                container.appendChild(track);
+                carouselSection.appendChild(header);
+                carouselSection.appendChild(container);
+                section.appendChild(carouselSection);
+                
+                return section;
+            }
+            
+            createExportDOM() {
+                const section = document.createElement('div');
+                section.className = 'section active mode-export';
+                
+                const header = document.createElement('h2');
+                header.textContent = '📥 Export Mode - Clean Slides';
+                header.style.textAlign = 'center';
+                header.style.marginBottom = '20px';
+                
+                const exportContainer = document.createElement('div');
+                exportContainer.className = 'export-container';
+                exportContainer.id = 'exportContainer';
+                
+                this.project.slides.forEach((slide, index) => {
+                    const cleanSlide = this.createCleanSlide(slide, index);
+                    exportContainer.appendChild(cleanSlide);
+                });
+                
+                section.appendChild(header);
+                section.appendChild(exportContainer);
+                
+                return section;
+            }
+            
+            createSlideElement(slide, editable) {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'slide-preview';
+                slideDiv.style.background = slide.background.color;
+                
+                slide.textBlocks.forEach(block => {
+                    const blockElement = this.createTextBlock(block, editable);
+                    slideDiv.appendChild(blockElement);
+                });
+                
+                return slideDiv;
+            }
+            
+            createTextBlock(block, editable) {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = editable ? 'slide-text-block' : 'slide-text-block-static';
+                blockDiv.dataset.blockId = block.id;
+                
+                blockDiv.style.left = block.x + '%';
+                blockDiv.style.top = block.y + '%';
+                blockDiv.style.width = block.width + '%';
+                blockDiv.style.fontSize = block.size + 'px';
+                blockDiv.style.fontFamily = block.font;
+                blockDiv.style.color = block.color;
+                
+                if (this.project.activeTextBlockId === block.id && editable) {
+                    blockDiv.classList.add('active');
+                }
+                
+                const slide = this.getSlideByBlockId(block.id);
+                blockDiv.innerHTML = this.parseTextWithKeywords(block.text, slide?.autoKeywords || []);
+                
+                return blockDiv;
+            }
+            
+            createCleanSlide(slide, index) {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'export-slide';
+                slideDiv.dataset.slideIndex = index;
+                slideDiv.style.background = slide.background.color;
+                
+                slide.textBlocks.forEach(block => {
+                    const cleanBlock = this.createCleanTextBlock(block);
+                    slideDiv.appendChild(cleanBlock);
+                });
+                
+                return slideDiv;
+            }
+            
+            createCleanTextBlock(block) {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = 'export-text-block';
+                
+                blockDiv.style.left = block.x + '%';
+                blockDiv.style.top = block.y + '%';
+                blockDiv.style.fontSize = block.size + 'px';
+                blockDiv.style.fontFamily = block.font;
+                blockDiv.style.color = block.color;
+                
+                const slide = this.getSlideByBlockId(block.id);
+                blockDiv.innerHTML = this.parseTextWithKeywords(block.text, slide?.autoKeywords || []);
+                
+                return blockDiv;
+            }
+            
+            // ===== UTILITY METHODS =====
+            
+            parseTextWithKeywords(text, autoKeywords = []) {
+                let parsedText = text;
+                
+                autoKeywords.forEach(keyword => {
+                    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                    parsedText = parsedText.replace(regex, '<span class="auto-keyword">$1</span>');
+                });
+                
+                return parsedText;
+            }
+            
+            getActiveSlide() {
+                return this.project.slides.find(slide => slide.id === this.project.activeSlideId);
+            }
+            
+            getSlideByBlockId(blockId) {
+                return this.project.slides.find(slide => 
+                    slide.textBlocks.some(block => block.id === blockId)
+                );
+            }
+            
+            updateModeDisplay() {
+                const modeDisplay = document.getElementById('currentMode');
+                modeDisplay.textContent = `Current Mode: ${this.project.mode}`;
+                modeDisplay.className = `current-mode mode-${this.project.mode}`;
+            }
+            
+            // ===== TEST METHODS =====
+            
+            async testExportSequence() {
+                console.log('🧪 Тестируем последовательность экспорта...');
+                
+                // 1. Переходим в режим экспорта
+                await this.setMode('export');
+                await this.nextTick();
+                this.render();
+                
+                console.log('✅ Режим экспорта активирован');
+                
+                // 2. Имитируем экспорт
+                setTimeout(() => {
+                    const exportContainer = document.getElementById('exportContainer');
+                    const slides = exportContainer?.querySelectorAll('.export-slide');
+                    
+                    console.log(`📸 Найдено ${slides?.length || 0} чистых слайдов для экспорта`);
+                    
+                    // 3. Возвращаемся в превью
+                    setTimeout(() => {
+                        this.enterPreviewMode();
+                        console.log('✅ Возврат в режим превью');
+                    }, 1000);
+                }, 500);
+            }
+        }
+        
+        // Инициализация тестового приложения
+        let testApp;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            testApp = new TestModeApp();
+            console.log('🔧 Complete Mode System Test загружен');
+        });
+    </script>
+</body>
+</html>

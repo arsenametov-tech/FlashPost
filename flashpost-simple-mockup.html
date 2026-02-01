@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FlashPost - Генератор каруселей</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .app-container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            color: #64748b;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .input-section {
+            margin-bottom: 32px;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+        
+        .topic-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.2s ease;
+            background: #fafafa;
+        }
+        
+        .topic-textarea:focus {
+            outline: none;
+            border-color: #833ab4;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(131, 58, 180, 0.1);
+        }
+        
+        .topic-textarea::placeholder {
+            color: #9ca3af;
+        }
+        
+        .popular-topics {
+            margin-top: 20px;
+        }
+        
+        .topics-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .topics-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+        }
+        
+        .topics-dropdown {
+            position: relative;
+        }
+        
+        .dropdown-button {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-button:hover {
+            background: #e5e7eb;
+        }
+        
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-width: 280px;
+            z-index: 10;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .dropdown-content.show {
+            display: block;
+        }
+        
+        .topic-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+        
+        .topic-item:last-child {
+            border-bottom: none;
+        }
+        
+        .topic-item:hover {
+            background: #f8fafc;
+        }
+        
+        .topic-item .topic-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+        
+        .topic-item .topic-subtitle {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .action-button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 56px;
+        }
+        
+        .manual-button {
+            background: #f8fafc;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .manual-button:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        
+        .generate-button {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            border: 2px solid transparent;
+        }
+        
+        .generate-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .generate-button:active {
+            transform: translateY(0);
+        }
+        
+        .button-icon {
+            font-size: 18px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 24px;
+                margin: 10px;
+                border-radius: 20px;
+            }
+            
+            .logo {
+                font-size: 28px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .dropdown-content {
+                right: auto;
+                left: 0;
+                min-width: 100%;
+            }
+        }
+        
+        /* Loading state */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .loading .generate-button {
+            background: #9ca3af;
+        }
+        
+        /* Animation for dropdown */
+        .dropdown-content {
+            animation: slideDown 0.2s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">FlashPost</div>
+            <div class="subtitle">Генератор вирусных каруселей</div>
+        </div>
+        
+        <div class="input-section">
+            <label class="input-label" for="topicInput">опиши тему</label>
+            <textarea 
+                id="topicInput" 
+                class="topic-textarea" 
+                placeholder="Например: Как заработать первый миллион в 25 лет"
+            ></textarea>
+            
+            <div class="popular-topics">
+                <div class="topics-header">
+                    <span class="topics-title">Популярные темы</span>
+                    <div class="topics-dropdown">
+                        <button class="dropdown-button" id="topicsDropdown">
+                            <span>Выбрать</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6,9 12,15 18,9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="dropdown-content" id="dropdownContent">
+                            <div class="topic-item" data-topic="Рынок — манипуляции">
+                                <div class="topic-title">Рынок — манипуляции</div>
+                                <div class="topic-subtitle">Как распознать и избежать</div>
+                            </div>
+                            <div class="topic-item" data-topic="Деньги — страх потерь">
+                                <div class="topic-title">Деньги — страх потерь</div>
+                                <div class="topic-subtitle">Психология инвестиций</div>
+                            </div>
+                            <div class="topic-item" data-topic="Крипта — правда">
+                                <div class="topic-title">Крипта — правда</div>
+                                <div class="topic-subtitle">Реальность криптовалют</div>
+                            </div>
+                            <div class="topic-item" data-topic="Бизнес — с нуля до миллиона">
+                                <div class="topic-title">Бизнес — с нуля до миллиона</div>
+                                <div class="topic-subtitle">Пошаговый план</div>
+                            </div>
+                            <div class="topic-item" data-topic="Продуктивность — без выгорания">
+                                <div class="topic-title">Продуктивность — без выгорания</div>
+                                <div class="topic-subtitle">Здоровые привычки</div>
+                            </div>
+                            <div class="topic-item" data-topic="Отношения — токсичность">
+                                <div class="topic-title">Отношения — токсичность</div>
+                                <div class="topic-subtitle">Как распознать и выйти</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-button manual-button" id="manualButton">
+                <span class="button-icon">✍</span>
+                <span>Создать из текста</span>
+            </button>
+            <button class="action-button generate-button" id="generateButton">
+                <span class="button-icon">🧠</span>
+                <span>Сгенерировать ИИ</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Dropdown functionality
+        const dropdownButton = document.getElementById('topicsDropdown');
+        const dropdownContent = document.getElementById('dropdownContent');
+        const topicInput = document.getElementById('topicInput');
+        const manualButton = document.getElementById('manualButton');
+        const generateButton = document.getElementById('generateButton');
+
+        // Toggle dropdown
+        dropdownButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownContent.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            dropdownContent.classList.remove('show');
+        });
+
+        // Handle topic selection
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const topic = item.dataset.topic;
+                topicInput.value = topic;
+                dropdownContent.classList.remove('show');
+                
+                // Add some visual feedback
+                topicInput.style.borderColor = '#10b981';
+                setTimeout(() => {
+                    topicInput.style.borderColor = '#e5e7eb';
+                }, 1000);
+            });
+        });
+
+        // Manual button functionality
+        manualButton.addEventListener('click', () => {
+            // Here you would open the manual input modal
+            alert('Открытие модального окна для ручного ввода текста');
+        });
+
+        // Generate button functionality
+        generateButton.addEventListener('click', () => {
+            const topic = topicInput.value.trim();
+            
+            if (!topic) {
+                alert('Пожалуйста, введите тему для генерации');
+                topicInput.focus();
+                return;
+            }
+            
+            // Add loading state
+            document.querySelector('.app-container').classList.add('loading');
+            generateButton.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                </svg>
+                <span>Генерируем...</span>
+            `;
+            
+            // Simulate API call
+            setTimeout(() => {
+                document.querySelector('.app-container').classList.remove('loading');
+                generateButton.innerHTML = `
+                    <span class="button-icon">🧠</span>
+                    <span>Сгенерировать ИИ</span>
+                `;
+                alert(`Генерация карусели на тему: "${topic}"`);
+            }, 2000);
+        });
+
+        // Auto-resize textarea
+        topicInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(120, this.scrollHeight) + 'px';
+        });
+
+        // Add some nice focus effects
+        topicInput.addEventListener('focus', () => {
+            topicInput.parentElement.style.transform = 'scale(1.02)';
+        });
+
+        topicInput.addEventListener('blur', () => {
+            topicInput.parentElement.style.transform = 'scale(1)';
+        });
+    </script>
+</body>
+</html>

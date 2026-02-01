@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Полная DOM-рендер система - FlashPost</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .demo-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        .slides-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .controls-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .slides-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .slide {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+        
+        .slide:hover {
+            border-color: #833ab4;
+            transform: translateY(-2px);
+        }
+        
+        .slide.active {
+            border-color: #833ab4;
+            box-shadow: 0 0 12px rgba(131, 58, 180, 0.3);
+        }
+        
+        .slide-text-block {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: move;
+            font-family: Inter, sans-serif;
+            color: #333;
+            min-width: 60px;
+            min-height: 30px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            text-align: center;
+            line-height: 1.2;
+            word-wrap: break-word;
+            user-select: none;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .slide-text-block:hover {
+            border-color: #833ab4;
+        }
+        
+        .slide-text-block.active {
+            border-color: #833ab4;
+            box-shadow: 0 0 8px rgba(131, 58, 180, 0.3);
+            z-index: 100;
+        }
+        
+        .slide-text-block.dragging {
+            z-index: 1000;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        
+        /* Стили для ключевых слов */
+        .auto-keyword {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            text-shadow: none;
+            box-shadow: 0 0 6px rgba(255, 107, 107, 0.4);
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        .manual-keyword {
+            background: linear-gradient(45deg, #48cae4, #0077b6);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            text-shadow: none;
+            box-shadow: 0 0 6px rgba(72, 202, 228, 0.4);
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-pulse {
+            0% { box-shadow: 0 0 6px rgba(255, 107, 107, 0.4); }
+            100% { box-shadow: 0 0 12px rgba(255, 107, 107, 0.8); }
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary { background: #833ab4; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        
+        .btn:hover { transform: translateY(-2px); }
+        
+        .slide-info {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .slide-info:hover {
+            border-color: #833ab4;
+        }
+        
+        .slide-info.active {
+            border-color: #833ab4;
+            background: #f8f9ff;
+        }
+        
+        .slide-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+        
+        .slide-details {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .edit-controls {
+            margin-top: 16px;
+        }
+        
+        .edit-group {
+            margin-bottom: 12px;
+        }
+        
+        .edit-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .edit-group input,
+        .edit-group select,
+        .edit-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .performance-info {
+            background: #e9ecef;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔧 Полная DOM-рендер система FlashPost</h1>
+        
+        <div class="demo-layout">
+            <!-- Слайды -->
+            <div class="slides-section">
+                <h3>Слайды</h3>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="domSystem.addSlide()">➕ Добавить слайд</button>
+                    <button class="btn btn-success" onclick="domSystem.addTextBlock()">📝 Добавить блок</button>
+                    <button class="btn btn-info" onclick="domSystem.toggleEditMode()">✏️ Режим редактирования</button>
+                    <button class="btn btn-warning" onclick="domSystem.renderAll()">🔄 Перерендерить</button>
+                </div>
+                
+                <div class="slides-container" id="slidesContainer">
+                    <!-- Слайды будут добавлены через DOM -->
+                </div>
+                
+                <div class="performance-info" id="performanceInfo">
+                    <!-- Информация о производительности -->
+                </div>
+            </div>
+            
+            <!-- Управление -->
+            <div class="controls-section">
+                <h3>Управление</h3>
+                
+                <div id="slidesList">
+                    <!-- Список слайдов -->
+                </div>
+                
+                <div class="edit-controls" id="editControls">
+                    <!-- Контролы редактирования -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== ПОЛНАЯ DOM-РЕНДЕР СИСТЕМА =====
+        
+        class CompleteDOMSystem {
+            constructor() {
+                this.project = {
+                    slides: [],
+                    activeSlideId: null,
+                    activeTextBlockId: null
+                };
+                
+                this.editMode = true;
+                this.dragState = {
+                    isDragging: false,
+                    activeBlockId: null,
+                    startX: 0,
+                    startY: 0,
+                    startBlockX: 0,
+                    startBlockY: 0,
+                    slideRect: null
+                };
+                
+                this.performanceMetrics = {
+                    totalRenderTime: 0,
+                    slidesRendered: 0,
+                    blocksRendered: 0,
+                    lastRender: null
+                };
+                
+                console.log('🔧 Инициализация полной DOM-рендер системы');
+                this.init();
+            }
+            
+            init() {
+                this.createInitialSlides();
+                this.bindGlobalEvents();
+                this.renderAll();
+            }
+            
+            // Создание начальных слайдов
+            createInitialSlides() {
+                this.project.slides = [
+                    {
+                        id: 'slide_1',
+                        background: { type: 'color', color: '#ff6b6b' },
+                        textBlocks: [
+                            {
+                                id: 'block_1_1',
+                                text: 'Заголовок первого слайда с рынком',
+                                x: 50, y: 30, width: 80,
+                                font: 'Inter', size: 18, weight: 700, color: '#ffffff'
+                            },
+                            {
+                                id: 'block_1_2',
+                                text: 'Подзаголовок об инвестициях',
+                                x: 50, y: 70, width: 70,
+                                font: 'Inter', size: 14, weight: 600, color: '#ffffff'
+                            }
+                        ],
+                        autoKeywords: ['рынок', 'инвестиции']
+                    },
+                    {
+                        id: 'slide_2',
+                        background: { type: 'color', color: '#4ecdc4' },
+                        textBlocks: [
+                            {
+                                id: 'block_2_1',
+                                text: 'Второй слайд о прибыли',
+                                x: 50, y: 50, width: 75,
+                                font: 'Inter', size: 16, weight: 600, color: '#ffffff'
+                            }
+                        ],
+                        autoKeywords: ['прибыль']
+                    }
+                ];
+                
+                this.project.activeSlideId = 'slide_1';
+                this.project.activeTextBlockId = 'block_1_1';
+            }
+            
+            // ===== ОСНОВНЫЕ ФУНКЦИИ DOM-РЕНДЕРИНГА =====
+            
+            renderTextBlock(block, editable = true) {
+                const startTime = performance.now();
+                
+                const el = document.createElement('div');
+                el.className = 'slide-text-block';
+                el.dataset.blockId = block.id;
+                
+                // Устанавливаем стили
+                el.style.position = 'absolute';
+                el.style.left = block.x + '%';
+                el.style.top = block.y + '%';
+                el.style.width = block.width + '%';
+                el.style.fontSize = block.size + 'px';
+                el.style.fontFamily = block.font;
+                el.style.fontWeight = block.weight;
+                el.style.color = block.color;
+                el.style.transform = 'translate(-50%, -50%)';
+                
+                // Добавляем активный класс
+                if (this.project.activeTextBlockId === block.id) {
+                    el.classList.add('active');
+                }
+                
+                // Парсим текст с ключевыми словами
+                const slide = this.getSlideByBlockId(block.id);
+                el.innerHTML = this.parseTextWithKeywords(
+                    block.text,
+                    slide ? slide.autoKeywords : []
+                );
+                
+                // Добавляем события для редактирования
+                if (editable) {
+                    el.addEventListener('mousedown', (e) => this.startDrag(e, block.id));
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.project.activeTextBlockId = block.id;
+                        this.updateControls();
+                    });
+                }
+                
+                const renderTime = performance.now() - startTime;
+                this.performanceMetrics.blocksRendered++;
+                
+                return el;
+            }
+            
+            // ===== КЛЮЧЕВАЯ ФУНКЦИЯ РЕНДЕРИНГА СЛАЙДА =====
+            renderSlide(slide, editable = true) {
+                const startTime = performance.now();
+                
+                const slideEl = document.createElement('div');
+                slideEl.className = 'slide';
+                slideEl.dataset.slideId = slide.id;
+                
+                // Добавляем активный класс
+                if (this.project.activeSlideId === slide.id) {
+                    slideEl.classList.add('active');
+                }
+                
+                // Устанавливаем фон
+                if (slide.background.type === 'color') {
+                    slideEl.style.background = slide.background.color;
+                } else if (slide.background.type === 'image') {
+                    slideEl.style.backgroundImage = `url(${slide.background.image})`;
+                    slideEl.style.backgroundSize = 'cover';
+                    slideEl.style.backgroundPosition = 'center';
+                }
+                
+                // Добавляем текстовые блоки
+                slide.textBlocks.forEach(block => {
+                    slideEl.appendChild(this.renderTextBlock(block, editable));
+                });
+                
+                // Добавляем событие клика по слайду
+                slideEl.addEventListener('click', (e) => {
+                    if (e.target === slideEl) {
+                        this.project.activeSlideId = slide.id;
+                        this.project.activeTextBlockId = null;
+                        this.updateControls();
+                        this.renderSlidesList();
+                    }
+                });
+                
+                const renderTime = performance.now() - startTime;
+                this.performanceMetrics.slidesRendered++;
+                this.performanceMetrics.totalRenderTime += renderTime;
+                
+                console.log(`🔧 Слайд ${slide.id} отрендерен за ${renderTime.toFixed(2)}ms`);
+                
+                return slideEl;
+            }
+            
+            // Рендеринг всех слайдов
+            renderAll() {
+                const startTime = performance.now();
+                
+                const container = document.getElementById('slidesContainer');
+                container.innerHTML = '';
+                
+                // Сбрасываем метрики
+                this.performanceMetrics = {
+                    totalRenderTime: 0,
+                    slidesRendered: 0,
+                    blocksRendered: 0,
+                    lastRender: new Date()
+                };
+                
+                // Рендерим каждый слайд
+                this.project.slides.forEach(slide => {
+                    const slideElement = this.renderSlide(slide, this.editMode);
+                    container.appendChild(slideElement);
+                });
+                
+                const totalTime = performance.now() - startTime;
+                this.performanceMetrics.totalRenderTime = totalTime;
+                
+                console.log(`🔧 Все слайды отрендерены за ${totalTime.toFixed(2)}ms`);
+                
+                // Обновляем панели
+                this.renderSlidesList();
+                this.updateControls();
+                this.updatePerformanceInfo();
+            }
+            
+            // ===== ПАРСИНГ КЛЮЧЕВЫХ СЛОВ =====
+            
+            parseTextWithKeywords(text, autoKeywords = []) {
+                if (!text) return '';
+                
+                let parsedText = text;
+                
+                // Автоматические ключевые слова
+                autoKeywords.forEach(keyword => {
+                    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                    parsedText = parsedText.replace(regex, '<span class="auto-keyword">$1</span>');
+                });
+                
+                return parsedText;
+            }
+            
+            // ===== УПРАВЛЕНИЕ СЛАЙДАМИ И БЛОКАМИ =====
+            
+            addSlide() {
+                const newSlide = {
+                    id: `slide_${Date.now()}`,
+                    background: { 
+                        type: 'color', 
+                        color: this.getRandomColor() 
+                    },
+                    textBlocks: [
+                        {
+                            id: `block_${Date.now()}`,
+                            text: `Новый слайд ${this.project.slides.length + 1}`,
+                            x: 50, y: 50, width: 70,
+                            font: 'Inter', size: 16, weight: 600, color: '#ffffff'
+                        }
+                    ],
+                    autoKeywords: []
+                };
+                
+                this.project.slides.push(newSlide);
+                this.project.activeSlideId = newSlide.id;
+                this.project.activeTextBlockId = newSlide.textBlocks[0].id;
+                
+                console.log(`➕ Добавлен слайд: ${newSlide.id}`);
+                this.renderAll();
+            }
+            
+            addTextBlock() {
+                const activeSlide = this.getActiveSlide();
+                if (!activeSlide) return;
+                
+                const newBlock = {
+                    id: `block_${Date.now()}`,
+                    text: `Новый блок ${activeSlide.textBlocks.length + 1}`,
+                    x: 30 + Math.random() * 40,
+                    y: 30 + Math.random() * 40,
+                    width: 60,
+                    font: 'Inter',
+                    size: 14,
+                    weight: 600,
+                    color: '#ffffff'
+                };
+                
+                activeSlide.textBlocks.push(newBlock);
+                this.project.activeTextBlockId = newBlock.id;
+                
+                console.log(`➕ Добавлен блок: ${newBlock.id}`);
+                this.renderAll();
+            }
+            
+            // ===== DRAG & DROP =====
+            
+            startDrag(e, blockId) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const block = this.getBlockById(blockId);
+                if (!block) return;
+                
+                const slideElement = e.target.closest('.slide');
+                const slideRect = slideElement.getBoundingClientRect();
+                
+                this.dragState = {
+                    isDragging: true,
+                    activeBlockId: blockId,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    startBlockX: block.x,
+                    startBlockY: block.y,
+                    slideRect: slideRect
+                };
+                
+                // Добавляем класс перетаскивания
+                const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+                if (blockElement) {
+                    blockElement.classList.add('dragging');
+                }
+                
+                console.log(`🎯 Начало перетаскивания: ${blockId}`);
+            }
+            
+            // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+            
+            getActiveSlide() {
+                return this.project.slides.find(slide => slide.id === this.project.activeSlideId);
+            }
+            
+            getBlockById(blockId) {
+                for (const slide of this.project.slides) {
+                    const block = slide.textBlocks.find(b => b.id === blockId);
+                    if (block) return block;
+                }
+                return null;
+            }
+            
+            getSlideByBlockId(blockId) {
+                return this.project.slides.find(slide => 
+                    slide.textBlocks.some(block => block.id === blockId)
+                );
+            }
+            
+            getRandomColor() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            // ===== РЕНДЕРИНГ ПАНЕЛЕЙ =====
+            
+            renderSlidesList() {
+                const container = document.getElementById('slidesList');
+                container.innerHTML = '';
+                
+                this.project.slides.forEach((slide, index) => {
+                    const slideInfo = document.createElement('div');
+                    slideInfo.className = 'slide-info';
+                    
+                    if (this.project.activeSlideId === slide.id) {
+                        slideInfo.classList.add('active');
+                    }
+                    
+                    slideInfo.innerHTML = `
+                        <div class="slide-title">Слайд ${index + 1}</div>
+                        <div class="slide-details">
+                            ${slide.textBlocks.length} блоков • ${slide.background.color}
+                        </div>
+                    `;
+                    
+                    slideInfo.addEventListener('click', () => {
+                        this.project.activeSlideId = slide.id;
+                        this.project.activeTextBlockId = null;
+                        this.renderAll();
+                    });
+                    
+                    container.appendChild(slideInfo);
+                });
+            }
+            
+            updateControls() {
+                const container = document.getElementById('editControls');
+                const activeSlide = this.getActiveSlide();
+                const activeBlock = this.getBlockById(this.project.activeTextBlockId);
+                
+                if (activeBlock) {
+                    container.innerHTML = `
+                        <h4>Редактирование блока</h4>
+                        <div class="edit-group">
+                            <label>Текст:</label>
+                            <textarea id="blockText">${activeBlock.text}</textarea>
+                        </div>
+                        <div class="edit-group">
+                            <label>Размер: ${activeBlock.size}px</label>
+                            <input type="range" id="blockSize" min="10" max="32" value="${activeBlock.size}">
+                        </div>
+                    `;
+                    
+                    // Привязываем события
+                    document.getElementById('blockText').addEventListener('input', (e) => {
+                        activeBlock.text = e.target.value;
+                        this.updateBlockElement(activeBlock.id);
+                    });
+                    
+                    document.getElementById('blockSize').addEventListener('input', (e) => {
+                        activeBlock.size = parseInt(e.target.value);
+                        this.updateBlockElement(activeBlock.id);
+                    });
+                    
+                } else if (activeSlide) {
+                    container.innerHTML = `
+                        <h4>Слайд: ${activeSlide.id}</h4>
+                        <p>Блоков: ${activeSlide.textBlocks.length}</p>
+                        <p>Фон: ${activeSlide.background.color}</p>
+                    `;
+                } else {
+                    container.innerHTML = '<p>Выберите слайд или блок</p>';
+                }
+            }
+            
+            updateBlockElement(blockId) {
+                const block = this.getBlockById(blockId);
+                const element = document.querySelector(`[data-block-id="${blockId}"]`);
+                
+                if (block && element) {
+                    element.style.fontSize = block.size + 'px';
+                    
+                    const slide = this.getSlideByBlockId(blockId);
+                    element.innerHTML = this.parseTextWithKeywords(
+                        block.text,
+                        slide ? slide.autoKeywords : []
+                    );
+                }
+            }
+            
+            updatePerformanceInfo() {
+                const info = document.getElementById('performanceInfo');
+                info.innerHTML = `
+                    <strong>Производительность DOM-рендера:</strong><br>
+                    Общее время: ${this.performanceMetrics.totalRenderTime.toFixed(2)}ms<br>
+                    Слайдов: ${this.performanceMetrics.slidesRendered}<br>
+                    Блоков: ${this.performanceMetrics.blocksRendered}<br>
+                    Последний рендер: ${this.performanceMetrics.lastRender ? this.performanceMetrics.lastRender.toLocaleTimeString() : 'не выполнен'}
+                `;
+            }
+            
+            // ===== ГЛОБАЛЬНЫЕ СОБЫТИЯ =====
+            
+            bindGlobalEvents() {
+                // Движение мыши для drag & drop
+                document.addEventListener('mousemove', (e) => {
+                    if (!this.dragState.isDragging) return;
+                    
+                    const block = this.getBlockById(this.dragState.activeBlockId);
+                    if (!block) return;
+                    
+                    const slideRect = this.dragState.slideRect;
+                    const deltaX = e.clientX - this.dragState.startX;
+                    const deltaY = e.clientY - this.dragState.startY;
+                    
+                    const deltaXPercent = (deltaX / slideRect.width) * 100;
+                    const deltaYPercent = (deltaY / slideRect.height) * 100;
+                    
+                    let newX = this.dragState.startBlockX + deltaXPercent;
+                    let newY = this.dragState.startBlockY + deltaYPercent;
+                    
+                    // Ограничения границ
+                    newX = Math.max(0, Math.min(100 - block.width, newX));
+                    newY = Math.max(0, Math.min(100 - 10, newY));
+                    
+                    block.x = newX;
+                    block.y = newY;
+                    
+                    // Обновляем позицию элемента
+                    const blockElement = document.querySelector(`[data-block-id="${block.id}"]`);
+                    if (blockElement) {
+                        blockElement.style.left = block.x + '%';
+                        blockElement.style.top = block.y + '%';
+                    }
+                });
+                
+                // Отпускание мыши
+                document.addEventListener('mouseup', () => {
+                    if (this.dragState.isDragging) {
+                        const blockElement = document.querySelector(`[data-block-id="${this.dragState.activeBlockId}"]`);
+                        if (blockElement) {
+                            blockElement.classList.remove('dragging');
+                        }
+                        
+                        this.dragState.isDragging = false;
+                        this.renderSlidesList();
+                    }
+                });
+            }
+            
+            // ===== ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ =====
+            
+            toggleEditMode() {
+                this.editMode = !this.editMode;
+                console.log(`✏️ Режим редактирования: ${this.editMode ? 'включен' : 'выключен'}`);
+                this.renderAll();
+            }
+        }
+        
+        // Инициализация системы
+        let domSystem;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            domSystem = new CompleteDOMSystem();
+            console.log('🔧 Полная DOM-рендер система загружена');
+        });
+    </script>
+</body>
+</html>

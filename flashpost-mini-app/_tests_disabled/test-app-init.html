@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test App Initialization</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; color: #fff; font-family: Arial; }
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin: 10px; font-size: 16px; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test App Initialization</h1>
+        
+        <div id="initStatus" class="status info">🔄 Готов к тестированию...</div>
+        
+        <button class="btn" onclick="testAppInit()">Тест инициализации приложения</button>
+        <button class="btn" onclick="openMainApp()">Открыть основное приложение</button>
+        <button class="btn" onclick="openRestoredDesign()">Открыть восстановленный дизайн</button>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('initStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        async function testAppInit() {
+            log('🚀 Начинаем тест инициализации приложения...');
+            updateStatus('🔄 Тестирование...', 'info');
+            
+            try {
+                // Проверяем доступность основных файлов
+                log('📦 Проверка модулей...');
+                const modules = [
+                    '/src/state.js',
+                    '/src/renderer.js',
+                    '/src/app.js',
+                    '/app.css'
+                ];
+                
+                for (const module of modules) {
+                    const response = await fetch(module);
+                    if (response.ok) {
+                        log(`✅ ${module}: доступен`);
+                    } else {
+                        throw new Error(`${module}: ошибка ${response.status}`);
+                    }
+                }
+                
+                // Проверяем основное приложение
+                log('🌐 Проверка основного приложения...');
+                const indexResponse = await fetch('/index.html');
+                if (indexResponse.ok) {
+                    const indexContent = await indexResponse.text();
+                    
+                    // Проверяем наличие ключевых элементов
+                    if (indexContent.includes('id="app"')) {
+                        log('✅ #app элемент найден в HTML');
+                    } else {
+                        throw new Error('#app элемент не найден в HTML');
+                    }
+                    
+                    if (indexContent.includes('src/app.js')) {
+                        log('✅ app.js подключен');
+                    } else {
+                        throw new Error('app.js не подключен');
+                    }
+                    
+                    if (indexContent.includes('app.css')) {
+                        log('✅ app.css подключен');
+                    } else {
+                        throw new Error('app.css не подключен');
+                    }
+                    
+                } else {
+                    throw new Error(`index.html недоступен: ${indexResponse.status}`);
+                }
+                
+                log('✅ Все проверки пройдены успешно!');
+                updateStatus('✅ Приложение готово к запуску', 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`);
+                updateStatus('❌ Проблемы с инициализацией', 'error');
+            }
+        }
+
+        function openMainApp() {
+            log('🚀 Открытие основного приложения...');
+            window.open('/index.html', '_blank');
+        }
+
+        function openRestoredDesign() {
+            log('🎨 Открытие восстановленного дизайна...');
+            window.open('/restore-design.html', '_blank');
+        }
+
+        // Автотест при загрузке
+        window.addEventListener('load', () => {
+            log('🧪 Test App Initialization загружен');
+            setTimeout(testAppInit, 1000);
+        });
+    </script>
+</body>
+</html>

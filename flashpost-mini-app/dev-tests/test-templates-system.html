@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система шаблонов - FlashPost</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+        
+        .editor-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .templates-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .section-title {
+            margin: 0 0 16px 0;
+            color: #495057;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .slide-editor {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .text-block {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: move;
+            font-family: Inter, sans-serif;
+            color: #333;
+            min-width: 100px;
+            min-height: 40px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        .text-block:hover {
+            border-color: #833ab4;
+        }
+        
+        .text-block.active {
+            border-color: #833ab4;
+            box-shadow: 0 0 12px rgba(131, 58, 180, 0.3);
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: #833ab4;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #6d2d96;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .template-item {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .template-item:hover {
+            border-color: #833ab4;
+        }
+        
+        .template-item.active {
+            border-color: #833ab4;
+            background: #f8f9ff;
+        }
+        
+        .template-preview {
+            width: 100%;
+            height: 80px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .template-preview .text-block {
+            transform: scale(0.3);
+            transform-origin: top left;
+        }
+        
+        .template-info {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .template-name {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+        
+        .slide-info {
+            background: #e9ecef;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+        
+        .info-item {
+            margin-bottom: 4px;
+        }
+        
+        .color-picker {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .input-group label {
+            min-width: 80px;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">📋 Система шаблонов FlashPost</h1>
+        
+        <div class="main-layout">
+            <!-- Редактор слайда -->
+            <div class="editor-section">
+                <h2 class="section-title">Редактор слайда</h2>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="addTextBlock()">➕ Добавить текст</button>
+                    <button class="btn btn-success" onclick="saveTemplate()">💾 Сохранить шаблон</button>
+                    <button class="btn btn-info" onclick="randomizeSlide()">🎲 Случайный дизайн</button>
+                    <button class="btn btn-warning" onclick="clearSlide()">🗑️ Очистить</button>
+                </div>
+                
+                <div class="slide-editor" id="slideEditor" onclick="deselectBlocks()">
+                    <!-- Текстовые блоки будут добавлены JS -->
+                </div>
+                
+                <div class="input-group">
+                    <label>Фон:</label>
+                    <input type="color" class="color-picker" id="backgroundPicker" value="#ff6b6b" onchange="changeBackground(this.value)">
+                    <input type="text" id="backgroundInput" value="#ff6b6b" onchange="changeBackground(this.value)">
+                </div>
+                
+                <div class="slide-info" id="slideInfo">
+                    <!-- Информация о слайде -->
+                </div>
+            </div>
+            
+            <!-- Панель шаблонов -->
+            <div class="templates-section">
+                <h2 class="section-title">Шаблоны</h2>
+                
+                <div class="controls">
+                    <button class="btn btn-success" onclick="loadTemplates()">🔄 Обновить</button>
+                    <button class="btn btn-warning" onclick="clearTemplates()">🗑️ Очистить все</button>
+                </div>
+                
+                <div id="templatesList">
+                    <!-- Список шаблонов -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== СИСТЕМА ШАБЛОНОВ =====
+        
+        class TemplatesSystem {
+            constructor() {
+                this.currentSlide = {
+                    id: 'current_slide',
+                    background: { color: '#ff6b6b' },
+                    textBlocks: []
+                };
+                
+                this.activeBlockId = null;
+                this.templates = {};
+                
+                console.log('📋 Инициализация системы шаблонов');
+                this.init();
+            }
+            
+            init() {
+                this.createInitialBlocks();
+                this.loadTemplates();
+                this.render();
+                this.updateSlideInfo();
+            }
+            
+            // Создание начальных блоков
+            createInitialBlocks() {
+                this.currentSlide.textBlocks = [
+                    {
+                        id: 'block_1',
+                        text: 'Заголовок слайда',
+                        x: 10, y: 20, width: 80,
+                        font: 'Inter', size: 24, color: '#ffffff'
+                    },
+                    {
+                        id: 'block_2',
+                        text: 'Подзаголовок или описание',
+                        x: 10, y: 60, width: 70,
+                        font: 'Inter', size: 16, color: '#ffffff'
+                    }
+                ];
+            }
+            
+            // ===== СОХРАНЕНИЕ ШАБЛОНА =====
+            
+            saveTemplate() {
+                const templateName = prompt('Введите название шаблона:', `Шаблон ${Object.keys(this.templates).length + 1}`);
+                
+                if (!templateName) return;
+                
+                // Создаем глубокую копию текущего слайда
+                const template = {
+                    id: `template_${Date.now()}`,
+                    name: templateName,
+                    background: this.clone(this.currentSlide.background),
+                    textBlocks: this.clone(this.currentSlide.textBlocks),
+                    createdAt: new Date().toISOString(),
+                    preview: this.generatePreview()
+                };
+                
+                // Сохраняем в localStorage
+                const templateKey = `template_${template.id}`;
+                localStorage.setItem(templateKey, JSON.stringify(template));
+                
+                // Добавляем в локальный кэш
+                this.templates[template.id] = template;
+                
+                console.log(`💾 Шаблон сохранен: ${templateName}`, template);
+                
+                this.renderTemplates();
+                this.showNotification(`Шаблон "${templateName}" сохранен!`);
+            }
+            
+            // ===== ПРИМЕНЕНИЕ ШАБЛОНА =====
+            
+            applyTemplate(templateId) {
+                const template = this.templates[templateId];
+                if (!template) {
+                    console.error('Шаблон не найден:', templateId);
+                    return;
+                }
+                
+                // Применяем шаблон к текущему слайду
+                this.currentSlide.background = this.clone(template.background);
+                this.currentSlide.textBlocks = this.clone(template.textBlocks);
+                
+                // Сбрасываем выбор
+                this.activeBlockId = null;
+                
+                console.log(`✅ Шаблон применен: ${template.name}`, template);
+                
+                this.render();
+                this.updateSlideInfo();
+                this.showNotification(`Шаблон "${template.name}" применен!`);
+            }
+            
+            // ===== ЗАГРУЗКА ШАБЛОНОВ =====
+            
+            loadTemplates() {
+                this.templates = {};
+                
+                // Загружаем все шаблоны из localStorage
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    
+                    if (key && key.startsWith('template_')) {
+                        try {
+                            const templateData = localStorage.getItem(key);
+                            const template = JSON.parse(templateData);
+                            
+                            this.templates[template.id] = template;
+                            console.log(`📥 Загружен шаблон: ${template.name}`);
+                            
+                        } catch (error) {
+                            console.error(`Ошибка загрузки шаблона ${key}:`, error);
+                        }
+                    }
+                }
+                
+                console.log(`📋 Загружено шаблонов: ${Object.keys(this.templates).length}`);
+                this.renderTemplates();
+            }
+            
+            // ===== УПРАВЛЕНИЕ ТЕКСТОВЫМИ БЛОКАМИ =====
+            
+            addTextBlock() {
+                const newBlock = {
+                    id: `block_${Date.now()}`,
+                    text: 'Новый текст',
+                    x: 20 + Math.random() * 40,
+                    y: 30 + Math.random() * 40,
+                    width: 50,
+                    font: 'Inter',
+                    size: 18,
+                    color: '#ffffff'
+                };
+                
+                this.currentSlide.textBlocks.push(newBlock);
+                this.activeBlockId = newBlock.id;
+                
+                console.log(`➕ Добавлен блок: ${newBlock.id}`);
+                
+                this.render();
+                this.updateSlideInfo();
+            }
+            
+            selectBlock(blockId) {
+                this.activeBlockId = blockId;
+                console.log(`🎯 Выбран блок: ${blockId}`);
+                this.render();
+            }
+            
+            deselectBlocks() {
+                this.activeBlockId = null;
+                this.render();
+            }
+            
+            // ===== УПРАВЛЕНИЕ ФОНОМ =====
+            
+            changeBackground(color) {
+                this.currentSlide.background.color = color;
+                
+                // Синхронизируем инпуты
+                document.getElementById('backgroundPicker').value = color;
+                document.getElementById('backgroundInput').value = color;
+                
+                this.render();
+                this.updateSlideInfo();
+            }
+            
+            // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+            
+            // Глубокое клонирование объекта
+            clone(obj) {
+                return JSON.parse(JSON.stringify(obj));
+            }
+            
+            // Генерация превью шаблона
+            generatePreview() {
+                return {
+                    backgroundColor: this.currentSlide.background.color,
+                    blocksCount: this.currentSlide.textBlocks.length,
+                    hasTitle: this.currentSlide.textBlocks.some(block => block.size > 20)
+                };
+            }
+            
+            // Случайный дизайн
+            randomizeSlide() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#a8e6cf', '#ffd93d'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                this.changeBackground(randomColor);
+                
+                // Случайные позиции блоков
+                this.currentSlide.textBlocks.forEach(block => {
+                    block.x = 10 + Math.random() * 60;
+                    block.y = 10 + Math.random() * 70;
+                });
+                
+                this.render();
+                this.updateSlideInfo();
+            }
+            
+            // Очистка слайда
+            clearSlide() {
+                this.currentSlide.textBlocks = [];
+                this.activeBlockId = null;
+                this.render();
+                this.updateSlideInfo();
+            }
+            
+            // Очистка всех шаблонов
+            clearTemplates() {
+                if (!confirm('Удалить все шаблоны? Это действие нельзя отменить.')) return;
+                
+                // Удаляем из localStorage
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('template_')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
+                // Очищаем локальный кэш
+                this.templates = {};
+                
+                console.log('🗑️ Все шаблоны удалены');
+                this.renderTemplates();
+                this.showNotification('Все шаблоны удалены');
+            }
+            
+            // Уведомления
+            showNotification(message) {
+                // Простое уведомление
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    z-index: 1000;
+                    font-weight: 600;
+                `;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+            
+            // ===== РЕНДЕРИНГ =====
+            
+            render() {
+                this.renderSlide();
+                this.renderTemplates();
+            }
+            
+            renderSlide() {
+                const editor = document.getElementById('slideEditor');
+                editor.style.background = this.currentSlide.background.color;
+                
+                // Очищаем редактор
+                editor.innerHTML = '';
+                
+                // Рендерим текстовые блоки
+                this.currentSlide.textBlocks.forEach(block => {
+                    const blockElement = document.createElement('div');
+                    blockElement.className = 'text-block';
+                    blockElement.id = block.id;
+                    
+                    if (this.activeBlockId === block.id) {
+                        blockElement.classList.add('active');
+                    }
+                    
+                    blockElement.style.left = `${block.x}%`;
+                    blockElement.style.top = `${block.y}%`;
+                    blockElement.style.width = `${block.width}%`;
+                    blockElement.style.fontSize = `${block.size}px`;
+                    blockElement.style.fontFamily = block.font;
+                    blockElement.style.color = block.color;
+                    
+                    blockElement.textContent = block.text;
+                    
+                    // Обработчик клика
+                    blockElement.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.selectBlock(block.id);
+                    });
+                    
+                    editor.appendChild(blockElement);
+                });
+            }
+            
+            renderTemplates() {
+                const templatesList = document.getElementById('templatesList');
+                
+                if (Object.keys(this.templates).length === 0) {
+                    templatesList.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #6c757d;">
+                            <p>Нет сохраненных шаблонов</p>
+                            <p>Создайте дизайн и нажмите "Сохранить шаблон"</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                templatesList.innerHTML = Object.values(this.templates).map(template => `
+                    <div class="template-item" onclick="templatesSystem.applyTemplate('${template.id}')">
+                        <div class="template-preview" style="background: ${template.background.color};">
+                            ${template.textBlocks.map(block => `
+                                <div class="text-block" style="
+                                    left: ${block.x}%;
+                                    top: ${block.y}%;
+                                    width: ${block.width}%;
+                                    font-size: ${block.size}px;
+                                    color: ${block.color};
+                                ">${block.text}</div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="template-name">${template.name}</div>
+                        <div class="template-info">
+                            ${template.textBlocks.length} блоков • ${new Date(template.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateSlideInfo() {
+                const info = document.getElementById('slideInfo');
+                
+                info.innerHTML = `
+                    <div class="info-item"><strong>Фон:</strong> ${this.currentSlide.background.color}</div>
+                    <div class="info-item"><strong>Блоков:</strong> ${this.currentSlide.textBlocks.length}</div>
+                    <div class="info-item"><strong>Активный блок:</strong> ${this.activeBlockId || 'нет'}</div>
+                    <div class="info-item"><strong>Шаблонов:</strong> ${Object.keys(this.templates).length}</div>
+                `;
+            }
+        }
+        
+        // Инициализация системы
+        let templatesSystem;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            templatesSystem = new TemplatesSystem();
+            console.log('📋 Система шаблонов загружена');
+        });
+        
+        // Глобальные функции для кнопок
+        function addTextBlock() {
+            templatesSystem.addTextBlock();
+        }
+        
+        function saveTemplate() {
+            templatesSystem.saveTemplate();
+        }
+        
+        function loadTemplates() {
+            templatesSystem.loadTemplates();
+        }
+        
+        function clearTemplates() {
+            templatesSystem.clearTemplates();
+        }
+        
+        function randomizeSlide() {
+            templatesSystem.randomizeSlide();
+        }
+        
+        function clearSlide() {
+            templatesSystem.clearSlide();
+        }
+        
+        function changeBackground(color) {
+            templatesSystem.changeBackground(color);
+        }
+        
+        function deselectBlocks() {
+            templatesSystem.deselectBlocks();
+        }
+    </script>
+</body>
+</html>

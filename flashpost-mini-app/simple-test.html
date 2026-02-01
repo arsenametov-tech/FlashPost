@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Simple Module Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        
+        .console {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Simple Module Test</h1>
+    <div id="results"></div>
+    <div id="console" class="console"></div>
+
+    <script>
+        const results = document.getElementById('results');
+        const consoleDiv = document.getElementById('console');
+        
+        function log(message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+            
+            consoleDiv.textContent += `[${new Date().toLocaleTimeString()}] ${message}\n`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        // Перехватываем ошибки
+        window.addEventListener('error', function(event) {
+            log(`❌ Ошибка: ${event.message} в ${event.filename}:${event.lineno}`, 'error');
+        });
+        
+        log('🚀 Начинаем тест загрузки модулей...');
+        
+        // Проверяем каждый модуль после загрузки
+        function checkModule(name) {
+            if (window[name]) {
+                log(`✅ ${name} загружен успешно`);
+                return true;
+            } else {
+                log(`❌ ${name} НЕ загружен`, 'error');
+                return false;
+            }
+        }
+        
+        // Функция для проверки всех модулей
+        function checkAllModules() {
+            log('📋 Проверка всех модулей...');
+            
+            const modules = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager',
+                'FlashPostApp'
+            ];
+            
+            let loaded = 0;
+            modules.forEach(module => {
+                if (checkModule(module)) {
+                    loaded++;
+                }
+            });
+            
+            log(`📊 Итого загружено: ${loaded}/${modules.length} модулей`);
+            
+            if (loaded === modules.length) {
+                log('🎉 Все модули загружены! Пробуем инициализировать приложение...');
+                tryInitApp();
+            } else {
+                log('⚠️ Не все модули загружены. Инициализация отменена.', 'error');
+            }
+        }
+        
+        function tryInitApp() {
+            try {
+                log('🔧 Создание экземпляра FlashPostApp...');
+                const app = new FlashPostApp();
+                log('✅ Приложение успешно инициализировано!');
+                window.testApp = app;
+            } catch (error) {
+                log(`❌ Ошибка инициализации: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+        }
+        
+        // Проверяем модули через интервалы
+        let checkCount = 0;
+        const maxChecks = 10;
+        
+        const checkInterval = setInterval(() => {
+            checkCount++;
+            log(`🔍 Проверка #${checkCount}...`);
+            
+            checkAllModules();
+            
+            if (checkCount >= maxChecks || window.FlashPostApp) {
+                clearInterval(checkInterval);
+                if (!window.FlashPostApp) {
+                    log('❌ Модули не загрузились за отведенное время', 'error');
+                }
+            }
+        }, 1000);
+    </script>
+    
+    <!-- Загружаем модули по одному с проверкой -->
+    <script>
+        log('📦 Загружаем StateManager...');
+    </script>
+    <script src="src/state.js"></script>
+    <script>
+        if (window.StateManager) {
+            log('✅ StateManager загружен');
+        } else {
+            log('❌ StateManager НЕ загружен', 'error');
+        }
+        log('📦 Загружаем Renderer...');
+    </script>
+    <script src="src/renderer.js"></script>
+    <script>
+        if (window.Renderer) {
+            log('✅ Renderer загружен');
+        } else {
+            log('❌ Renderer НЕ загружен', 'error');
+        }
+        log('📦 Загружаем Editor...');
+    </script>
+    <script src="src/editor.js"></script>
+    <script>
+        if (window.Editor) {
+            log('✅ Editor загружен');
+        } else {
+            log('❌ Editor НЕ загружен', 'error');
+        }
+        log('📦 Загружаем DragManager...');
+    </script>
+    <script src="src/drag.js"></script>
+    <script>
+        if (window.DragManager) {
+            log('✅ DragManager загружен');
+        } else {
+            log('❌ DragManager НЕ загружен', 'error');
+        }
+        log('📦 Загружаем ExportManager...');
+    </script>
+    <script src="src/export.js"></script>
+    <script>
+        if (window.ExportManager) {
+            log('✅ ExportManager загружен');
+        } else {
+            log('❌ ExportManager НЕ загружен', 'error');
+        }
+        log('📦 Загружаем AIManager...');
+    </script>
+    <script src="src/ai.js"></script>
+    <script>
+        if (window.AIManager) {
+            log('✅ AIManager загружен');
+        } else {
+            log('❌ AIManager НЕ загружен', 'error');
+        }
+        log('📦 Загружаем TemplateManager...');
+    </script>
+    <script src="src/templates.js"></script>
+    <script>
+        if (window.TemplateManager) {
+            log('✅ TemplateManager загружен');
+        } else {
+            log('❌ TemplateManager НЕ загружен', 'error');
+        }
+        log('📦 Загружаем FlashPostApp...');
+    </script>
+    <script src="src/app.js"></script>
+    <script>
+        if (window.FlashPostApp) {
+            log('✅ FlashPostApp загружен');
+        } else {
+            log('❌ FlashPostApp НЕ загружен', 'error');
+        }
+        log('🏁 Все скрипты загружены. Финальная проверка через 1 секунду...');
+    </script>
+</body>
+</html>

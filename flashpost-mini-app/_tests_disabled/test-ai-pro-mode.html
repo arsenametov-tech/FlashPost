@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - AI PRO MODE Test</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            font-weight: 800;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .test-section h2 {
+            color: #333;
+            margin: 0 0 20px 0;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        }
+
+        .results {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e1e5e9;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+        }
+
+        .log-info { background: #e3f2fd; color: #1976d2; }
+        .log-success { background: #e8f5e8; color: #2e7d32; }
+        .log-warning { background: #fff3e0; color: #f57c00; }
+        .log-error { background: #ffebee; color: #d32f2f; }
+
+        .slide-preview {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #e1e5e9;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .slide-preview h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .slide-preview .slide-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .slide-preview .slide-text {
+            color: #555;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .slide-preview .slide-keywords {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background: #f1f3f4;
+            color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status-loading {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #2196f3;
+        }
+
+        .status-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        .status-error {
+            background: #ffebee;
+            color: #d32f2f;
+            border-left: 4px solid #f44336;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e1e5e9;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 AI PRO MODE Test</h1>
+            <p>Тестирование двухэтапной генерации карусели (outline → content)</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 PRO MODE Generation Test</h2>
+            
+            <div class="input-group">
+                <label for="topicInput">Тема для генерации карусели:</label>
+                <input type="text" id="topicInput" placeholder="Например: продуктивность, инвестиции, фитнес..." value="продуктивность">
+            </div>
+
+            <button class="btn" onclick="testProModeGeneration()">🎯 Тест PRO MODE</button>
+            <button class="btn btn-secondary" onclick="testOutlineGeneration()">📋 Тест Outline</button>
+            <button class="btn btn-secondary" onclick="testContentGeneration()">✍️ Тест Content</button>
+            <button class="btn btn-success" onclick="clearResults()">🧹 Очистить</button>
+
+            <div id="status"></div>
+            <div id="metrics" class="metrics"></div>
+            <div id="results" class="results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Результаты генерации</h2>
+            <div id="slidePreview"></div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/ai.js"></script>
+
+    <script>
+        // Инициализация системы
+        let stateManager, aiManager;
+        let testResults = [];
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // Инициализируем StateManager
+                stateManager = new StateManager();
+                console.log('✅ StateManager инициализирован');
+
+                // Инициализируем AIManager
+                aiManager = new AIManager(stateManager);
+                console.log('✅ AIManager инициализирован');
+
+                log('info', '🚀 Система PRO MODE готова к тестированию');
+                updateStatus('success', 'Система инициализирована и готова к работе');
+
+            } catch (error) {
+                console.error('❌ Ошибка инициализации:', error);
+                log('error', `❌ Ошибка инициализации: ${error.message}`);
+                updateStatus('error', `Ошибка инициализации: ${error.message}`);
+            }
+        });
+
+        // Тест полной PRO MODE генерации
+        async function testProModeGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Введите тему для генерации');
+                return;
+            }
+
+            updateStatus('loading', `🎯 Запуск PRO MODE генерации для темы: "${topic}"`);
+            log('info', `🎯 Начало PRO MODE генерации для темы: "${topic}"`);
+
+            const startTime = Date.now();
+
+            try {
+                // Тестируем PRO MODE генерацию
+                const result = await aiManager.generateProModeCarousel(topic);
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('success', `✅ PRO MODE генерация завершена за ${duration}ms`);
+                log('info', `📊 Создано слайдов: ${result.slides.length}`);
+                log('info', `🎭 Режим генерации: ${result.generatedBy}`);
+
+                // Показываем метрики
+                updateMetrics({
+                    slides: result.slides.length,
+                    duration: `${duration}ms`,
+                    mode: result.generatedBy,
+                    topic: result.topic
+                });
+
+                // Показываем превью слайдов
+                displaySlidePreview(result.slides);
+
+                updateStatus('success', `✅ PRO MODE генерация успешно завершена! Создано ${result.slides.length} слайдов`);
+
+                // Сохраняем результат для анализа
+                testResults.push({
+                    type: 'pro_mode_full',
+                    topic: topic,
+                    result: result,
+                    duration: duration,
+                    timestamp: new Date().toISOString()
+                });
+
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('error', `❌ Ошибка PRO MODE генерации: ${error.message}`);
+                updateStatus('error', `❌ Ошибка PRO MODE генерации: ${error.message}`);
+                
+                console.error('Детали ошибки:', error);
+            }
+        }
+
+        // Тест генерации outline
+        async function testOutlineGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Введите тему для генерации');
+                return;
+            }
+
+            updateStatus('loading', `📋 Генерация outline для темы: "${topic}"`);
+            log('info', `📋 Начало генерации outline для темы: "${topic}"`);
+
+            const startTime = Date.now();
+
+            try {
+                // Тестируем генерацию outline
+                const outline = await aiManager.generateCarouselOutline(topic);
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('success', `✅ Outline генерация завершена за ${duration}ms`);
+                log('info', `📊 Создано слайдов в outline: ${outline.outline.length}`);
+                log('info', `🏗️ Структура: ${outline.structure}`);
+
+                // Показываем детали outline
+                outline.outline.forEach((slide, index) => {
+                    log('info', `📄 Слайд ${slide.slideNumber} (${slide.type}): ${slide.mainIdea}`);
+                });
+
+                updateStatus('success', `✅ Outline успешно создан! ${outline.outline.length} слайдов`);
+
+                // Сохраняем результат
+                testResults.push({
+                    type: 'outline_only',
+                    topic: topic,
+                    result: outline,
+                    duration: duration,
+                    timestamp: new Date().toISOString()
+                });
+
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('error', `❌ Ошибка генерации outline: ${error.message}`);
+                updateStatus('error', `❌ Ошибка генерации outline: ${error.message}`);
+                
+                console.error('Детали ошибки:', error);
+            }
+        }
+
+        // Тест генерации контента
+        async function testContentGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Введите тему для генерации');
+                return;
+            }
+
+            updateStatus('loading', `✍️ Генерация контента для темы: "${topic}"`);
+            log('info', `✍️ Начало генерации контента для темы: "${topic}"`);
+
+            const startTime = Date.now();
+
+            try {
+                // Сначала создаем outline
+                const outline = await aiManager.generateCarouselOutline(topic);
+                log('info', `📋 Outline создан: ${outline.outline.length} слайдов`);
+
+                // Затем генерируем контент
+                const content = await aiManager.generateCarouselContent(topic, outline);
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('success', `✅ Контент генерация завершена за ${duration}ms`);
+                log('info', `📊 Создано слайдов с контентом: ${content.slides.length}`);
+
+                // Показываем детали контента
+                content.slides.forEach((slide, index) => {
+                    const lines = slide.text.split('\n').filter(line => line.trim().length > 0);
+                    log('info', `📄 Слайд ${slide.slideNumber} (${slide.type}): ${lines.length} строк`);
+                });
+
+                updateStatus('success', `✅ Контент успешно создан! ${content.slides.length} слайдов`);
+
+                // Показываем превью контента
+                displayContentPreview(content.slides);
+
+                // Сохраняем результат
+                testResults.push({
+                    type: 'content_only',
+                    topic: topic,
+                    result: content,
+                    duration: duration,
+                    timestamp: new Date().toISOString()
+                });
+
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('error', `❌ Ошибка генерации контента: ${error.message}`);
+                updateStatus('error', `❌ Ошибка генерации контента: ${error.message}`);
+                
+                console.error('Детали ошибки:', error);
+            }
+        }
+
+        // Отображение превью слайдов
+        function displaySlidePreview(slides) {
+            const previewContainer = document.getElementById('slidePreview');
+            previewContainer.innerHTML = '';
+
+            slides.forEach((slide, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'slide-preview';
+                
+                const slideType = slide.slideType || slide.metadata?.slideType || 'unknown';
+                const keywordType = slide.keywordType || slide.metadata?.keywordType || 'unknown';
+                
+                slideDiv.innerHTML = `
+                    <h4>Слайд ${index + 1}</h4>
+                    <div class="slide-type">${slideType}</div>
+                    <div class="slide-text">${slide.textBlocks?.[1]?.text || 'Нет текста'}</div>
+                    <div class="slide-keywords">
+                        <strong>Ключевые слова (${keywordType}):</strong><br>
+                        ${(slide.autoKeywords || []).map(keyword => 
+                            `<span class="keyword-tag">${keyword}</span>`
+                        ).join('')}
+                    </div>
+                `;
+                
+                previewContainer.appendChild(slideDiv);
+            });
+        }
+
+        // Отображение превью контента
+        function displayContentPreview(slides) {
+            const previewContainer = document.getElementById('slidePreview');
+            previewContainer.innerHTML = '';
+
+            slides.forEach((slide, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = 'slide-preview';
+                
+                const lines = slide.text.split('\n').filter(line => line.trim().length > 0);
+                
+                slideDiv.innerHTML = `
+                    <h4>${slide.title}</h4>
+                    <div class="slide-type">${slide.type} (${slide.keywordType})</div>
+                    <div class="slide-text">${slide.text}</div>
+                    <div class="slide-keywords">
+                        <strong>Статистика:</strong> ${lines.length} строк, ${slide.text.length} символов
+                    </div>
+                `;
+                
+                previewContainer.appendChild(slideDiv);
+            });
+        }
+
+        // Обновление метрик
+        function updateMetrics(metrics) {
+            const metricsContainer = document.getElementById('metrics');
+            metricsContainer.innerHTML = `
+                <div class="metric">
+                    <div class="metric-value">${metrics.slides}</div>
+                    <div class="metric-label">Слайдов</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${metrics.duration}</div>
+                    <div class="metric-label">Время</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${metrics.mode}</div>
+                    <div class="metric-label">Режим</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${metrics.topic}</div>
+                    <div class="metric-label">Тема</div>
+                </div>
+            `;
+        }
+
+        // Обновление статуса
+        function updateStatus(type, message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status status-${type}`;
+            statusDiv.textContent = message;
+        }
+
+        // Логирование
+        function log(type, message) {
+            const resultsDiv = document.getElementById('results');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Очистка результатов
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('slidePreview').innerHTML = '';
+            document.getElementById('metrics').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+            testResults = [];
+            log('info', '🧹 Результаты очищены');
+        }
+
+        // Обработка ошибок
+        window.addEventListener('error', function(event) {
+            log('error', `❌ JavaScript ошибка: ${event.error.message}`);
+            console.error('JavaScript ошибка:', event.error);
+        });
+
+        // Обработка необработанных промисов
+        window.addEventListener('unhandledrejection', function(event) {
+            log('error', `❌ Необработанная ошибка промиса: ${event.reason}`);
+            console.error('Необработанная ошибка промиса:', event.reason);
+        });
+    </script>
+</body>
+</html>

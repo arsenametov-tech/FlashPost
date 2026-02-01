@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FlashPost Mini App - Emergency Fix</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* CRITICAL: Force visibility */
+        body {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        .input-section {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .topic-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            line-height: 1.5;
+            min-height: 80px;
+        }
+        
+        .topic-input:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+            transform: scale(1.01);
+        }
+        
+        .topic-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .generation-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+            pointer-events: auto;
+        }
+        
+        .btn-generate {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .btn-generate:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(131, 58, 180, 0.4);
+        }
+        
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .carousel-container {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .carousel-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .carousel-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 4px;
+        }
+        
+        .slide-preview {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .slide-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .carousel-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .indicators {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .indicator.active {
+            background: white;
+            transform: scale(1.4);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            font-size: 14px;
+            max-width: 300px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: #f44336;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .status-ok {
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .status-error {
+            border-left: 4px solid #f44336;
+        }
+        
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .generation-buttons {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Status indicator -->
+    <div class="status-indicator status-ok" id="statusIndicator">
+        ✅ Emergency Mode Active
+    </div>
+
+    <div class="app">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="title">🚀 FlashPost AI</h1>
+                <p class="subtitle">Создавайте вирусные карусели за минуты</p>
+            </div>
+            
+            <!-- Input Section -->
+            <div class="input-section">
+                <label class="input-label">💡 Введи тему для карусели:</label>
+                <textarea 
+                    id="topicInput" 
+                    class="topic-input" 
+                    placeholder="Например: 'Здоровое питание', 'Продуктивность', 'Инвестиции'..."
+                    maxlength="200"
+                ></textarea>
+                
+                <!-- Generation Buttons -->
+                <div class="generation-buttons">
+                    <button class="btn btn-generate" id="generateBtn">
+                        🎯 Создать карусель
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Carousel (hidden by default) -->
+            <div class="carousel-container" id="carouselContainer">
+                <div class="carousel-header">
+                    <h2 id="carouselTitle">Ваша карусель готова!</h2>
+                    <p>Используйте стрелки для навигации</p>
+                </div>
+                
+                <div class="slide-preview" id="slidePreview">
+                    <div class="slide-text" id="slideText">Загрузка...</div>
+                    <div class="slide-number" id="slideNumber">1/5</div>
+                </div>
+                
+                <div class="carousel-nav">
+                    <button class="nav-btn" id="prevBtn">‹</button>
+                    <div class="indicators" id="indicators"></div>
+                    <button class="nav-btn" id="nextBtn">›</button>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-secondary" id="newCarouselBtn">
+                        🔄 Новая карусель
+                    </button>
+                    <button class="btn btn-secondary" id="expandBtn">
+                        🚀 Развернуть идею
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // EMERGENCY MODE: Simple standalone implementation
+        console.log('🚨 FlashPost Emergency Mode activated');
+        
+        // Set PREVIEW_MODE
+        window.PREVIEW_MODE = true;
+        
+        // Mock Telegram API
+        window.Telegram = {
+            WebApp: {
+                ready: () => console.log('📱 Mock: Telegram.WebApp.ready()'),
+                expand: () => console.log('📱 Mock: Telegram.WebApp.expand()'),
+                setHeaderColor: () => {},
+                setBackgroundColor: () => {},
+                MainButton: {
+                    setText: () => {},
+                    show: () => {},
+                    hide: () => {}
+                },
+                version: '6.1',
+                colorScheme: 'dark'
+            }
+        };
+        
+        // Simple state
+        let currentSlides = [];
+        let currentSlideIndex = 0;
+        let isGenerating = false;
+        
+        // DOM elements
+        const topicInput = document.getElementById('topicInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const carouselContainer = document.getElementById('carouselContainer');
+        const slidePreview = document.getElementById('slidePreview');
+        const slideText = document.getElementById('slideText');
+        const slideNumber = document.getElementById('slideNumber');
+        const indicators = document.getElementById('indicators');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const newCarouselBtn = document.getElementById('newCarouselBtn');
+        const expandBtn = document.getElementById('expandBtn');
+        const carouselTitle = document.getElementById('carouselTitle');
+        const statusIndicator = document.getElementById('statusIndicator');
+        
+        // Slide colors
+        const slideColors = [
+            'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
+        ];
+        
+        // Generate manual slides
+        function generateManualSlides(topic) {
+            const templates = [
+                {
+                    title: `${topic}`,
+                    subtitle: 'Полное руководство'
+                },
+                {
+                    title: 'Что это такое?',
+                    subtitle: `Основы ${topic.toLowerCase()}`
+                },
+                {
+                    title: 'Почему это важно?',
+                    subtitle: 'Ключевые преимущества'
+                },
+                {
+                    title: 'Как начать?',
+                    subtitle: 'Первые шаги'
+                },
+                {
+                    title: 'Частые ошибки',
+                    subtitle: 'Чего избегать'
+                },
+                {
+                    title: 'Полезные советы',
+                    subtitle: 'Лайфхаки и рекомендации'
+                },
+                {
+                    title: 'Заключение',
+                    subtitle: 'Главные выводы'
+                }
+            ];
+
+            const slideCount = Math.floor(Math.random() * 3) + 5; // 5-7 slides
+            return templates.slice(0, slideCount).map((template, index) => ({
+                id: `slide_${Date.now()}_${index}`,
+                title: template.title,
+                subtitle: template.subtitle,
+                text: `${template.title}\n\n${template.subtitle}`,
+                color: slideColors[index % slideColors.length]
+            }));
+        }
+        
+        // Generate expand slides
+        function generateExpandSlides(topic) {
+            const expandTemplates = [
+                {
+                    title: `Миф о ${topic.toLowerCase()}`,
+                    subtitle: 'Разрушаем популярные заблуждения'
+                },
+                {
+                    title: 'Главная ошибка новичков',
+                    subtitle: `Что НЕ нужно делать в ${topic.toLowerCase()}`
+                },
+                {
+                    title: 'Неочевидный инсайт',
+                    subtitle: 'То, о чем не говорят эксперты'
+                },
+                {
+                    title: 'Практический кейс',
+                    subtitle: 'Реальный пример из жизни'
+                },
+                {
+                    title: 'Следующие шаги',
+                    subtitle: 'Что делать дальше'
+                }
+            ];
+
+            const slideCount = Math.floor(Math.random() * 3) + 3; // 3-5 slides
+            const startIndex = currentSlides.length;
+            
+            return expandTemplates.slice(0, slideCount).map((template, index) => ({
+                id: `expand_slide_${Date.now()}_${index}`,
+                title: template.title,
+                subtitle: template.subtitle,
+                text: `${template.title}\n\n${template.subtitle}`,
+                color: slideColors[(startIndex + index) % slideColors.length]
+            }));
+        }
+        
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            try {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => toast.classList.add('show'), 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            } catch (error) {
+                console.error('Toast error:', error);
+            }
+        }
+        
+        // Update slide display
+        function updateSlideDisplay() {
+            if (currentSlides.length === 0) return;
+
+            const slide = currentSlides[currentSlideIndex];
+            slideText.textContent = slide.text;
+            slideNumber.textContent = `${currentSlideIndex + 1}/${currentSlides.length}`;
+            slidePreview.style.background = slide.color;
+
+            // Update indicators
+            indicators.innerHTML = '';
+            currentSlides.forEach((_, index) => {
+                const indicator = document.createElement('div');
+                indicator.className = `indicator ${index === currentSlideIndex ? 'active' : ''}`;
+                indicator.addEventListener('click', () => {
+                    currentSlideIndex = index;
+                    updateSlideDisplay();
+                });
+                indicators.appendChild(indicator);
+            });
+
+            // Update navigation buttons
+            prevBtn.disabled = currentSlideIndex === 0;
+            nextBtn.disabled = currentSlideIndex === currentSlides.length - 1;
+        }
+        
+        // Handle manual generation
+        function handleManualGenerate() {
+            const topic = topicInput.value.trim();
+            if (!topic) {
+                showToast('Введите тему для карусели', 'error');
+                return;
+            }
+
+            if (isGenerating) return;
+
+            isGenerating = true;
+            generateBtn.textContent = '🔄 Создаем карусель...';
+            generateBtn.disabled = true;
+
+            setTimeout(() => {
+                try {
+                    currentSlides = generateManualSlides(topic);
+                    currentSlideIndex = 0;
+                    
+                    carouselTitle.textContent = `Карусель "${topic}" готова!`;
+                    carouselContainer.style.display = 'block';
+                    updateSlideDisplay();
+                    
+                    showToast(`Создано ${currentSlides.length} слайдов!`);
+                    console.log('✅ Carousel created:', currentSlides);
+                    
+                } catch (error) {
+                    console.error('❌ Generation error:', error);
+                    showToast('Ошибка создания карусели', 'error');
+                } finally {
+                    isGenerating = false;
+                    generateBtn.textContent = '🎯 Создать карусель';
+                    generateBtn.disabled = false;
+                }
+            }, 1500);
+        }
+        
+        // Handle expand idea
+        function handleExpandIdea() {
+            if (currentSlides.length === 0) {
+                showToast('Сначала создайте карусель', 'error');
+                return;
+            }
+
+            const topic = currentSlides[0].title;
+            expandBtn.textContent = '🔄 Развертываем...';
+            expandBtn.disabled = true;
+
+            setTimeout(() => {
+                try {
+                    const newSlides = generateExpandSlides(topic);
+                    currentSlides = [...currentSlides, ...newSlides];
+                    
+                    updateSlideDisplay();
+                    showToast(`Добавлено ${newSlides.length} слайдов!`);
+                    console.log('✅ Idea expanded:', newSlides);
+                    
+                } catch (error) {
+                    console.error('❌ Expand error:', error);
+                    showToast('Ошибка развертывания идеи', 'error');
+                } finally {
+                    expandBtn.textContent = '🚀 Развернуть идею';
+                    expandBtn.disabled = false;
+                }
+            }, 1000);
+        }
+        
+        // Handle new carousel
+        function handleNewCarousel() {
+            currentSlides = [];
+            currentSlideIndex = 0;
+            carouselContainer.style.display = 'none';
+            topicInput.value = '';
+            topicInput.focus();
+        }
+        
+        // Navigate slides
+        function navigateSlide(direction) {
+            if (direction === 'prev' && currentSlideIndex > 0) {
+                currentSlideIndex--;
+            } else if (direction === 'next' && currentSlideIndex < currentSlides.length - 1) {
+                currentSlideIndex++;
+            }
+            updateSlideDisplay();
+        }
+        
+        // Event listeners
+        generateBtn.addEventListener('click', handleManualGenerate);
+        expandBtn.addEventListener('click', handleExpandIdea);
+        newCarouselBtn.addEventListener('click', handleNewCarousel);
+        prevBtn.addEventListener('click', () => navigateSlide('prev'));
+        nextBtn.addEventListener('click', () => navigateSlide('next'));
+        
+        // Enter key handling
+        topicInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleManualGenerate();
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (carouselContainer.style.display === 'block') {
+                if (e.key === 'ArrowLeft') navigateSlide('prev');
+                if (e.key === 'ArrowRight') navigateSlide('next');
+            }
+        });
+        
+        // Initialize
+        console.log('🚀 FlashPost Emergency Mode loaded');
+        topicInput.focus();
+        
+        // Show ready status
+        setTimeout(() => {
+            showToast('FlashPost Emergency Mode готов к работе!');
+            statusIndicator.textContent = '✅ Emergency Mode Ready';
+        }, 500);
+    </script>
+</body>
+</html>

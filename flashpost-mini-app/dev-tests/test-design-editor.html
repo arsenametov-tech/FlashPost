@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Тест дизайн-редактора</title>
+    <link rel="stylesheet" href="app.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div id="loading" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+    </div>
+
+    <div class="app" id="app">
+        <div class="section active" id="testSection">
+            <div class="glass-card">
+                <h2 style="text-align: center; color: white; margin-bottom: 20px;">🎨 Тест дизайн-редактора</h2>
+                <p style="text-align: center; color: rgba(255,255,255,0.8); margin-bottom: 24px;">
+                    Проверяем все функции нового редактора
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <button class="btn btn-primary" id="testBasicEditor">
+                        🔧 Базовый редактор
+                    </button>
+                    <button class="btn btn-primary" id="testFontSystem">
+                        🔤 Система шрифтов
+                    </button>
+                    <button class="btn btn-primary" id="testTextBlocks">
+                        📝 Текстовые блоки
+                    </button>
+                    <button class="btn btn-primary" id="testDragDrop">
+                        🖱️ Drag & Drop
+                    </button>
+                    <button class="btn btn-primary" id="testAutoKeywords">
+                        ⭐ Авто-ключевые слова
+                    </button>
+                    <button class="btn btn-primary" id="testFullEditor">
+                        🚀 Полный редактор
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения для тестирования
+        const app = new FlashPostApp();
+        
+        // Тестовые данные
+        const testSlides = [
+            {
+                title: "Hook",
+                text: "🔥 *Секрет* успешных предпринимателей:\n\nОни не работают больше — они работают *умнее*.\n\nВ то время как 95% людей тратят 12 часов на рутину, топ-менеджеры делегируют 80% задач.\n\nРезультат? Свободное время + рост доходов на 300%."
+            },
+            {
+                title: "Problem", 
+                text: "❌ Ты работаешь 10-12 часов в день, но результата нет.\n\nПостоянно отвлекаешься на *мелочи*: письма, звонки, встречи.\n\nВажные проекты откладываются на месяцы.\n\nК вечеру чувствуешь себя выжатым лимоном, а *прогресса* — ноль."
+            },
+            {
+                title: "Solution",
+                text: "✅ Система *4D*: Delete, Delegate, Defer, Do.\n\n• Delete — удаляй ненужные задачи (30%)\n• Delegate — делегируй рутину (40%)\n• Defer — откладывай несрочное (20%)\n• Do — делай только *важное* (10%)\n\nРезультат: фокус на том, что приносит 80% результата."
+            }
+        ];
+
+        const testKeywords = ["секрет", "умнее", "мелочи", "прогресса", "4D", "важное"];
+
+        // Обработчики тестов
+        document.getElementById('testBasicEditor').addEventListener('click', () => {
+            console.log('🧪 Тест базового редактора');
+            app.slides = testSlides;
+            app.initializeSlideStyles();
+            app.showEditor();
+        });
+
+        document.getElementById('testFontSystem').addEventListener('click', () => {
+            console.log('🧪 Тест системы шрифтов');
+            app.slides = testSlides;
+            app.initializeSlideStyles();
+            
+            // Устанавливаем разные шрифты для тестирования
+            app.slideStyles[0].fontFamily = 'Bebas Neue';
+            app.slideStyles[1].fontFamily = 'Playfair Display';
+            app.slideStyles[2].fontFamily = 'Oswald';
+            
+            app.showEditor();
+        });
+
+        document.getElementById('testTextBlocks').addEventListener('click', () => {
+            console.log('🧪 Тест текстовых блоков');
+            app.slides = testSlides;
+            app.initializeSlideStyles();
+            
+            // Добавляем тестовые текстовые блоки
+            app.slideStyles[0].textBlocks = [
+                {
+                    id: 'block1',
+                    text: 'Заголовок *блока*',
+                    font: 'Bebas Neue',
+                    size: 24,
+                    weight: 700,
+                    color: '#ffffff',
+                    position: { x: 20, y: 20 },
+                    width: 60,
+                    keywordColor: '#ff6b6b',
+                    highlightEnabled: true,
+                    glow: true
+                },
+                {
+                    id: 'block2',
+                    text: 'Подзаголовок с *выделением*',
+                    font: 'Inter',
+                    size: 16,
+                    weight: 500,
+                    color: '#ffffff',
+                    position: { x: 20, y: 60 },
+                    width: 70,
+                    keywordColor: '#4ecdc4',
+                    highlightEnabled: true,
+                    glow: false
+                }
+            ];
+            
+            app.showEditor();
+        });
+
+        document.getElementById('testDragDrop').addEventListener('click', () => {
+            console.log('🧪 Тест Drag & Drop');
+            app.slides = testSlides;
+            app.initializeSlideStyles();
+            
+            // Добавляем блоки для тестирования перетаскивания
+            app.slideStyles[0].textBlocks = [
+                {
+                    id: 'drag1',
+                    text: 'Перетащи *меня*!',
+                    font: 'Inter',
+                    size: 18,
+                    weight: 600,
+                    color: '#ffffff',
+                    position: { x: 30, y: 30 },
+                    width: 50,
+                    keywordColor: '#f9ca24',
+                    highlightEnabled: true
+                },
+                {
+                    id: 'drag2',
+                    text: 'И меня *тоже*!',
+                    font: 'Montserrat',
+                    size: 16,
+                    weight: 500,
+                    color: '#ffffff',
+                    position: { x: 40, y: 70 },
+                    width: 45,
+                    keywordColor: '#a55eea',
+                    highlightEnabled: true
+                }
+            ];
+            
+            app.showEditor();
+        });
+
+        document.getElementById('testAutoKeywords').addEventListener('click', () => {
+            console.log('🧪 Тест авто-ключевых слов');
+            app.slides = testSlides.map(slide => ({
+                ...slide,
+                autoKeywords: testKeywords
+            }));
+            app.initializeSlideStyles();
+            app.showEditor();
+        });
+
+        document.getElementById('testFullEditor').addEventListener('click', () => {
+            console.log('🧪 Тест полного редактора');
+            app.slides = testSlides.map(slide => ({
+                ...slide,
+                autoKeywords: testKeywords
+            }));
+            app.initializeSlideStyles();
+            
+            // Настраиваем разные стили для каждого слайда
+            app.slideStyles[0].fontFamily = 'Bebas Neue';
+            app.slideStyles[0].fontSize = 20;
+            app.slideStyles[0].backgroundColor = '#833ab4';
+            
+            app.slideStyles[1].fontFamily = 'Playfair Display';
+            app.slideStyles[1].fontSize = 18;
+            app.slideStyles[1].backgroundColor = '#fd1d1d';
+            
+            app.slideStyles[2].fontFamily = 'Oswald';
+            app.slideStyles[2].fontSize = 19;
+            app.slideStyles[2].backgroundColor = '#28a745';
+            
+            // Добавляем текстовые блоки
+            app.slideStyles.forEach((style, index) => {
+                style.textBlocks = [
+                    {
+                        id: `full_block_${index}_1`,
+                        text: `Блок ${index + 1} с *выделением*`,
+                        font: style.fontFamily,
+                        size: 16,
+                        weight: 600,
+                        color: '#ffffff',
+                        position: { x: 20, y: 80 },
+                        width: 60,
+                        keywordColor: '#ff6b6b',
+                        highlightEnabled: true,
+                        glow: index === 0
+                    }
+                ];
+            });
+            
+            app.showEditor();
+        });
+
+        // Добавляем информацию о тестировании
+        console.log(`
+🧪 ТЕСТИРОВАНИЕ ДИЗАЙН-РЕДАКТОРА
+
+Доступные тесты:
+1. Базовый редактор - основные функции
+2. Система шрифтов - Google Fonts с превью
+3. Текстовые блоки - layer system
+4. Drag & Drop - перетаскивание блоков
+5. Авто-ключевые слова - подсветка от AI
+6. Полный редактор - все функции вместе
+
+Что проверяем:
+✅ Реальное переключение шрифтов
+✅ Превью шрифтов в селекторе
+✅ Система текстовых блоков
+✅ Drag & Drop с правильным позиционированием
+✅ Авто-подсветка ключевых слов
+✅ Левая панель превью / правая панель контролов
+✅ Применение ко всем слайдам
+✅ Экспорт в JPEG 1080x1080
+        `);
+    </script>
+</body>
+</html>

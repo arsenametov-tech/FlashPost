@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Design Fix Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; background: #0f0f14; color: #fff; font-family: Arial, sans-serif; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .test-section { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2); }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .warning { background: #5f4a1a; border: 2px solid #ffc107; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+        .btn { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin: 10px; font-size: 16px; font-weight: 600; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 15px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px; overflow-y: auto; margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .test-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .test-result { font-weight: bold; margin-top: 10px; }
+        .iframe-container { width: 100%; height: 600px; border: 2px solid #444; border-radius: 8px; overflow: hidden; margin: 20px 0; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 FlashPost Design Fix Test</h1>
+        <p>Диагностика и исправление проблем с дизайном приложения</p>
+        
+        <div id="overallStatus" class="status info">🔄 Готов к тестированию...</div>
+        
+        <div class="test-section">
+            <h2>🚀 Быстрые действия</h2>
+            <button class="btn" onclick="runFullDiagnostic()">🔍 Полная диагностика</button>
+            <button class="btn" onclick="openMainApp()">📱 Открыть основное приложение</button>
+            <button class="btn" onclick="openRestoreDesign()">🎨 Открыть восстановленный дизайн</button>
+            <button class="btn" onclick="fixDesignIssues()">🔧 Исправить проблемы дизайна</button>
+        </div>
+
+        <div class="grid">
+            <div class="test-item">
+                <h3>📦 Проверка модулей</h3>
+                <div id="moduleStatus">Не проверено</div>
+                <div id="moduleResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🎨 Проверка CSS</h3>
+                <div id="cssStatus">Не проверено</div>
+                <div id="cssResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🏗️ Проверка HTML структуры</h3>
+                <div id="htmlStatus">Не проверено</div>
+                <div id="htmlResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>⚡ Проверка инициализации</h3>
+                <div id="initStatus">Не проверено</div>
+                <div id="initResults" class="test-result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Лог диагностики</h2>
+            <div id="diagnosticLog" class="log">Лог будет здесь...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>👀 Превью приложения</h2>
+            <div class="iframe-container">
+                <iframe id="appPreview" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let logElement;
+        
+        function log(message, type = 'info') {
+            if (!logElement) logElement = document.getElementById('diagnosticLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logElement.innerHTML += `<div style="color: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#74c0fc'}">[${timestamp}] ${icon} ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.className = `status ${type}`;
+            }
+        }
+
+        function updateTestResult(elementId, message, success) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = success ? `✅ ${message}` : `❌ ${message}`;
+                element.style.color = success ? '#51cf66' : '#ff6b6b';
+            }
+        }
+
+        async function checkModules() {
+            log('📦 Проверка модулей...', 'info');
+            updateStatus('moduleStatus', '🔄 Проверяем...', 'info');
+            
+            const modules = [
+                '/src/state.js',
+                '/src/renderer.js', 
+                '/src/editor.js',
+                '/src/drag.js',
+                '/src/export.js',
+                '/src/ai.js',
+                '/src/template-manager.js',
+                '/src/app.js'
+            ];
+            
+            let successCount = 0;
+            let errors = [];
+            
+            for (const module of modules) {
+                try {
+                    const response = await fetch(module);
+                    if (response.ok) {
+                        log(`✅ ${module}: доступен`, 'success');
+                        successCount++;
+                    } else {
+                        const error = `${module}: HTTP ${response.status}`;
+                        log(`❌ ${error}`, 'error');
+                        errors.push(error);
+                    }
+                } catch (error) {
+                    const errorMsg = `${module}: ${error.message}`;
+                    log(`❌ ${errorMsg}`, 'error');
+                    errors.push(errorMsg);
+                }
+            }
+            
+            const success = successCount === modules.length;
+            updateStatus('moduleStatus', success ? '✅ Все модули доступны' : '❌ Проблемы с модулями', success ? 'success' : 'error');
+            updateTestResult('moduleResults', `${successCount}/${modules.length} модулей загружено`, success);
+            
+            return { success, successCount, total: modules.length, errors };
+        }
+
+        async function checkCSS() {
+            log('🎨 Проверка CSS...', 'info');
+            updateStatus('cssStatus', '🔄 Проверяем...', 'info');
+            
+            try {
+                const response = await fetch('/app.css');
+                if (response.ok) {
+                    const cssContent = await response.text();
+                    
+                    // Проверяем ключевые стили
+                    const checks = [
+                        { name: 'Instagram градиент', pattern: /--instagram-gradient/ },
+                        { name: 'Основные цвета', pattern: /:root\s*{/ },
+                        { name: 'Стили приложения', pattern: /\.app\s*{/ },
+                        { name: 'Стили загрузки', pattern: /\.loading/ },
+                        { name: 'Стили кнопок', pattern: /\.btn/ }
+                    ];
+                    
+                    let passedChecks = 0;
+                    for (const check of checks) {
+                        if (check.pattern.test(cssContent)) {
+                            log(`✅ CSS: ${check.name} найден`, 'success');
+                            passedChecks++;
+                        } else {
+                            log(`❌ CSS: ${check.name} не найден`, 'error');
+                        }
+                    }
+                    
+                    const success = passedChecks === checks.length;
+                    updateStatus('cssStatus', success ? '✅ CSS корректен' : '⚠️ Проблемы с CSS', success ? 'success' : 'warning');
+                    updateTestResult('cssResults', `${passedChecks}/${checks.length} стилей найдено`, success);
+                    
+                    return { success, passedChecks, total: checks.length };
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Ошибка загрузки CSS: ${error.message}`, 'error');
+                updateStatus('cssStatus', '❌ CSS недоступен', 'error');
+                updateTestResult('cssResults', 'CSS файл недоступен', false);
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function checkHTML() {
+            log('🏗️ Проверка HTML структуры...', 'info');
+            updateStatus('htmlStatus', '🔄 Проверяем...', 'info');
+            
+            try {
+                const response = await fetch('/index.html');
+                if (response.ok) {
+                    const htmlContent = await response.text();
+                    
+                    const checks = [
+                        { name: '#app элемент', pattern: /id="app"/ },
+                        { name: '#loading элемент', pattern: /id="loading"/ },
+                        { name: 'app.css подключен', pattern: /app\.css/ },
+                        { name: 'Модули подключены', pattern: /src\/app\.js/ },
+                        { name: 'Telegram WebApp SDK', pattern: /telegram-web-app\.js/ },
+                        { name: 'Google Fonts', pattern: /fonts\.googleapis\.com/ }
+                    ];
+                    
+                    let passedChecks = 0;
+                    for (const check of checks) {
+                        if (check.pattern.test(htmlContent)) {
+                            log(`✅ HTML: ${check.name} найден`, 'success');
+                            passedChecks++;
+                        } else {
+                            log(`❌ HTML: ${check.name} не найден`, 'error');
+                        }
+                    }
+                    
+                    const success = passedChecks === checks.length;
+                    updateStatus('htmlStatus', success ? '✅ HTML структура корректна' : '⚠️ Проблемы с HTML', success ? 'success' : 'warning');
+                    updateTestResult('htmlResults', `${passedChecks}/${checks.length} элементов найдено`, success);
+                    
+                    return { success, passedChecks, total: checks.length };
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Ошибка загрузки HTML: ${error.message}`, 'error');
+                updateStatus('htmlStatus', '❌ HTML недоступен', 'error');
+                updateTestResult('htmlResults', 'HTML файл недоступен', false);
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function checkInitialization() {
+            log('⚡ Проверка инициализации...', 'info');
+            updateStatus('initStatus', '🔄 Проверяем...', 'info');
+            
+            // Создаем тестовый iframe для проверки инициализации
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = '/index.html';
+                
+                let resolved = false;
+                const timeout = setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        log('❌ Таймаут инициализации (10 сек)', 'error');
+                        updateStatus('initStatus', '❌ Таймаут инициализации', 'error');
+                        updateTestResult('initResults', 'Приложение не инициализируется', false);
+                        document.body.removeChild(iframe);
+                        resolve({ success: false, error: 'Timeout' });
+                    }
+                }, 10000);
+                
+                iframe.onload = () => {
+                    setTimeout(() => {
+                        try {
+                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                            const app = iframeDoc.getElementById('app');
+                            const loading = iframeDoc.getElementById('loading');
+                            const flashPostApp = iframe.contentWindow.flashPostApp;
+                            
+                            let checks = 0;
+                            let total = 4;
+                            
+                            if (app) {
+                                log('✅ #app элемент найден в DOM', 'success');
+                                checks++;
+                            } else {
+                                log('❌ #app элемент не найден в DOM', 'error');
+                            }
+                            
+                            if (loading) {
+                                log('✅ #loading элемент найден в DOM', 'success');
+                                checks++;
+                            } else {
+                                log('❌ #loading элемент не найден в DOM', 'error');
+                            }
+                            
+                            if (flashPostApp) {
+                                log('✅ FlashPostApp инициализирован', 'success');
+                                checks++;
+                            } else {
+                                log('❌ FlashPostApp не инициализирован', 'error');
+                            }
+                            
+                            // Проверяем видимость loading screen
+                            if (loading) {
+                                const loadingStyle = iframe.contentWindow.getComputedStyle(loading);
+                                if (loadingStyle.display === 'none' || loadingStyle.opacity === '0') {
+                                    log('✅ Loading screen скрыт', 'success');
+                                    checks++;
+                                } else {
+                                    log('⚠️ Loading screen все еще виден', 'warning');
+                                }
+                            }
+                            
+                            const success = checks >= 3; // Минимум 3 из 4 проверок
+                            updateStatus('initStatus', success ? '✅ Инициализация успешна' : '❌ Проблемы с инициализацией', success ? 'success' : 'error');
+                            updateTestResult('initResults', `${checks}/${total} проверок пройдено`, success);
+                            
+                            if (!resolved) {
+                                resolved = true;
+                                clearTimeout(timeout);
+                                document.body.removeChild(iframe);
+                                resolve({ success, checks, total });
+                            }
+                        } catch (error) {
+                            log(`❌ Ошибка проверки инициализации: ${error.message}`, 'error');
+                            if (!resolved) {
+                                resolved = true;
+                                clearTimeout(timeout);
+                                document.body.removeChild(iframe);
+                                resolve({ success: false, error: error.message });
+                            }
+                        }
+                    }, 3000); // Ждем 3 секунды для инициализации
+                };
+                
+                iframe.onerror = () => {
+                    log('❌ Ошибка загрузки iframe', 'error');
+                    if (!resolved) {
+                        resolved = true;
+                        clearTimeout(timeout);
+                        document.body.removeChild(iframe);
+                        resolve({ success: false, error: 'Iframe load error' });
+                    }
+                };
+                
+                document.body.appendChild(iframe);
+            });
+        }
+
+        async function runFullDiagnostic() {
+            log('🔍 Запуск полной диагностики...', 'info');
+            updateStatus('overallStatus', '🔄 Диагностика в процессе...', 'info');
+            
+            const results = {
+                modules: await checkModules(),
+                css: await checkCSS(),
+                html: await checkHTML(),
+                init: await checkInitialization()
+            };
+            
+            // Подсчитываем общий результат
+            const totalTests = 4;
+            let passedTests = 0;
+            
+            if (results.modules.success) passedTests++;
+            if (results.css.success) passedTests++;
+            if (results.html.success) passedTests++;
+            if (results.init.success) passedTests++;
+            
+            const overallSuccess = passedTests >= 3;
+            
+            log(`📊 Диагностика завершена: ${passedTests}/${totalTests} тестов пройдено`, overallSuccess ? 'success' : 'error');
+            updateStatus('overallStatus', 
+                overallSuccess ? '✅ Приложение работает корректно' : '❌ Обнаружены проблемы', 
+                overallSuccess ? 'success' : 'error'
+            );
+            
+            // Показываем превью приложения
+            document.getElementById('appPreview').src = '/index.html';
+            
+            return results;
+        }
+
+        function openMainApp() {
+            log('📱 Открытие основного приложения...', 'info');
+            window.open('/index.html', '_blank');
+        }
+
+        function openRestoreDesign() {
+            log('🎨 Открытие восстановленного дизайна...', 'info');
+            window.open('/restore-design.html', '_blank');
+        }
+
+        async function fixDesignIssues() {
+            log('🔧 Попытка исправления проблем дизайна...', 'info');
+            
+            // Здесь можно добавить автоматические исправления
+            log('ℹ️ Автоматические исправления пока не реализованы', 'info');
+            log('💡 Рекомендации:', 'info');
+            log('1. Проверьте что все CSS файлы загружаются', 'info');
+            log('2. Убедитесь что JavaScript модули инициализируются', 'info');
+            log('3. Проверьте консоль браузера на ошибки', 'info');
+            log('4. Попробуйте открыть restore-design.html для сравнения', 'info');
+        }
+
+        // Автозапуск диагностики
+        window.addEventListener('load', () => {
+            log('🧪 Design Fix Test загружен', 'info');
+            setTimeout(() => {
+                runFullDiagnostic();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

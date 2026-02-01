@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FlashPost Mini App - Restored Design</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Oswald:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Bebas+Neue:wght@400&family=Rubik:wght@300;400;500;600;700;800;900&family=Manrope:wght@200;300;400;500;600;700;800&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Основные стили приложения -->
+    <link rel="stylesheet" href="app.css">
+    
+    <style>
+        /* Принудительные стили для восстановления дизайна */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #0f0f14;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        #app {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            display: block;
+            position: relative;
+        }
+        
+        /* Восстановленный дизайн стартового экрана */
+        .start-section {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 30px;
+        }
+        
+        .start-header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .start-header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+        
+        .description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            margin-top: 15px;
+        }
+        
+        .input-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        
+        .topic-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .topic-input:focus {
+            outline: none;
+            border-color: #833ab4;
+            box-shadow: 0 0 20px rgba(131, 58, 180, 0.3);
+        }
+        
+        .topic-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.4);
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(131, 58, 180, 0.6);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .ideas-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ideas-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .idea-btn {
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .idea-btn:hover {
+            background: rgba(131, 58, 180, 0.3);
+            border-color: #833ab4;
+            transform: translateY(-1px);
+        }
+        
+        /* Анимированные пузырьки */
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .bubble {
+            position: absolute;
+            background: rgba(131, 58, 180, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .bubble:nth-child(1) { width: 40px; height: 40px; left: 10%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 20px; height: 20px; left: 20%; animation-delay: 2s; }
+        .bubble:nth-child(3) { width: 50px; height: 50px; left: 35%; animation-delay: 4s; }
+        .bubble:nth-child(4) { width: 80px; height: 80px; left: 50%; animation-delay: 0s; }
+        .bubble:nth-child(5) { width: 35px; height: 35px; left: 70%; animation-delay: 3s; }
+        .bubble:nth-child(6) { width: 45px; height: 45px; left: 80%; animation-delay: 5s; }
+        .bubble:nth-child(7) { width: 25px; height: 25px; left: 90%; animation-delay: 1s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10%, 90% { opacity: 1; }
+            50% { transform: translateY(-100px) rotate(180deg); }
+        }
+        
+        /* Статус бар */
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимированные пузырьки -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="app">
+        <div class="start-section">
+            <!-- Заголовок -->
+            <div class="start-header">
+                <h1>🚀 FlashPost AI<br><span class="subtitle">Создавайте вирусные карусели за минуты</span></h1>
+                <p class="description">Введите тему, и ИИ создаст детальную обучающую карусель из 7-9 слайдов с экспертным контентом</p>
+            </div>
+
+            <!-- Форма ввода -->
+            <div class="input-form">
+                <div class="input-group">
+                    <label for="topicInput">💡 О чем создать карусель?</label>
+                    <input 
+                        type="text" 
+                        id="topicInput" 
+                        class="topic-input"
+                        placeholder="Например: Как начать инвестировать в 2024"
+                        maxlength="100"
+                    >
+                </div>
+                <button class="generate-btn" onclick="generateCarousel()">
+                    ✨ Создать карусель с ИИ
+                </button>
+            </div>
+
+            <!-- Популярные идеи -->
+            <div class="ideas-section">
+                <div class="ideas-title">💡 Популярные идеи</div>
+                <div class="ideas-grid">
+                    <button class="idea-btn" onclick="setTopic('Как начать инвестировать')">💰 Инвестиции</button>
+                    <button class="idea-btn" onclick="setTopic('Здоровое питание')">🥗 Питание</button>
+                    <button class="idea-btn" onclick="setTopic('Продуктивность')">⚡ Продуктивность</button>
+                    <button class="idea-btn" onclick="setTopic('Изучение языков')">🗣️ Языки</button>
+                    <button class="idea-btn" onclick="setTopic('Фитнес дома')">💪 Фитнес</button>
+                    <button class="idea-btn" onclick="setTopic('Психология отношений')">❤️ Отношения</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статус бар -->
+    <div class="status-bar">
+        🎨 Дизайн восстановлен | 
+        <span onclick="openOriginalApp()" style="color: #4CAF50; cursor: pointer;">Открыть оригинальное приложение</span>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            console.log('✅ Telegram WebApp инициализирован');
+        }
+
+        function setTopic(topic) {
+            document.getElementById('topicInput').value = topic;
+            document.getElementById('topicInput').focus();
+        }
+
+        function generateCarousel() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Пожалуйста, введите тему для карусели');
+                return;
+            }
+            
+            // Показываем процесс генерации
+            const btn = document.querySelector('.generate-btn');
+            btn.innerHTML = '🔄 Генерируем карусель...';
+            btn.disabled = true;
+            
+            // Имитация генерации (в реальном приложении здесь будет вызов ИИ)
+            setTimeout(() => {
+                alert(`Карусель на тему "${topic}" будет создана!\n\nВ полной версии здесь запустится ИИ генерация.`);
+                btn.innerHTML = '✨ Создать карусель с ИИ';
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        function openOriginalApp() {
+            window.open('/index.html', '_blank');
+        }
+
+        // Анимация при загрузке
+        window.addEventListener('load', () => {
+            console.log('🎨 Дизайн FlashPost восстановлен');
+            
+            // Анимация появления элементов
+            const elements = document.querySelectorAll('.start-header, .input-form, .ideas-section');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+
+        // Обработка Enter в поле ввода
+        document.getElementById('topicInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generateCarousel();
+            }
+        });
+    </script>
+</body>
+</html>

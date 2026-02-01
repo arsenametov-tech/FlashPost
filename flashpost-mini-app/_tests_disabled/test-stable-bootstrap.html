@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🔒 Stable Bootstrap Test - FlashPost</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            height: 100vh;
+            height: 100dvh;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 4s ease infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+            font-size: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .app {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+        
+        /* Test Panel Styles */
+        .test-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 15000;
+            max-width: 400px;
+            font-size: 12px;
+        }
+        
+        .test-result {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        
+        .test-pass { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
+        .test-fail { background: rgba(255, 0, 0, 0.2); color: #ff0000; }
+        .test-warn { background: rgba(255, 255, 0, 0.2); color: #ffff00; }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 12px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-icon">🔒</div>
+        <div class="loading-text">Testing Stable Bootstrap</div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app" id="app">
+        <!-- Content will be loaded by renderApp() -->
+    </div>
+
+    <!-- Test Panel -->
+    <div class="test-panel" id="testPanel">
+        <h3>🔒 STABLE BOOTSTRAP TEST</h3>
+        <div id="testResults"></div>
+        <div style="margin-top: 15px;">
+            <button class="test-button" onclick="runBootstrapTests()">🔄 Run Tests</button>
+            <button class="test-button" onclick="testErrorRecovery()">⚠️ Test Error Recovery</button>
+            <button class="test-button" onclick="testDOMDestruction()">💥 Test DOM Destruction</button>
+            <button class="test-button" onclick="toggleTestPanel()">❌ Hide Panel</button>
+        </div>
+    </div>
+
+    <!-- Main App Styles -->
+    <link rel="stylesheet" href="app.css">
+    
+    <!-- Modular Architecture -->
+    <script src="src/state.js" defer></script>
+    <script src="src/renderer.js" defer></script>
+    <script src="src/editor.js" defer></script>
+    <script src="src/drag.js" defer></script>
+    <script src="src/export.js" defer></script>
+    <script src="src/ai.js" defer></script>
+    <script src="src/template-manager.js" defer></script>
+    <script src="src/app.js" defer></script>
+    
+    <script>
+        // 🔒 STABLE BOOTSTRAP TEST SUITE
+        
+        let testResults = [];
+        
+        function addTestResult(name, passed, message = '') {
+            const result = {
+                name,
+                passed,
+                message,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            testResults.push(result);
+            updateTestDisplay();
+        }
+        
+        function updateTestDisplay() {
+            const container = document.getElementById('testResults');
+            container.innerHTML = testResults.map(result => `
+                <div class="test-result ${result.passed ? 'test-pass' : 'test-fail'}">
+                    [${result.timestamp}] ${result.passed ? '✅' : '❌'} ${result.name}
+                    ${result.message ? `<br>&nbsp;&nbsp;&nbsp;&nbsp;${result.message}` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function runBootstrapTests() {
+            console.log('🔒 Running Stable Bootstrap Tests...');
+            testResults = [];
+            
+            // Test 1: DOM Structure
+            const appExists = !!document.getElementById('app');
+            const loadingExists = !!document.getElementById('loading');
+            addTestResult('DOM Structure', appExists && loadingExists, 
+                `app: ${appExists}, loading: ${loadingExists}`);
+            
+            // Test 2: App Instance
+            const appInstance = !!window.flashPostApp;
+            addTestResult('App Instance', appInstance, 
+                appInstance ? 'window.flashPostApp exists' : 'App not initialized');
+            
+            if (appInstance) {
+                // Test 3: State Manager
+                const hasState = !!window.flashPostApp.state;
+                addTestResult('State Manager', hasState, 
+                    hasState ? `Mode: ${window.flashPostApp.state.getMode()}` : 'State missing');
+                
+                // Test 4: Renderer
+                const hasRenderer = !!window.flashPostApp.renderer;
+                addTestResult('Renderer', hasRenderer, 
+                    hasRenderer ? 'Renderer available' : 'Renderer missing');
+                
+                // Test 5: Bootstrap Validation
+                const validation = window.flashPostApp.validateStableBootstrap();
+                addTestResult('Bootstrap Validation', validation.isValid, 
+                    `Visible: ${validation.appVisible}, State: ${validation.stateInitialized}`);
+                
+                // Test 6: renderApp() Method
+                const hasRenderApp = typeof window.flashPostApp.renderApp === 'function';
+                addTestResult('renderApp() Method', hasRenderApp, 
+                    hasRenderApp ? 'Method exists' : 'Method missing');
+                
+                // Test 7: Fallback UI Methods
+                const hasFallbacks = typeof window.flashPostApp.renderErrorUI === 'function' &&
+                                   typeof window.flashPostApp.renderCriticalFallbackUI === 'function';
+                addTestResult('Fallback UI Methods', hasFallbacks, 
+                    hasFallbacks ? 'Error recovery methods exist' : 'Fallback methods missing');
+                
+                // Test 8: UI Visibility
+                const app = document.getElementById('app');
+                const isVisible = app && window.getComputedStyle(app).display !== 'none';
+                addTestResult('UI Visibility', isVisible, 
+                    isVisible ? 'App is visible' : 'App is hidden');
+            }
+            
+            console.log('✅ Bootstrap tests completed');
+        }
+        
+        function testErrorRecovery() {
+            console.log('⚠️ Testing error recovery...');
+            
+            if (window.flashPostApp) {
+                try {
+                    // Simulate a render error
+                    const testError = new Error('Test error for bootstrap validation');
+                    window.flashPostApp.renderErrorUI(testError);
+                    addTestResult('Error Recovery', true, 'Error UI displayed successfully');
+                } catch (error) {
+                    addTestResult('Error Recovery', false, `Failed: ${error.message}`);
+                }
+            } else {
+                addTestResult('Error Recovery', false, 'App not available for testing');
+            }
+        }
+        
+        function testDOMDestruction() {
+            console.log('💥 Testing DOM destruction recovery...');
+            
+            // Remove app element
+            const app = document.getElementById('app');
+            if (app) {
+                app.remove();
+                addTestResult('DOM Destruction', true, 'App element removed');
+                
+                // Try to render - should trigger fallback
+                setTimeout(() => {
+                    if (window.flashPostApp) {
+                        window.flashPostApp.renderApp();
+                        
+                        // Check if fallback was created
+                        setTimeout(() => {
+                            const newApp = document.getElementById('app');
+                            addTestResult('Fallback Creation', !!newApp, 
+                                newApp ? 'App element recreated' : 'No fallback created');
+                        }, 500);
+                    }
+                }, 100);
+            } else {
+                addTestResult('DOM Destruction', false, 'App element not found');
+            }
+        }
+        
+        function toggleTestPanel() {
+            const panel = document.getElementById('testPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Auto-run tests when app is ready
+        setTimeout(() => {
+            if (window.flashPostApp) {
+                runBootstrapTests();
+            } else {
+                addTestResult('Auto Test', false, 'App not ready after 3 seconds');
+            }
+        }, 3000);
+        
+        // Monitor for app initialization
+        let checkCount = 0;
+        const checkInterval = setInterval(() => {
+            checkCount++;
+            if (window.flashPostApp) {
+                addTestResult('App Ready', true, `Initialized after ${checkCount} checks`);
+                clearInterval(checkInterval);
+                setTimeout(runBootstrapTests, 500);
+            } else if (checkCount > 20) {
+                addTestResult('App Ready', false, 'Failed to initialize after 20 checks');
+                clearInterval(checkInterval);
+            }
+        }, 500);
+        
+        // Global error monitoring
+        window.addEventListener('error', (event) => {
+            addTestResult('Global Error', false, `${event.message} at ${event.filename}:${event.lineno}`);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            addTestResult('Promise Rejection', false, `${event.reason}`);
+        });
+        
+        console.log('🔒 STABLE BOOTSTRAP Test Suite Loaded');
+    </script>
+</body>
+</html>

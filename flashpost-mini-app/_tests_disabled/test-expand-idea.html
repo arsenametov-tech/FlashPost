@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Expand Idea - FlashPost</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Основные стили приложения -->
+    <link rel="stylesheet" href="app.css">
+    
+    <style>
+        .test-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #0f0f14;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-btn {
+            background: linear-gradient(45deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            padding: 15px 30px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(131, 58, 180, 0.6);
+        }
+        
+        .log {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚀 Test Expand Idea</h1>
+        <p>Тестирование функции "Развернуть идею"</p>
+        
+        <div class="test-section">
+            <h3>📝 Шаг 1: Создание базовой карусели</h3>
+            <button class="test-btn" onclick="createBaseCarousel()">🎯 Создать базовую карусель</button>
+            <div id="step1Log" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🚀 Шаг 2: Развертывание идеи</h3>
+            <button class="test-btn" onclick="testExpandIdea()">🚀 Развернуть идею</button>
+            <button class="test-btn" onclick="openMainApp()">📱 Открыть основное приложение</button>
+            <div id="step2Log" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Результат</h3>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <!-- Модульная архитектура -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let testApp;
+
+        function log(message, type = 'info', logId = 'step1Log') {
+            const logElement = document.getElementById(logId);
+            const className = type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info');
+            logElement.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function createBaseCarousel() {
+            log('🚀 Создаем базовую карусель...', 'info', 'step1Log');
+            
+            try {
+                // Создаем приложение если еще не создано
+                if (!testApp) {
+                    log('📦 Инициализация FlashPostApp...', 'info', 'step1Log');
+                    testApp = new FlashPostApp();
+                    log('✅ FlashPostApp создан', 'success', 'step1Log');
+                }
+                
+                // Создаем базовую карусель
+                const topic = 'Как начать инвестировать';
+                log(`📝 Тема: "${topic}"`, 'info', 'step1Log');
+                
+                // Генерируем слайды
+                const slidesData = testApp.generateManualSlides(topic);
+                log(`✅ Сгенерировано ${slidesData.length} базовых слайдов`, 'success', 'step1Log');
+                
+                // Создаем слайды в проекте
+                testApp.state.clearProject();
+                const createdSlides = testApp.createSlidesInProject(slidesData);
+                log(`✅ Создано ${createdSlides.length} слайдов в проекте`, 'success', 'step1Log');
+                
+                // Переводим в режим превью
+                testApp.state.setMode('preview');
+                log('✅ Переведено в режим превью', 'success', 'step1Log');
+                
+                const totalSlides = testApp.state.getSlidesCount();
+                log(`📊 Базовая карусель готова: ${totalSlides} слайдов`, 'success', 'step1Log');
+                
+                // Показываем результат
+                updateResult(`Базовая карусель создана: ${totalSlides} слайдов`);
+                
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error', 'step1Log');
+                console.error('Ошибка создания базовой карусели:', error);
+            }
+        }
+
+        function testExpandIdea() {
+            if (!testApp) {
+                log('❌ Сначала создайте базовую карусель', 'error', 'step2Log');
+                return;
+            }
+            
+            log('🚀 Тестируем развертывание идеи...', 'info', 'step2Log');
+            
+            try {
+                const slidesBefore = testApp.state.getSlidesCount();
+                log(`📊 Слайдов до развертывания: ${slidesBefore}`, 'info', 'step2Log');
+                
+                // Тестируем метод expandIdea
+                testApp.expandIdea();
+                
+                // Проверяем результат через некоторое время
+                setTimeout(() => {
+                    const slidesAfter = testApp.state.getSlidesCount();
+                    const addedSlides = slidesAfter - slidesBefore;
+                    
+                    log(`📊 Слайдов после развертывания: ${slidesAfter}`, 'success', 'step2Log');
+                    log(`➕ Добавлено новых слайдов: ${addedSlides}`, 'success', 'step2Log');
+                    
+                    if (addedSlides > 0) {
+                        log('✅ Развертывание идеи работает!', 'success', 'step2Log');
+                        
+                        // Показываем детальный результат
+                        const allSlides = testApp.state.getAllSlides();
+                        const expandSlides = allSlides.slice(slidesBefore);
+                        
+                        updateResult(`
+                            <h4>✅ Развертывание успешно!</h4>
+                            <p><strong>Базовых слайдов:</strong> ${slidesBefore}</p>
+                            <p><strong>Добавлено слайдов:</strong> ${addedSlides}</p>
+                            <p><strong>Всего слайдов:</strong> ${slidesAfter}</p>
+                            <div style="margin-top: 15px;">
+                                <h5>📋 Добавленные слайды:</h5>
+                                ${expandSlides.map((slide, index) => `
+                                    <div style="background: rgba(255,255,255,0.1); padding: 8px; margin: 3px 0; border-radius: 5px; font-size: 12px;">
+                                        <strong>${slidesBefore + index + 1}. ${slide.title}</strong><br>
+                                        <small>${slide.text}</small>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `);
+                        
+                    } else {
+                        log('❌ Новые слайды не добавлены', 'error', 'step2Log');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error', 'step2Log');
+                console.error('Ошибка развертывания идеи:', error);
+            }
+        }
+
+        function updateResult(content) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <div style="background: rgba(76, 175, 80, 0.2); padding: 15px; border-radius: 8px; border: 1px solid #4CAF50;">
+                    ${content}
+                </div>
+            `;
+        }
+
+        function openMainApp() {
+            log('🚀 Открытие основного приложения...', 'info', 'step2Log');
+            window.open('/index.html', '_blank');
+        }
+
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            log('🧪 Test Expand Idea загружен', 'info', 'step1Log');
+        });
+    </script>
+</body>
+</html>

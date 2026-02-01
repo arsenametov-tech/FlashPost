@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Quick Functionality Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1a1a2e; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test-card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; }
+        .btn { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; margin: 10px; }
+        .status { padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .warning { background: #5f4a1a; border: 2px solid #ffc107; }
+        .log { background: #2a2a2a; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .test-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: center; }
+        .test-result { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Quick Functionality Test</h1>
+        <p>Быстрая проверка основной функциональности приложения</p>
+        
+        <div id="overallStatus" class="status warning">🔄 Готов к тестированию...</div>
+        
+        <div class="test-card">
+            <h2>🚀 Быстрые тесты</h2>
+            <button class="btn" onclick="runAllTests()">⚡ Запустить все тесты</button>
+            <button class="btn" onclick="testMainApp()">📱 Тест основного приложения</button>
+            <button class="btn" onclick="testWorkingApp()">🎯 Тест рабочей версии</button>
+        </div>
+
+        <div class="grid">
+            <div class="test-item">
+                <h3>📱 Основное приложение</h3>
+                <div id="mainAppResult" class="test-result">Не проверено</div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🎯 Рабочая версия</h3>
+                <div id="workingAppResult" class="test-result">Не проверено</div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🖱️ Кликабельность</h3>
+                <div id="clickabilityResult" class="test-result">Не проверено</div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🔧 JavaScript</h3>
+                <div id="jsResult" class="test-result">Не проверено</div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>📋 Лог тестирования</h2>
+            <div id="testLog" class="log">Ожидание запуска тестов...<br></div>
+        </div>
+    </div>
+
+    <script>
+        let testLog = document.getElementById('testLog');
+        let testResults = {};
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#74c0fc';
+            
+            testLog.innerHTML += `<span style="color: ${color}">[${timestamp}] ${icon} ${message}</span><br>`;
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+
+        function updateResult(elementId, message, success) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = success ? `✅ ${message}` : `❌ ${message}`;
+                element.style.color = success ? '#51cf66' : '#ff6b6b';
+            }
+        }
+
+        async function testMainApp() {
+            log('📱 Тестирование основного приложения...', 'info');
+            
+            try {
+                // Создаем скрытый iframe для тестирования
+                const iframe = document.createElement('iframe');
+                iframe.src = 'index.html';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                await new Promise(resolve => {
+                    iframe.onload = resolve;
+                    setTimeout(resolve, 3000); // Таймаут 3 сек
+                });
+                
+                const frameDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Проверяем ключевые элементы
+                const checks = [
+                    { name: 'Заголовок', selector: '.title', required: true },
+                    { name: 'Кнопка генерации', selector: '#generateBtn', required: true },
+                    { name: 'Поле ввода темы', selector: '#topicInput', required: true },
+                    { name: 'Кнопка ручного ввода', selector: '#manualBtn', required: true },
+                    { name: 'Поле ручного ввода', selector: '#manualInput', required: true }
+                ];
+                
+                let passed = 0;
+                let failed = 0;
+                
+                checks.forEach(check => {
+                    const element = frameDoc.querySelector(check.selector);
+                    if (element) {
+                        passed++;
+                        log(`✅ ${check.name}: найден`, 'success');
+                    } else {
+                        failed++;
+                        log(`❌ ${check.name}: не найден`, 'error');
+                    }
+                });
+                
+                document.body.removeChild(iframe);
+                
+                const success = failed === 0;
+                updateResult('mainAppResult', `${passed}/${checks.length} элементов`, success);
+                testResults.mainApp = success;
+                
+                log(`📊 Основное приложение: ${passed}/${checks.length} проверок пройдено`, success ? 'success' : 'error');
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования основного приложения: ${error.message}`, 'error');
+                updateResult('mainAppResult', 'Ошибка тестирования', false);
+                testResults.mainApp = false;
+            }
+        }
+
+        async function testWorkingApp() {
+            log('🎯 Тестирование рабочей версии...', 'info');
+            
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.src = 'working-app.html';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                await new Promise(resolve => {
+                    iframe.onload = resolve;
+                    setTimeout(resolve, 3000);
+                });
+                
+                const frameDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const frameWindow = iframe.contentWindow;
+                
+                // Проверяем расширенные функции
+                const checks = [
+                    { name: 'Редактор слайдов', selector: '#editorContainer', required: true },
+                    { name: 'Кнопка добавления текста', selector: '#addTextBtn', required: true },
+                    { name: 'Редактор текстовых блоков', selector: '#textBlockEditor', required: true },
+                    { name: 'Система шрифтов', check: () => frameDoc.querySelectorAll('link[href*="fonts.googleapis.com"]').length > 0 }
+                ];
+                
+                let passed = 0;
+                let failed = 0;
+                
+                checks.forEach(check => {
+                    let found = false;
+                    
+                    if (check.selector) {
+                        found = frameDoc.querySelector(check.selector) !== null;
+                    } else if (check.check) {
+                        found = check.check();
+                    }
+                    
+                    if (found) {
+                        passed++;
+                        log(`✅ ${check.name}: найден`, 'success');
+                    } else {
+                        failed++;
+                        log(`❌ ${check.name}: не найден`, 'error');
+                    }
+                });
+                
+                // Проверяем JavaScript переменные
+                if (frameWindow.currentSlides !== undefined) {
+                    passed++;
+                    log('✅ JavaScript переменные: инициализированы', 'success');
+                } else {
+                    failed++;
+                    log('❌ JavaScript переменные: не найдены', 'error');
+                }
+                
+                document.body.removeChild(iframe);
+                
+                const success = failed === 0;
+                updateResult('workingAppResult', `${passed}/${checks.length + 1} проверок`, success);
+                testResults.workingApp = success;
+                
+                log(`📊 Рабочая версия: ${passed}/${checks.length + 1} проверок пройдено`, success ? 'success' : 'error');
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования рабочей версии: ${error.message}`, 'error');
+                updateResult('workingAppResult', 'Ошибка тестирования', false);
+                testResults.workingApp = false;
+            }
+        }
+
+        function testClickability() {
+            log('🖱️ Тестирование кликабельности...', 'info');
+            
+            try {
+                // Проверяем кнопки на этой странице
+                const buttons = document.querySelectorAll('button');
+                let clickableCount = 0;
+                
+                buttons.forEach((btn, index) => {
+                    const style = window.getComputedStyle(btn);
+                    const isClickable = style.pointerEvents !== 'none' && 
+                                      style.cursor === 'pointer' && 
+                                      !btn.disabled;
+                    
+                    if (isClickable) {
+                        clickableCount++;
+                        log(`✅ Кнопка ${index + 1}: кликабельна`, 'success');
+                    } else {
+                        log(`❌ Кнопка ${index + 1}: не кликабельна`, 'error');
+                    }
+                });
+                
+                const success = clickableCount === buttons.length;
+                updateResult('clickabilityResult', `${clickableCount}/${buttons.length} кнопок`, success);
+                testResults.clickability = success;
+                
+                log(`📊 Кликабельность: ${clickableCount}/${buttons.length} кнопок работают`, success ? 'success' : 'warning');
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования кликабельности: ${error.message}`, 'error');
+                updateResult('clickabilityResult', 'Ошибка тестирования', false);
+                testResults.clickability = false;
+            }
+        }
+
+        function testJavaScript() {
+            log('🔧 Тестирование JavaScript...', 'info');
+            
+            try {
+                let passed = 0;
+                let total = 0;
+                
+                // Проверяем базовые JavaScript функции
+                const tests = [
+                    { name: 'Array methods', test: () => [1,2,3].map(x => x * 2).length === 3 },
+                    { name: 'DOM manipulation', test: () => document.createElement('div') !== null },
+                    { name: 'Event handling', test: () => typeof addEventListener === 'function' },
+                    { name: 'Local storage', test: () => typeof localStorage !== 'undefined' },
+                    { name: 'Fetch API', test: () => typeof fetch === 'function' }
+                ];
+                
+                tests.forEach(test => {
+                    total++;
+                    try {
+                        if (test.test()) {
+                            passed++;
+                            log(`✅ ${test.name}: работает`, 'success');
+                        } else {
+                            log(`❌ ${test.name}: не работает`, 'error');
+                        }
+                    } catch (e) {
+                        log(`❌ ${test.name}: ошибка - ${e.message}`, 'error');
+                    }
+                });
+                
+                const success = passed === total;
+                updateResult('jsResult', `${passed}/${total} функций`, success);
+                testResults.javascript = success;
+                
+                log(`📊 JavaScript: ${passed}/${total} функций работают`, success ? 'success' : 'error');
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования JavaScript: ${error.message}`, 'error');
+                updateResult('jsResult', 'Ошибка тестирования', false);
+                testResults.javascript = false;
+            }
+        }
+
+        async function runAllTests() {
+            log('⚡ Запуск всех тестов...', 'info');
+            document.getElementById('overallStatus').className = 'status warning';
+            document.getElementById('overallStatus').textContent = '🔄 Тестирование в процессе...';
+            
+            // Запускаем тесты последовательно
+            testJavaScript();
+            testClickability();
+            await testMainApp();
+            await testWorkingApp();
+            
+            // Подводим итоги
+            setTimeout(() => {
+                const results = Object.values(testResults);
+                const passed = results.filter(r => r).length;
+                const total = results.length;
+                const success = passed === total;
+                
+                const status = document.getElementById('overallStatus');
+                status.className = `status ${success ? 'success' : 'error'}`;
+                status.textContent = success ? 
+                    '✅ Все тесты пройдены успешно!' : 
+                    `❌ Пройдено ${passed}/${total} тестов`;
+                
+                log(`🎯 ИТОГОВЫЙ РЕЗУЛЬТАТ: ${passed}/${total} тестов пройдено`, success ? 'success' : 'error');
+                
+                if (success) {
+                    log('🚀 Приложение готово к использованию!', 'success');
+                } else {
+                    log('⚠️ Требуется дополнительная проверка некоторых компонентов', 'warning');
+                }
+                
+            }, 2000);
+        }
+
+        // Автозапуск при загрузке
+        window.addEventListener('load', () => {
+            log('⚡ Quick Functionality Test загружен', 'info');
+        });
+    </script>
+</body>
+</html>

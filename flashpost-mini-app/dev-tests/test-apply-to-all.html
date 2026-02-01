@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест "Применить ко всем" - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .test-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .test-steps {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .test-steps li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .test-steps li:last-child {
+            border-bottom: none;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .start-btn:hover {
+            background: #6d2d96;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🧪 Тест "Применить ко всем"</h1>
+        
+        <div class="test-info">
+            <strong>Что тестируем:</strong><br>
+            Функциональность "Применить ко всем слайдам" в редакторе FlashPost.
+            При включении этой опции изменения фона и шрифтов должны применяться ко всем слайдам,
+            но позиции текстовых блоков остаются индивидуальными.
+        </div>
+        
+        <h3>Шаги тестирования:</h3>
+        <ol class="test-steps">
+            <li><span class="step-number">1</span>Создать карусель с несколькими слайдами</li>
+            <li><span class="step-number">2</span>Открыть редактор</li>
+            <li><span class="step-number">3</span>Включить чекбокс "Применить ко всем слайдам"</li>
+            <li><span class="step-number">4</span>Изменить цвет фона - должен применится ко всем</li>
+            <li><span class="step-number">5</span>Изменить шрифт - должен применится ко всем</li>
+            <li><span class="step-number">6</span>Переместить текстовый блок - должен остаться только на текущем слайде</li>
+            <li><span class="step-number">7</span>Переключиться между слайдами и проверить результат</li>
+        </ol>
+        
+        <button class="start-btn" onclick="startTest()">🚀 Начать тест</button>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function startTest() {
+            console.log('🧪 Запуск теста "Применить ко всем"');
+            
+            // Создаем экземпляр приложения
+            window.testApp = new FlashPostApp();
+            
+            // Переопределяем метод показа приложения для автоматического тестирования
+            const originalShowApp = window.testApp.showApp;
+            window.testApp.showApp = function() {
+                originalShowApp.call(this);
+                
+                // Автоматически заполняем тему и создаем карусель
+                setTimeout(() => {
+                    const topicInput = document.getElementById('topicInput');
+                    if (topicInput) {
+                        topicInput.value = 'Тестирование функции "Применить ко всем"';
+                        this.updateInputCounter();
+                        
+                        // Автоматически генерируем карусель
+                        setTimeout(() => {
+                            this.handleGenerate();
+                        }, 500);
+                    }
+                }, 1000);
+            };
+            
+            // Скрываем тестовый контейнер
+            document.querySelector('.test-container').style.display = 'none';
+            
+            // Создаем контейнер для приложения
+            const appContainer = document.createElement('div');
+            appContainer.id = 'app';
+            appContainer.style.display = 'block';
+            document.body.appendChild(appContainer);
+            
+            // Создаем loading экран
+            const loadingContainer = document.createElement('div');
+            loadingContainer.id = 'loading';
+            loadingContainer.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: white;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🧪</div>
+                        <div>Загрузка теста...</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingContainer);
+        }
+        
+        // Логирование для отладки
+        console.log('🧪 Тестовая страница загружена');
+        console.log('📋 Доступные методы тестирования:');
+        console.log('- startTest() - запуск автоматического теста');
+    </script>
+</body>
+</html>

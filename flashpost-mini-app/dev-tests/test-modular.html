@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost Modular Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #6a2c91;
+        }
+        #testResults {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 FlashPost Modular Architecture Test</h1>
+        
+        <div class="test-section">
+            <h3>Module Loading Status</h3>
+            <div id="moduleStatus">Checking modules...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>State Management Test</h3>
+            <button onclick="testStateManager()">Test State Manager</button>
+            <div id="stateResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Renderer Test</h3>
+            <button onclick="testRenderer()">Test Renderer</button>
+            <div id="rendererResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Editor Test</h3>
+            <button onclick="testEditor()">Test Editor</button>
+            <div id="editorResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Drag Manager Test</h3>
+            <button onclick="testDragManager()">Test Drag Manager</button>
+            <div id="dragResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Export Manager Test</h3>
+            <button onclick="testExportManager()">Test Export Manager</button>
+            <div id="exportResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>AI Manager Test</h3>
+            <button onclick="testAIManager()">Test AI Manager</button>
+            <div id="aiResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Full App Integration Test</h3>
+            <button onclick="testFullApp()">Test Full App</button>
+            <div id="appResults"></div>
+        </div>
+        
+        <div id="testResults"></div>
+    </div>
+
+    <!-- Load modules -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        // Check module loading
+        function checkModules() {
+            const modules = [
+                { name: 'StateManager', class: StateManager },
+                { name: 'Renderer', class: Renderer },
+                { name: 'Editor', class: Editor },
+                { name: 'DragManager', class: DragManager },
+                { name: 'ExportManager', class: ExportManager },
+                { name: 'AIManager', class: AIManager },
+                { name: 'FlashPostApp', class: FlashPostApp }
+            ];
+            
+            let statusHtml = '';
+            let allLoaded = true;
+            
+            modules.forEach(module => {
+                const loaded = typeof module.class !== 'undefined';
+                if (!loaded) allLoaded = false;
+                
+                statusHtml += `<div class="status ${loaded ? 'success' : 'error'}">
+                    ${module.name}: ${loaded ? '✅ Loaded' : '❌ Not loaded'}
+                </div>`;
+            });
+            
+            document.getElementById('moduleStatus').innerHTML = statusHtml;
+            return allLoaded;
+        }
+        
+        // Test StateManager
+        function testStateManager() {
+            try {
+                const state = new StateManager();
+                
+                // Test basic functionality
+                state.setMode('preview');
+                const mode = state.getMode();
+                
+                // Test slide creation
+                const slide = state.createSlide({
+                    title: 'Test Slide',
+                    text: 'Test content'
+                });
+                
+                // Test text block creation
+                const textBlock = state.createTextBlock(slide.id, {
+                    text: 'Test text block',
+                    x: 25,
+                    y: 25
+                });
+                
+                document.getElementById('stateResults').innerHTML = `
+                    <div class="status success">
+                        ✅ StateManager working<br>
+                        Mode: ${mode}<br>
+                        Slide created: ${slide.id}<br>
+                        Text block created: ${textBlock.id}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('stateResults').innerHTML = `
+                    <div class="status error">❌ StateManager error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Test Renderer
+        function testRenderer() {
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Create test slide
+                const slide = state.createSlide({
+                    title: 'Test Slide',
+                    text: 'Test content'
+                });
+                state.createTextBlock(slide.id, {
+                    text: 'Test text block'
+                });
+                
+                // Test DOM creation
+                const startDOM = renderer.createStartDOM();
+                const previewDOM = renderer.createPreviewDOM();
+                
+                document.getElementById('rendererResults').innerHTML = `
+                    <div class="status success">
+                        ✅ Renderer working<br>
+                        Start DOM created: ${startDOM ? 'Yes' : 'No'}<br>
+                        Preview DOM created: ${previewDOM ? 'Yes' : 'No'}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('rendererResults').innerHTML = `
+                    <div class="status error">❌ Renderer error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Test Editor
+        function testEditor() {
+            try {
+                const state = new StateManager();
+                const editor = new Editor(state);
+                
+                // Test text block addition
+                const slide = state.createSlide({
+                    title: 'Test Slide'
+                });
+                state.setActiveSlideByIndex(0);
+                
+                const textBlock = editor.addTextBlock();
+                
+                document.getElementById('editorResults').innerHTML = `
+                    <div class="status success">
+                        ✅ Editor working<br>
+                        Text block added: ${textBlock ? textBlock.id : 'None'}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('editorResults').innerHTML = `
+                    <div class="status error">❌ Editor error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Test DragManager
+        function testDragManager() {
+            try {
+                const state = new StateManager();
+                const dragManager = new DragManager(state);
+                
+                // Test drag state
+                const isDragging = dragManager.isDragInProgress();
+                
+                document.getElementById('dragResults').innerHTML = `
+                    <div class="status success">
+                        ✅ DragManager working<br>
+                        Is dragging: ${isDragging}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('dragResults').innerHTML = `
+                    <div class="status error">❌ DragManager error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Test ExportManager
+        function testExportManager() {
+            try {
+                const state = new StateManager();
+                const exportManager = new ExportManager(state);
+                
+                // Test template storage
+                const templates = exportManager.getTemplatesFromStorage();
+                
+                document.getElementById('exportResults').innerHTML = `
+                    <div class="status success">
+                        ✅ ExportManager working<br>
+                        Templates found: ${templates.length}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('exportResults').innerHTML = `
+                    <div class="status error">❌ ExportManager error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Test AIManager
+        function testAIManager() {
+            try {
+                const state = new StateManager();
+                const aiManager = new AIManager(state);
+                
+                // Test local keyword extraction
+                const keywords = aiManager.extractKeywordsLocally('This is a test text with some important keywords for testing');
+                
+                document.getElementById('aiResults').innerHTML = `
+                    <div class="status success">
+                        ✅ AIManager working<br>
+                        Keywords extracted: ${keywords.length}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('aiResults').innerHTML = `
+                    <div class="status error">❌ AIManager error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Test Full App
+        function testFullApp() {
+            try {
+                // Create a temporary container for testing
+                const testContainer = document.createElement('div');
+                testContainer.id = 'app';
+                testContainer.style.display = 'none';
+                document.body.appendChild(testContainer);
+                
+                const app = new FlashPostApp();
+                
+                // Test mode switching
+                app.state.setMode('start');
+                const mode = app.getMode();
+                
+                // Test slide creation
+                const slide = app.state.createSlide({
+                    title: 'Integration Test Slide'
+                });
+                
+                // Clean up
+                document.body.removeChild(testContainer);
+                
+                document.getElementById('appResults').innerHTML = `
+                    <div class="status success">
+                        ✅ Full App integration working<br>
+                        Mode: ${mode}<br>
+                        Slide created: ${slide.id}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('appResults').innerHTML = `
+                    <div class="status error">❌ Full App error: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Run module check on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const allLoaded = checkModules();
+                
+                if (allLoaded) {
+                    document.getElementById('testResults').innerHTML = `
+                        <div class="status success">
+                            🎉 All modules loaded successfully! The modular architecture is working.
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('testResults').innerHTML = `
+                        <div class="status error">
+                            ❌ Some modules failed to load. Check the console for errors.
+                        </div>
+                    `;
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

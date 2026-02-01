@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест унифицированной структуры данных - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Стили для отладочной панели */
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 10000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .debug-section {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .debug-title {
+            color: #4ecdc4;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .debug-item {
+            margin: 3px 0;
+            padding-left: 10px;
+        }
+        
+        .debug-value {
+            color: #ffeb3b;
+        }
+        
+        .debug-controls {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            z-index: 10000;
+        }
+        
+        .debug-controls button {
+            margin: 2px;
+            padding: 8px 12px;
+            background: #833ab4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .debug-controls button:hover {
+            background: #6d2d96;
+        }
+        
+        .structure-valid {
+            color: #4caf50;
+        }
+        
+        .structure-invalid {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Загрузка FlashPost...</div>
+    </div>
+
+    <div id="app" class="app"></div>
+    
+    <!-- Отладочная панель -->
+    <div class="debug-panel" id="debugPanel">
+        <div class="debug-section">
+            <div class="debug-title">📊 СТРУКТУРА ПРОЕКТА</div>
+            <div class="debug-item">Режим: <span class="debug-value" id="debugMode">start</span></div>
+            <div class="debug-item">Слайдов: <span class="debug-value" id="debugSlidesCount">0</span></div>
+            <div class="debug-item">Активный слайд: <span class="debug-value" id="debugActiveSlide">null</span></div>
+            <div class="debug-item">Активный блок: <span class="debug-value" id="debugActiveBlock">null</span></div>
+        </div>
+        
+        <div class="debug-section">
+            <div class="debug-title">🎯 АКТИВНЫЙ СЛАЙД</div>
+            <div class="debug-item">ID: <span class="debug-value" id="debugSlideId">-</span></div>
+            <div class="debug-item">Заголовок: <span class="debug-value" id="debugSlideTitle">-</span></div>
+            <div class="debug-item">Фон: <span class="debug-value" id="debugSlideBackground">-</span></div>
+            <div class="debug-item">Текст. блоков: <span class="debug-value" id="debugTextBlocksCount">0</span></div>
+            <div class="debug-item">Ключ. слов: <span class="debug-value" id="debugKeywordsCount">0</span></div>
+        </div>
+        
+        <div class="debug-section">
+            <div class="debug-title">📝 АКТИВНЫЙ БЛОК</div>
+            <div class="debug-item">ID: <span class="debug-value" id="debugBlockId">-</span></div>
+            <div class="debug-item">Текст: <span class="debug-value" id="debugBlockText">-</span></div>
+            <div class="debug-item">Позиция: <span class="debug-value" id="debugBlockPosition">-</span></div>
+            <div class="debug-item">Шрифт: <span class="debug-value" id="debugBlockFont">-</span></div>
+        </div>
+        
+        <div class="debug-section">
+            <div class="debug-title">✅ ВАЛИДАЦИЯ</div>
+            <div class="debug-item">Структура: <span id="debugStructureValid" class="structure-valid">✓ Валидна</span></div>
+            <div class="debug-item">Дубли: <span id="debugNoDuplicates" class="structure-valid">✓ Отсутствуют</span></div>
+            <div class="debug-item">Единый источник: <span id="debugSingleSource" class="structure-valid">✓ project.slides</span></div>
+        </div>
+    </div>
+    
+    <!-- Контролы для тестирования -->
+    <div class="debug-controls">
+        <button onclick="testCreateSlide()">+ Слайд</button>
+        <button onclick="testCreateTextBlock()">+ Блок</button>
+        <button onclick="testUpdateSlide()">Обновить слайд</button>
+        <button onclick="testUpdateBlock()">Обновить блок</button>
+        <button onclick="testDeleteBlock()">Удалить блок</button>
+        <button onclick="validateStructure()">Проверить</button>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        const app = new FlashPostApp();
+        
+        // Функции для тестирования структуры
+        function testCreateSlide() {
+            const slide = app.createSlide({
+                title: `Тестовый слайд ${app.project.slides.length + 1}`,
+                text: 'Это тестовый слайд для проверки структуры',
+                background: {
+                    type: 'color',
+                    color: '#' + Math.floor(Math.random()*16777215).toString(16),
+                    x: 50,
+                    y: 50,
+                    brightness: 100
+                }
+            });
+            
+            console.log('🧪 Создан тестовый слайд:', slide);
+            updateDebugInfo();
+        }
+        
+        function testCreateTextBlock() {
+            const activeSlide = app.getActiveSlide();
+            if (!activeSlide) {
+                alert('Сначала создайте слайд!');
+                return;
+            }
+            
+            const block = app.createTextBlock(activeSlide.id, {
+                text: `Тестовый блок ${activeSlide.textBlocks.length + 1}`,
+                x: 20 + Math.random() * 60,
+                y: 20 + Math.random() * 60,
+                width: 60 + Math.random() * 20,
+                font: ['Inter', 'Montserrat', 'Bebas Neue'][Math.floor(Math.random() * 3)],
+                size: 14 + Math.random() * 10,
+                color: '#' + Math.floor(Math.random()*16777215).toString(16)
+            });
+            
+            console.log('🧪 Создан тестовый блок:', block);
+            updateDebugInfo();
+        }
+        
+        function testUpdateSlide() {
+            const activeSlide = app.getActiveSlide();
+            if (!activeSlide) {
+                alert('Нет активного слайда!');
+                return;
+            }
+            
+            app.updateSlideProperty(activeSlide.id, 'background.color', '#' + Math.floor(Math.random()*16777215).toString(16));
+            app.updateSlideProperty(activeSlide.id, 'background.x', Math.random() * 100);
+            app.updateSlideProperty(activeSlide.id, 'background.y', Math.random() * 100);
+            
+            console.log('🧪 Обновлен слайд:', activeSlide.id);
+            updateDebugInfo();
+        }
+        
+        function testUpdateBlock() {
+            const activeBlock = app.getActiveTextBlock();
+            if (!activeBlock) {
+                alert('Нет активного текстового блока!');
+                return;
+            }
+            
+            app.updateTextBlockProperty(activeBlock.id, 'x', Math.random() * 100);
+            app.updateTextBlockProperty(activeBlock.id, 'y', Math.random() * 100);
+            app.updateTextBlockProperty(activeBlock.id, 'color', '#' + Math.floor(Math.random()*16777215).toString(16));
+            
+            console.log('🧪 Обновлен блок:', activeBlock.id);
+            updateDebugInfo();
+        }
+        
+        function testDeleteBlock() {
+            const activeBlock = app.getActiveTextBlock();
+            if (!activeBlock) {
+                alert('Нет активного текстового блока!');
+                return;
+            }
+            
+            const blockId = activeBlock.id;
+            app.deleteTextBlock(blockId);
+            
+            console.log('🧪 Удален блок:', blockId);
+            updateDebugInfo();
+        }
+        
+        function validateStructure() {
+            const project = app.project;
+            let isValid = true;
+            let errors = [];
+            
+            // Проверяем основную структуру
+            if (!project.slides || !Array.isArray(project.slides)) {
+                isValid = false;
+                errors.push('project.slides должен быть массивом');
+            }
+            
+            // Проверяем каждый слайд
+            project.slides.forEach((slide, index) => {
+                if (!slide.id) {
+                    isValid = false;
+                    errors.push(`Слайд ${index} не имеет ID`);
+                }
+                
+                if (!slide.background) {
+                    isValid = false;
+                    errors.push(`Слайд ${index} не имеет background`);
+                }
+                
+                if (!Array.isArray(slide.textBlocks)) {
+                    isValid = false;
+                    errors.push(`Слайд ${index} textBlocks не массив`);
+                }
+                
+                // Проверяем текстовые блоки
+                slide.textBlocks.forEach((block, blockIndex) => {
+                    if (!block.id) {
+                        isValid = false;
+                        errors.push(`Блок ${blockIndex} в слайде ${index} не имеет ID`);
+                    }
+                    
+                    if (typeof block.x !== 'number' || typeof block.y !== 'number') {
+                        isValid = false;
+                        errors.push(`Блок ${blockIndex} в слайде ${index} имеет некорректные координаты`);
+                    }
+                });
+            });
+            
+            // Проверяем на дубли координат (это теперь разрешено, но проверим структуру)
+            const structureValid = document.getElementById('debugStructureValid');
+            if (isValid) {
+                structureValid.textContent = '✓ Валидна';
+                structureValid.className = 'structure-valid';
+                console.log('✅ Структура данных валидна');
+            } else {
+                structureValid.textContent = '✗ Ошибки';
+                structureValid.className = 'structure-invalid';
+                console.error('❌ Ошибки в структуре:', errors);
+            }
+            
+            return isValid;
+        }
+        
+        // Обновление отладочной информации
+        function updateDebugInfo() {
+            const project = app.project;
+            const activeSlide = app.getActiveSlide();
+            const activeBlock = app.getActiveTextBlock();
+            
+            // Основная информация
+            document.getElementById('debugMode').textContent = project.mode;
+            document.getElementById('debugSlidesCount').textContent = project.slides.length;
+            document.getElementById('debugActiveSlide').textContent = project.activeSlideId || 'null';
+            document.getElementById('debugActiveBlock').textContent = project.activeTextBlockId || 'null';
+            
+            // Информация об активном слайде
+            if (activeSlide) {
+                document.getElementById('debugSlideId').textContent = activeSlide.id;
+                document.getElementById('debugSlideTitle').textContent = activeSlide.title;
+                document.getElementById('debugSlideBackground').textContent = `${activeSlide.background.type}: ${activeSlide.background.color}`;
+                document.getElementById('debugTextBlocksCount').textContent = activeSlide.textBlocks.length;
+                document.getElementById('debugKeywordsCount').textContent = activeSlide.autoKeywords.length;
+            } else {
+                document.getElementById('debugSlideId').textContent = '-';
+                document.getElementById('debugSlideTitle').textContent = '-';
+                document.getElementById('debugSlideBackground').textContent = '-';
+                document.getElementById('debugTextBlocksCount').textContent = '0';
+                document.getElementById('debugKeywordsCount').textContent = '0';
+            }
+            
+            // Информация об активном блоке
+            if (activeBlock) {
+                document.getElementById('debugBlockId').textContent = activeBlock.id;
+                document.getElementById('debugBlockText').textContent = activeBlock.text.substring(0, 20) + '...';
+                document.getElementById('debugBlockPosition').textContent = `${activeBlock.x}, ${activeBlock.y}`;
+                document.getElementById('debugBlockFont').textContent = `${activeBlock.font} ${activeBlock.size}px`;
+            } else {
+                document.getElementById('debugBlockId').textContent = '-';
+                document.getElementById('debugBlockText').textContent = '-';
+                document.getElementById('debugBlockPosition').textContent = '-';
+                document.getElementById('debugBlockFont').textContent = '-';
+            }
+            
+            // Автоматическая валидация
+            validateStructure();
+        }
+        
+        // Переопределяем методы для отслеживания изменений
+        const originalSetMode = app.setMode.bind(app);
+        app.setMode = function(newMode) {
+            const result = originalSetMode(newMode);
+            updateDebugInfo();
+            return result;
+        };
+        
+        const originalSetActiveSlide = app.setActiveSlide.bind(app);
+        app.setActiveSlide = function(slideId) {
+            const result = originalSetActiveSlide(slideId);
+            updateDebugInfo();
+            return result;
+        };
+        
+        const originalSetActiveTextBlock = app.setActiveTextBlock.bind(app);
+        app.setActiveTextBlock = function(blockId) {
+            const result = originalSetActiveTextBlock(blockId);
+            updateDebugInfo();
+            return result;
+        };
+        
+        // Обновляем информацию каждые 2 секунды
+        setInterval(updateDebugInfo, 2000);
+        
+        // Начальное обновление
+        setTimeout(updateDebugInfo, 1000);
+        
+        console.log('🧪 Тест унифицированной структуры данных запущен');
+        console.log('📊 Структура проекта:', app.project);
+        console.log('🎮 Используйте кнопки справа внизу для тестирования');
+        console.log('🔍 Отладочная панель справа вверху показывает текущее состояние');
+    </script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FlashPost - Slide Layout Mockup</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .slide-demo {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slide-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .slide-preview {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            padding: 24px;
+        }
+        
+        /* Username positioning */
+        .username {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Content area */
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .slide-title-text {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .slide-main-text {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+        
+        /* Navigation elements */
+        .slide-navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .swipe-indicator {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-arrow {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Slide variations */
+        .first-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .middle-slide {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+        }
+        
+        .last-slide {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        /* CTA text for last slide */
+        .cta-text {
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Demo controls */
+        .demo-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .username-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .username-input:focus {
+            outline: none;
+            border-color: #833ab4;
+        }
+        
+        .demo-note {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .slide-title-text {
+                font-size: 24px;
+            }
+            
+            .slide-main-text {
+                font-size: 16px;
+            }
+            
+            .username {
+                font-size: 14px;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- First Slide Demo -->
+        <div class="slide-demo">
+            <div class="slide-title">Первый слайд (с username)</div>
+            <div class="slide-preview first-slide">
+                <div class="username" id="username1">@username</div>
+                <div class="slide-content">
+                    <div class="slide-title-text">Заголовок</div>
+                    <div class="slide-main-text">основной текст</div>
+                </div>
+                <div class="slide-navigation">
+                    <div class="swipe-indicator">⬅ Листай</div>
+                    <div class="nav-arrow">➡</div>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <input type="text" class="username-input" id="usernameInput1" placeholder="Введите username" value="@flashpost_ai">
+                <div class="demo-note">Username показывается на первом слайде</div>
+            </div>
+        </div>
+        
+        <!-- Middle Slide Demo -->
+        <div class="slide-demo">
+            <div class="slide-title">Средний слайд (без username)</div>
+            <div class="slide-preview middle-slide">
+                <div class="slide-content">
+                    <div class="slide-title-text">Заголовок</div>
+                    <div class="slide-main-text">основной текст</div>
+                </div>
+                <div class="slide-navigation">
+                    <div class="swipe-indicator">⬅ Листай</div>
+                    <div class="nav-arrow">➡</div>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <div class="demo-note">На средних слайдах username не показывается</div>
+            </div>
+        </div>
+        
+        <!-- Last Slide Demo -->
+        <div class="slide-demo">
+            <div class="slide-title">Последний слайд (с username + CTA)</div>
+            <div class="slide-preview last-slide">
+                <div class="username" id="username2">@username</div>
+                <div class="slide-content">
+                    <div class="slide-title-text">Заголовок</div>
+                    <div class="slide-main-text">основной текст</div>
+                </div>
+                <div class="cta-text" id="ctaText">
+                    Подписывайтесь на @flashpost_ai для больше контента!
+                </div>
+                <div class="slide-navigation">
+                    <div class="swipe-indicator">⬅ Листай</div>
+                    <div class="nav-arrow">➡</div>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <input type="text" class="username-input" id="usernameInput2" placeholder="Введите username" value="@flashpost_ai">
+                <div class="demo-note">Username + автоматический CTA на последнем слайде</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update usernames in real-time
+        function updateUsernames() {
+            const input1 = document.getElementById('usernameInput1');
+            const input2 = document.getElementById('usernameInput2');
+            const username1 = document.getElementById('username1');
+            const username2 = document.getElementById('username2');
+            const ctaText = document.getElementById('ctaText');
+            
+            // Sync both inputs
+            input1.addEventListener('input', () => {
+                const value = input1.value || '@username';
+                username1.textContent = value;
+                username2.textContent = value;
+                input2.value = input1.value;
+                
+                // Update CTA text
+                const cleanUsername = value.startsWith('@') ? value : '@' + value;
+                ctaText.textContent = `Подписывайтесь на ${cleanUsername} для больше контента!`;
+            });
+            
+            input2.addEventListener('input', () => {
+                const value = input2.value || '@username';
+                username1.textContent = value;
+                username2.textContent = value;
+                input1.value = input2.value;
+                
+                // Update CTA text
+                const cleanUsername = value.startsWith('@') ? value : '@' + value;
+                ctaText.textContent = `Подписывайтесь на ${cleanUsername} для больше контента!`;
+            });
+        }
+        
+        // Initialize
+        updateUsernames();
+        
+        // Trigger initial update
+        document.getElementById('usernameInput1').dispatchEvent(new Event('input'));
+    </script>
+</body>
+</html>

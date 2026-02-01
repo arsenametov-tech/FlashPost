@@ -30,7 +30,7 @@ class FlashPostApp {
             // Показ приложения
             setTimeout(() => {
                 this.showApp();
-            }, 1000);
+            }, 500);
             
             console.log('✅ Приложение инициализировано');
         } catch (error) {
@@ -262,7 +262,7 @@ class FlashPostApp {
 
     // Генерация слайдов
     async generateSlides(topic) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         return [
             { type: 'hook', text: `🔥 Секреты ${topic.toLowerCase()}, которые изменят вашу жизнь` },
@@ -633,44 +633,58 @@ class FlashPostApp {
         const previewPrev = document.getElementById('previewPrev');
         const previewNext = document.getElementById('previewNext');
         
+        console.log('🔍 Поиск кнопок навигации...');
+        console.log('editorPrevBtn:', editorPrevBtn);
+        console.log('editorNextBtn:', editorNextBtn);
+        console.log('previewPrev:', previewPrev);
+        console.log('previewNext:', previewNext);
+        
         if (editorPrevBtn) {
             editorPrevBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Editor prev clicked');
+                console.log('🔥 Editor prev clicked');
                 this.previousEditorSlide();
             });
             console.log('✅ Editor prev button bound');
+        } else {
+            console.warn('⚠️ editorPrevBtn not found');
         }
         
         if (editorNextBtn) {
             editorNextBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Editor next clicked');
+                console.log('🔥 Editor next clicked');
                 this.nextEditorSlide();
             });
             console.log('✅ Editor next button bound');
+        } else {
+            console.warn('⚠️ editorNextBtn not found');
         }
 
         if (previewPrev) {
             previewPrev.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Preview prev clicked');
+                console.log('🔥 Preview prev clicked');
                 this.previousEditorSlide();
             });
             console.log('✅ Preview prev button bound');
+        } else {
+            console.warn('⚠️ previewPrev not found');
         }
         
         if (previewNext) {
             previewNext.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Preview next clicked');
+                console.log('🔥 Preview next clicked');
                 this.nextEditorSlide();
             });
             console.log('✅ Preview next button bound');
+        } else {
+            console.warn('⚠️ previewNext not found');
         }
 
         // Кнопки действий
@@ -679,11 +693,17 @@ class FlashPostApp {
         const downloadSlidesBtn = document.getElementById('downloadSlidesBtn');
         const saveAndExitBtn = document.getElementById('saveAndExitBtn');
 
+        console.log('🔍 Поиск кнопок действий...');
+        console.log('exitEditorBtn:', exitEditorBtn);
+        console.log('saveTemplateBtn:', saveTemplateBtn);
+        console.log('downloadSlidesBtn:', downloadSlidesBtn);
+        console.log('saveAndExitBtn:', saveAndExitBtn);
+
         if (exitEditorBtn) {
             exitEditorBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Exit editor clicked');
+                console.log('🔥 Exit editor clicked');
                 this.exitEditor();
             });
             console.log('✅ Exit editor button bound');
@@ -695,7 +715,7 @@ class FlashPostApp {
             saveTemplateBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Save template clicked');
+                console.log('🔥 Save template clicked');
                 this.saveTemplate();
             });
             console.log('✅ Save template button bound');
@@ -707,7 +727,7 @@ class FlashPostApp {
             downloadSlidesBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Download slides clicked');
+                console.log('🔥 Download slides clicked');
                 this.downloadSlides();
             });
             console.log('✅ Download slides button bound');
@@ -719,7 +739,7 @@ class FlashPostApp {
             saveAndExitBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Save and exit clicked');
+                console.log('🔥 Save and exit clicked');
                 this.saveAndExit();
             });
             console.log('✅ Save and exit button bound');
@@ -731,9 +751,13 @@ class FlashPostApp {
         const textEditor = document.getElementById('textEditor');
         if (textEditor) {
             textEditor.addEventListener('input', (e) => {
+                console.log('📝 Text editor input:', e.target.value.substring(0, 30) + '...');
                 this.slides[this.currentEditingSlide].text = e.target.value;
                 this.updatePreview();
             });
+            console.log('✅ Text editor bound');
+        } else {
+            console.warn('⚠️ Text editor not found');
         }
 
         // Слайдер размера шрифта
@@ -741,6 +765,7 @@ class FlashPostApp {
         if (fontSizeSlider) {
             fontSizeSlider.addEventListener('input', (e) => {
                 const fontSize = parseInt(e.target.value);
+                console.log('🔤 Font size changed:', fontSize);
                 this.slideStyles[this.currentEditingSlide].fontSize = fontSize;
                 const fontSizeValue = document.getElementById('fontSizeValue');
                 if (fontSizeValue) {
@@ -748,12 +773,18 @@ class FlashPostApp {
                 }
                 this.updatePreview();
             });
+            console.log('✅ Font size slider bound');
+        } else {
+            console.warn('⚠️ Font size slider not found');
         }
 
         // Кнопки шрифтов
-        document.querySelectorAll('[data-font]').forEach(btn => {
+        const fontButtons = document.querySelectorAll('[data-font]');
+        console.log(`🎯 Found ${fontButtons.length} font buttons`);
+        fontButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const font = btn.getAttribute('data-font');
+                console.log('🔤 Font changed:', font);
                 this.slideStyles[this.currentEditingSlide].fontFamily = font;
                 
                 document.querySelectorAll('[data-font]').forEach(b => b.classList.remove('active'));
@@ -765,9 +796,12 @@ class FlashPostApp {
         });
 
         // Кнопки цвета фона
-        document.querySelectorAll('[data-bg]').forEach(btn => {
+        const colorButtons = document.querySelectorAll('[data-bg]');
+        console.log(`🎯 Found ${colorButtons.length} color buttons`);
+        colorButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const bg = btn.getAttribute('data-bg');
+                console.log('🎨 Background color changed:', bg);
                 this.slideStyles[this.currentEditingSlide].backgroundColor = bg;
                 
                 document.querySelectorAll('[data-bg]').forEach(b => b.classList.remove('active'));
@@ -778,23 +812,25 @@ class FlashPostApp {
             });
         });
 
-        // Свайп навигация для превью
-        this.setupEditorSwipeNavigation();
-
-        // Свайп навигация для всего редактора
-        this.setupFullEditorSwipeNavigation();
-
         // Индикаторы в редакторе
-        document.querySelectorAll('.editor-indicator').forEach((indicator, index) => {
+        const indicators = document.querySelectorAll('.editor-indicator');
+        console.log(`🎯 Found ${indicators.length} indicators`);
+        
+        indicators.forEach((indicator, index) => {
             indicator.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                console.log(`🔥 Indicator ${index} clicked`);
                 if (index !== this.currentEditingSlide) {
                     this.currentEditingSlide = index;
                     this.updateEditorSlide();
                 }
             });
         });
+
+        // Свайп навигация
+        this.setupEditorSwipeNavigation();
+        this.setupFullEditorSwipeNavigation();
         
         console.log('✅ Все события редактора привязаны');
     }
@@ -893,28 +929,53 @@ class FlashPostApp {
 
     // Навигация в редакторе
     previousEditorSlide() {
+        console.log(`⬅️ previousEditorSlide called, current: ${this.currentEditingSlide}`);
         if (this.currentEditingSlide > 0) {
             this.currentEditingSlide--;
+            console.log(`⬅️ Moving to slide ${this.currentEditingSlide}`);
             this.updateEditorSlide();
+        } else {
+            console.log('⬅️ Already at first slide');
         }
     }
 
     nextEditorSlide() {
+        console.log(`➡️ nextEditorSlide called, current: ${this.currentEditingSlide}`);
         if (this.currentEditingSlide < this.slides.length - 1) {
             this.currentEditingSlide++;
+            console.log(`➡️ Moving to slide ${this.currentEditingSlide}`);
             this.updateEditorSlide();
+        } else {
+            console.log('➡️ Already at last slide');
         }
     }
 
     // Обновление слайда в редакторе без перерисовки
     updateEditorSlide() {
+        console.log(`🔄 updateEditorSlide called, currentEditingSlide: ${this.currentEditingSlide}`);
+        
+        if (!this.slides || !this.slideStyles) {
+            console.error('❌ Slides or slideStyles not found');
+            return;
+        }
+        
         const currentSlide = this.slides[this.currentEditingSlide];
         const currentStyles = this.slideStyles[this.currentEditingSlide];
+        
+        if (!currentSlide || !currentStyles) {
+            console.error('❌ Current slide or styles not found');
+            return;
+        }
+        
+        console.log(`📝 Updating to slide: "${currentSlide.text.substring(0, 30)}..."`);
         
         // Обновляем счетчик
         const editorCounter = document.getElementById('editorCounter');
         if (editorCounter) {
             editorCounter.textContent = `${this.currentEditingSlide + 1}/${this.slides.length}`;
+            console.log('✅ Counter updated to:', editorCounter.textContent);
+        } else {
+            console.warn('⚠️ Editor counter not found');
         }
         
         // Обновляем кнопки навигации в хедере
@@ -922,9 +983,15 @@ class FlashPostApp {
         const editorNextBtn = document.getElementById('editorNextBtn');
         if (editorPrevBtn) {
             editorPrevBtn.disabled = this.currentEditingSlide === 0;
+            console.log(`✅ Editor prev button disabled: ${editorPrevBtn.disabled}`);
+        } else {
+            console.warn('⚠️ Editor prev button not found');
         }
         if (editorNextBtn) {
             editorNextBtn.disabled = this.currentEditingSlide === this.slides.length - 1;
+            console.log(`✅ Editor next button disabled: ${editorNextBtn.disabled}`);
+        } else {
+            console.warn('⚠️ Editor next button not found');
         }
         
         // Обновляем кнопки навигации у превью
@@ -932,15 +999,24 @@ class FlashPostApp {
         const previewNext = document.getElementById('previewNext');
         if (previewPrev) {
             previewPrev.disabled = this.currentEditingSlide === 0;
+            console.log(`✅ Preview prev button disabled: ${previewPrev.disabled}`);
+        } else {
+            console.warn('⚠️ Preview prev button not found');
         }
         if (previewNext) {
             previewNext.disabled = this.currentEditingSlide === this.slides.length - 1;
+            console.log(`✅ Preview next button disabled: ${previewNext.disabled}`);
+        } else {
+            console.warn('⚠️ Preview next button not found');
         }
         
         // Обновляем текстовый редактор
         const textEditor = document.getElementById('textEditor');
         if (textEditor) {
             textEditor.value = currentSlide.text;
+            console.log('✅ Text editor updated with:', currentSlide.text.substring(0, 30) + '...');
+        } else {
+            console.warn('⚠️ Text editor not found');
         }
         
         // Обновляем слайдер размера шрифта
@@ -949,21 +1025,42 @@ class FlashPostApp {
         if (fontSizeSlider && fontSizeValue) {
             fontSizeSlider.value = currentStyles.fontSize;
             fontSizeValue.textContent = currentStyles.fontSize + 'px';
+            console.log('✅ Font size slider updated to:', currentStyles.fontSize);
+        } else {
+            console.warn('⚠️ Font size controls not found');
         }
         
         // Обновляем активные кнопки шрифтов
-        document.querySelectorAll('[data-font]').forEach(btn => {
-            btn.classList.toggle('active', btn.getAttribute('data-font') === currentStyles.fontFamily);
+        const fontButtons = document.querySelectorAll('[data-font]');
+        console.log(`🎯 Found ${fontButtons.length} font buttons`);
+        fontButtons.forEach(btn => {
+            const isActive = btn.getAttribute('data-font') === currentStyles.fontFamily;
+            btn.classList.toggle('active', isActive);
+            if (isActive) {
+                console.log('✅ Font button activated:', currentStyles.fontFamily);
+            }
         });
         
         // Обновляем активные кнопки цветов
-        document.querySelectorAll('[data-bg]').forEach(btn => {
-            btn.classList.toggle('active', btn.getAttribute('data-bg') === currentStyles.backgroundColor);
+        const colorButtons = document.querySelectorAll('[data-bg]');
+        console.log(`🎯 Found ${colorButtons.length} color buttons`);
+        colorButtons.forEach(btn => {
+            const isActive = btn.getAttribute('data-bg') === currentStyles.backgroundColor;
+            btn.classList.toggle('active', isActive);
+            if (isActive) {
+                console.log('✅ Color button activated:', currentStyles.backgroundColor);
+            }
         });
         
         // Обновляем индикаторы
-        document.querySelectorAll('.editor-indicator').forEach((indicator, index) => {
-            indicator.classList.toggle('active', index === this.currentEditingSlide);
+        const indicators = document.querySelectorAll('.editor-indicator');
+        console.log(`🎯 Found ${indicators.length} indicators`);
+        indicators.forEach((indicator, index) => {
+            const isActive = index === this.currentEditingSlide;
+            indicator.classList.toggle('active', isActive);
+            if (isActive) {
+                console.log('✅ Indicator activated:', index);
+            }
         });
         
         // Обновляем превью
@@ -972,7 +1069,7 @@ class FlashPostApp {
         // Haptic feedback
         this.hapticFeedback();
         
-        console.log(`📝 Переключен на слайд ${this.currentEditingSlide + 1}`);
+        console.log(`✅ Переключен на слайд ${this.currentEditingSlide + 1} из ${this.slides.length}`);
     }
 
     // Обновление превью
@@ -980,48 +1077,44 @@ class FlashPostApp {
         const slidePreview = document.getElementById('slidePreview');
         const previewText = document.getElementById('previewText');
         
-        if (slidePreview && previewText) {
-            const currentSlide = this.slides[this.currentEditingSlide];
-            const currentStyles = this.slideStyles[this.currentEditingSlide];
-            const instagramContact = document.getElementById('instagramInput')?.value.trim() || '';
-            const isFirstSlide = this.currentEditingSlide === 0;
-            const isLastSlide = this.currentEditingSlide === this.slides.length - 1;
-            const showInstagram = (isFirstSlide || isLastSlide) && instagramContact;
-            
-            // Добавляем класс анимации
-            slidePreview.classList.add('updating');
-            
-            setTimeout(() => {
-                previewText.textContent = currentSlide.text;
-                previewText.style.fontSize = currentStyles.fontSize + 'px';
-                previewText.style.fontFamily = currentStyles.fontFamily;
-                slidePreview.style.background = currentStyles.backgroundColor;
-                
-                // Удаляем старый Instagram элемент если есть
-                const existingInstagram = slidePreview.querySelector('.preview-instagram');
-                if (existingInstagram) {
-                    existingInstagram.remove();
-                }
-                
-                // Добавляем Instagram если нужно
-                if (showInstagram) {
-                    const instagramElement = document.createElement('div');
-                    instagramElement.className = 'preview-instagram';
-                    instagramElement.innerHTML = `
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                            <path d="m16 11.37-.4-.4a6 6 0 1 0-7.2 0l-.4.4"/>
-                            <circle cx="12" cy="12" r="3"/>
-                            <circle cx="17.5" cy="6.5" r="1.5"/>
-                        </svg>
-                        ${instagramContact}
-                    `;
-                    slidePreview.appendChild(instagramElement);
-                }
-                
-                // Убираем класс анимации
-                slidePreview.classList.remove('updating');
-            }, 150);
+        if (!slidePreview || !previewText) {
+            console.warn('⚠️ Preview elements not found');
+            return;
+        }
+        
+        const currentSlide = this.slides[this.currentEditingSlide];
+        const currentStyles = this.slideStyles[this.currentEditingSlide];
+        const instagramContact = document.getElementById('instagramInput')?.value.trim() || '';
+        const isFirstSlide = this.currentEditingSlide === 0;
+        const isLastSlide = this.currentEditingSlide === this.slides.length - 1;
+        const showInstagram = (isFirstSlide || isLastSlide) && instagramContact;
+        
+        // Быстрое обновление без анимации для лучшей производительности
+        previewText.textContent = currentSlide.text;
+        previewText.style.fontSize = currentStyles.fontSize + 'px';
+        previewText.style.fontFamily = currentStyles.fontFamily;
+        slidePreview.style.background = currentStyles.backgroundColor;
+        
+        // Удаляем старый Instagram элемент если есть
+        const existingInstagram = slidePreview.querySelector('.preview-instagram');
+        if (existingInstagram) {
+            existingInstagram.remove();
+        }
+        
+        // Добавляем Instagram если нужно
+        if (showInstagram) {
+            const instagramElement = document.createElement('div');
+            instagramElement.className = 'preview-instagram';
+            instagramElement.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="white">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="m16 11.37-.4-.4a6 6 0 1 0-7.2 0l-.4.4"/>
+                    <circle cx="12" cy="12" r="3"/>
+                    <circle cx="17.5" cy="6.5" r="1.5"/>
+                </svg>
+                ${instagramContact}
+            `;
+            slidePreview.appendChild(instagramElement);
         }
     }
 
@@ -1156,7 +1249,7 @@ class FlashPostApp {
                     URL.revokeObjectURL(url);
                 }, 'image/png');
                 
-                await new Promise(resolve => setTimeout(resolve, 200));
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
             
             this.showToast('✅ Все слайды скачаны!', 'success');
@@ -1190,7 +1283,189 @@ class FlashPostApp {
 
     // Открытие ручного ввода
     openManualInput() {
-        this.showToast('Ручной ввод в разработке', 'info');
+        console.log('📝 Открытие ручного ввода');
+        const manualModal = document.getElementById('manualModal');
+        if (manualModal) {
+            manualModal.style.display = 'flex';
+            
+            // Очищаем поле ввода и фокусируемся
+            const manualTextInput = document.getElementById('manualTextInput');
+            if (manualTextInput) {
+                manualTextInput.value = '';
+                manualTextInput.focus();
+            }
+            
+            // Привязываем события модального окна
+            this.bindManualModalEvents();
+        } else {
+            this.showToast('Модальное окно не найдено', 'error');
+        }
+    }
+
+    // Привязка событий модального окна ручного ввода
+    bindManualModalEvents() {
+        const closeManualBtn = document.getElementById('closeManualBtn');
+        const cancelManualBtn = document.getElementById('cancelManualBtn');
+        const createManualBtn = document.getElementById('createManualBtn');
+        const manualModal = document.getElementById('manualModal');
+        const manualTextInput = document.getElementById('manualTextInput');
+
+        // Закрытие модального окна
+        if (closeManualBtn) {
+            closeManualBtn.onclick = () => {
+                manualModal.style.display = 'none';
+            };
+        }
+
+        if (cancelManualBtn) {
+            cancelManualBtn.onclick = () => {
+                manualModal.style.display = 'none';
+            };
+        }
+
+        // Создание карусели из текста
+        if (createManualBtn) {
+            createManualBtn.onclick = () => {
+                this.createManualCarousel();
+            };
+        }
+
+        // Обновление статистики и горячие клавиши
+        if (manualTextInput) {
+            manualTextInput.oninput = () => {
+                this.updateManualInputStats();
+            };
+
+            manualTextInput.onkeydown = (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    this.createManualCarousel();
+                }
+            };
+        }
+
+        // Закрытие по клику вне модального окна
+        manualModal.onclick = (e) => {
+            if (e.target === manualModal) {
+                manualModal.style.display = 'none';
+            }
+        };
+    }
+
+    // Обновление статистики ручного ввода
+    updateManualInputStats() {
+        const manualTextInput = document.getElementById('manualTextInput');
+        const manualCharCount = document.getElementById('manualCharCount');
+        const manualSlideCount = document.getElementById('manualSlideCount');
+
+        if (!manualTextInput || !manualCharCount || !manualSlideCount) return;
+
+        const inputText = manualTextInput.value;
+        const charCount = inputText.length;
+
+        // Подсчет слайдов
+        let slideCount = 0;
+        if (inputText.trim()) {
+            // Пробуем разделить по двойному пробелу
+            let slides = inputText.split('  ').map(text => text.trim()).filter(text => text);
+            
+            // Если нет двойных пробелов, пробуем по двойному переносу
+            if (slides.length === 1) {
+                slides = inputText.split('\n\n').map(text => text.trim()).filter(text => text);
+            }
+            
+            // Если всё ещё один слайд, считаем по строкам
+            if (slides.length === 1) {
+                const lines = inputText.split('\n').map(text => text.trim()).filter(text => text);
+                slideCount = Math.min(lines.length, 15);
+            } else {
+                slideCount = Math.min(slides.length, 15);
+            }
+        }
+
+        manualCharCount.textContent = `${charCount} символов`;
+        manualSlideCount.textContent = `${slideCount} слайдов`;
+    }
+
+    // Создание карусели из ручного ввода
+    createManualCarousel() {
+        const manualTextInput = document.getElementById('manualTextInput');
+        const manualModal = document.getElementById('manualModal');
+
+        if (!manualTextInput) {
+            this.showToast('Ошибка: поле ввода не найдено', 'error');
+            return;
+        }
+
+        const inputText = manualTextInput.value.trim();
+        
+        if (!inputText) {
+            this.showToast('Введите текст для создания карусели', 'error');
+            manualTextInput.focus();
+            return;
+        }
+
+        try {
+            // Создаем слайды из текста
+            const slides = this.generateSlidesFromText(inputText);
+            this.slides = slides;
+            this.currentSlide = 0;
+            
+            // Инициализируем стили слайдов
+            this.initializeSlideStyles();
+            
+            // Показываем карусель
+            this.showCarousel();
+            
+            // Закрываем модальное окно
+            if (manualModal) {
+                manualModal.style.display = 'none';
+            }
+
+            this.showToast(`✅ Карусель из ${slides.length} слайдов создана!`, 'success');
+            console.log('✅ Карусель создана из ручного ввода:', slides.length, 'слайдов');
+            
+        } catch (error) {
+            console.error('❌ Ошибка создания карусели:', error);
+            this.showToast(`❌ Ошибка: ${error.message}`, 'error');
+        }
+    }
+
+    // Генерация слайдов из текста
+    generateSlidesFromText(text) {
+        console.log('📝 Создание слайдов из текста...');
+        
+        // Разделяем текст на слайды по двойному пробелу
+        let slideTexts = text.split('  ').map(text => text.trim()).filter(text => text);
+        
+        // Если нет двойных пробелов, пробуем разделить по переносам строк
+        if (slideTexts.length === 1) {
+            slideTexts = text.split('\n\n').map(text => text.trim()).filter(text => text);
+        }
+        
+        // Если всё ещё один слайд, разделяем по одинарным переносам
+        if (slideTexts.length === 1) {
+            const lines = text.split('\n').map(text => text.trim()).filter(text => text);
+            if (lines.length > 1) {
+                slideTexts = lines.slice(0, 15); // Ограничиваем 15 слайдами
+            }
+        }
+
+        // Проверяем результат
+        if (slideTexts.length === 0) {
+            throw new Error('Текст не содержит слайдов');
+        }
+
+        if (slideTexts.length > 15) {
+            slideTexts = slideTexts.slice(0, 15);
+            this.showToast('⚠️ Ограничено 15 слайдами', 'warning');
+        }
+
+        // Создаём слайды
+        return slideTexts.map((slideText, index) => ({
+            type: index === 0 ? 'hook' : (index === slideTexts.length - 1 ? 'cta' : 'content'),
+            text: slideText
+        }));
     }
 
     // Показ/скрытие загрузки

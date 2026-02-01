@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖱️ Test UI Clickability</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%); color: #fff; font-family: Arial, sans-serif; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .test-card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px); }
+        .btn { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin: 10px; font-size: 16px; font-weight: 600; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .warning { background: #5f4a1a; border: 2px solid #ffc107; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .test-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .test-result { font-weight: bold; margin-top: 10px; }
+        
+        /* Debug стили для hover */
+        .debug-mode button:hover,
+        .debug-mode .btn:hover,
+        .debug-mode [onclick]:hover,
+        .debug-mode [role="button"]:hover {
+            outline: 3px solid #ff0080 !important;
+            outline-offset: 2px !important;
+        }
+        
+        .debug-mode .clickable:hover {
+            outline: 2px solid #00ff80 !important;
+            outline-offset: 1px !important;
+        }
+        
+        .overlay-test {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 30px;
+            border-radius: 12px;
+            z-index: 10000;
+            display: none;
+        }
+        
+        .z-index-test {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .z-index-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,0,0,0.2);
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .pointer-events-test {
+            pointer-events: auto;
+            position: relative;
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖱️ Test UI Clickability</h1>
+        <p>Проверка кликабельности всех элементов интерфейса</p>
+        
+        <div id="overallStatus" class="status info">🔄 Готов к тестированию...</div>
+        
+        <div class="test-card">
+            <h2>🚀 Быстрые действия</h2>
+            <button class="btn" onclick="runFullClickabilityTest()">🔍 Полный тест кликабельности</button>
+            <button class="btn" onclick="toggleDebugMode()">🐛 Режим отладки (hover outline)</button>
+            <button class="btn" onclick="testZIndexIssues()">📐 Тест z-index проблем</button>
+            <button class="btn" onclick="openMainApp()">📱 Открыть основное приложение</button>
+        </div>
+
+        <div class="grid">
+            <div class="test-item">
+                <h3>🖱️ Кликабельность кнопок</h3>
+                <div id="buttonStatus">Не проверено</div>
+                <div id="buttonResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>📐 Z-index проблемы</h3>
+                <div id="zindexStatus">Не проверено</div>
+                <div id="zindexResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>👆 Pointer events</h3>
+                <div id="pointerStatus">Не проверено</div>
+                <div id="pointerResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>📱 Mini-app границы</h3>
+                <div id="boundariesStatus">Не проверено</div>
+                <div id="boundariesResults" class="test-result"></div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>🧪 Тестовые элементы</h2>
+            
+            <!-- Тест z-index -->
+            <div class="z-index-test" style="height: 100px; background: rgba(255,255,255,0.1); margin: 10px 0; position: relative;">
+                <div class="z-index-overlay"></div>
+                <button class="btn pointer-events-test" onclick="alert('Z-index тест пройден!')">
+                    Кнопка под overlay
+                </button>
+            </div>
+            
+            <!-- Тест перекрывающих div -->
+            <div style="position: relative; height: 80px; background: rgba(255,255,255,0.1); margin: 10px 0;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,255,0,0.1); pointer-events: none;"></div>
+                <button class="btn" onclick="alert('Перекрытие тест пройден!')" style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+                    Кнопка с перекрытием
+                </button>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>📋 Лог тестирования</h2>
+            <div id="testLog" class="log">Лог будет здесь...</div>
+        </div>
+        
+        <!-- Тестовый overlay -->
+        <div class="overlay-test" id="overlayTest">
+            <h3>Тест Overlay</h3>
+            <p>Этот overlay должен быть поверх всех элементов</p>
+            <button class="btn" onclick="closeOverlay()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        let logElement;
+        let debugMode = false;
+        
+        function log(message, type = 'info') {
+            if (!logElement) logElement = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logElement.innerHTML += `<div style="color: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#74c0fc'}">[${timestamp}] ${icon} ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.className = `status ${type}`;
+            }
+        }
+
+        function updateTestResult(elementId, message, success) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = success ? `✅ ${message}` : `❌ ${message}`;
+                element.style.color = success ? '#51cf66' : '#ff6b6b';
+            }
+        }
+
+        function toggleDebugMode() {
+            debugMode = !debugMode;
+            document.body.classList.toggle('debug-mode', debugMode);
+            
+            if (debugMode) {
+                log('🐛 Режим отладки включен - наведите на элементы для outline', 'info');
+                
+                // Добавляем класс clickable ко всем кликабельным элементам
+                const clickableElements = document.querySelectorAll('button, [onclick], [role="button"], a, input, select, textarea');
+                clickableElements.forEach(el => el.classList.add('clickable'));
+                
+            } else {
+                log('🐛 Режим отладки выключен', 'info');
+                
+                // Убираем класс clickable
+                const clickableElements = document.querySelectorAll('.clickable');
+                clickableElements.forEach(el => el.classList.remove('clickable'));
+            }
+        }
+
+        async function testButtonClickability() {
+            log('🖱️ Тестирование кликабельности кнопок...', 'info');
+            updateStatus('buttonStatus', '🔄 Тестируем...', 'info');
+            
+            try {
+                // Открываем основное приложение в iframe для тестирования
+                const iframe = document.createElement('iframe');
+                iframe.src = '/index.html';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                await new Promise(resolve => {
+                    iframe.onload = resolve;
+                    setTimeout(resolve, 5000); // Таймаут 5 сек
+                });
+                
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Ищем все кнопки в приложении
+                const buttons = iframeDoc.querySelectorAll('button, [onclick], [role="button"]');
+                log(`🔍 Найдено ${buttons.length} кликабельных элементов`, 'info');
+                
+                let clickableCount = 0;
+                let issues = [];
+                
+                buttons.forEach((btn, index) => {
+                    const rect = btn.getBoundingClientRect();
+                    const computedStyle = iframe.contentWindow.getComputedStyle(btn);
+                    
+                    // Проверяем видимость
+                    const isVisible = rect.width > 0 && rect.height > 0 && 
+                                    computedStyle.visibility !== 'hidden' && 
+                                    computedStyle.display !== 'none';
+                    
+                    // Проверяем pointer-events
+                    const hasPointerEvents = computedStyle.pointerEvents !== 'none';
+                    
+                    // Проверяем z-index
+                    const zIndex = computedStyle.zIndex;
+                    
+                    if (isVisible && hasPointerEvents) {
+                        clickableCount++;
+                        log(`✅ Кнопка ${index + 1}: кликабельна (z-index: ${zIndex})`, 'success');
+                    } else {
+                        const issue = `Кнопка ${index + 1}: ${!isVisible ? 'невидима' : ''} ${!hasPointerEvents ? 'pointer-events: none' : ''}`;
+                        issues.push(issue);
+                        log(`❌ ${issue}`, 'error');
+                    }
+                });
+                
+                document.body.removeChild(iframe);
+                
+                const success = issues.length === 0;
+                updateStatus('buttonStatus', success ? '✅ Все кнопки кликабельны' : '❌ Есть проблемы', success ? 'success' : 'error');
+                updateTestResult('buttonResults', `${clickableCount}/${buttons.length} кнопок кликабельны`, success);
+                
+                if (issues.length > 0) {
+                    log(`⚠️ Найдено ${issues.length} проблем с кликабельностью`, 'warning');
+                }
+                
+                return { success, clickableCount, total: buttons.length, issues };
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования кнопок: ${error.message}`, 'error');
+                updateStatus('buttonStatus', '❌ Ошибка тестирования', 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testZIndexIssues() {
+            log('📐 Тестирование z-index проблем...', 'info');
+            updateStatus('zindexStatus', '🔄 Тестируем...', 'info');
+            
+            try {
+                // Создаем тестовые элементы с разными z-index
+                const testContainer = document.createElement('div');
+                testContainer.style.cssText = `
+                    position: fixed;
+                    top: 50px;
+                    left: 50px;
+                    width: 200px;
+                    height: 200px;
+                    background: rgba(255,0,0,0.3);
+                    z-index: 1000;
+                `;
+                
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,255,0,0.3);
+                    z-index: 1001;
+                    pointer-events: none;
+                `;
+                
+                const button = document.createElement('button');
+                button.textContent = 'Test Button';
+                button.style.cssText = `
+                    position: absolute;
+                    top: 50px;
+                    left: 50px;
+                    z-index: 1002;
+                    padding: 10px;
+                    background: #007bff;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                `;
+                
+                let clicked = false;
+                button.onclick = () => { clicked = true; };
+                
+                testContainer.appendChild(overlay);
+                testContainer.appendChild(button);
+                document.body.appendChild(testContainer);
+                
+                // Симулируем клик
+                button.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(testContainer);
+                    
+                    const success = clicked;
+                    updateStatus('zindexStatus', success ? '✅ Z-index работает корректно' : '❌ Проблемы с z-index', success ? 'success' : 'error');
+                    updateTestResult('zindexResults', success ? 'Z-index тест пройден' : 'Z-index блокирует клики', success);
+                    
+                    log(success ? '✅ Z-index тест пройден' : '❌ Z-index блокирует клики', success ? 'success' : 'error');
+                }, 100);
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования z-index: ${error.message}`, 'error');
+                updateStatus('zindexStatus', '❌ Ошибка тестирования', 'error');
+            }
+        }
+
+        async function testPointerEvents() {
+            log('👆 Тестирование pointer events...', 'info');
+            updateStatus('pointerStatus', '🔄 Тестируем...', 'info');
+            
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.src = '/index.html';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                await new Promise(resolve => {
+                    iframe.onload = resolve;
+                    setTimeout(resolve, 5000);
+                });
+                
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const elements = iframeDoc.querySelectorAll('*');
+                
+                let pointerNoneCount = 0;
+                let totalElements = elements.length;
+                
+                elements.forEach(el => {
+                    const style = iframe.contentWindow.getComputedStyle(el);
+                    if (style.pointerEvents === 'none') {
+                        pointerNoneCount++;
+                    }
+                });
+                
+                document.body.removeChild(iframe);
+                
+                log(`📊 Элементов с pointer-events: none: ${pointerNoneCount}/${totalElements}`, 'info');
+                
+                const success = pointerNoneCount < totalElements * 0.5; // Не более 50% элементов должны иметь pointer-events: none
+                updateStatus('pointerStatus', success ? '✅ Pointer events в норме' : '⚠️ Много элементов с pointer-events: none', success ? 'success' : 'warning');
+                updateTestResult('pointerResults', `${pointerNoneCount}/${totalElements} элементов с pointer-events: none`, success);
+                
+                return { success, pointerNoneCount, totalElements };
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования pointer events: ${error.message}`, 'error');
+                updateStatus('pointerStatus', '❌ Ошибка тестирования', 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testMiniAppBoundaries() {
+            log('📱 Тестирование границ mini-app...', 'info');
+            updateStatus('boundariesStatus', '🔄 Тестируем...', 'info');
+            
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.src = '/index.html';
+                iframe.style.cssText = 'width: 400px; height: 600px; border: 1px solid #ccc;';
+                document.body.appendChild(iframe);
+                
+                await new Promise(resolve => {
+                    iframe.onload = resolve;
+                    setTimeout(resolve, 5000);
+                });
+                
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Проверяем что все элементы помещаются в границы
+                const body = iframeDoc.body;
+                const bodyRect = body.getBoundingClientRect();
+                
+                let overflowElements = [];
+                const allElements = iframeDoc.querySelectorAll('*');
+                
+                allElements.forEach((el, index) => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.right > bodyRect.right + 10 || rect.bottom > bodyRect.bottom + 10) {
+                        overflowElements.push(`Элемент ${index}: ${el.tagName} (${el.className})`);
+                    }
+                });
+                
+                document.body.removeChild(iframe);
+                
+                const success = overflowElements.length === 0;
+                updateStatus('boundariesStatus', success ? '✅ Все элементы в границах' : '❌ Есть выходящие элементы', success ? 'success' : 'error');
+                updateTestResult('boundariesResults', success ? 'Границы соблюдены' : `${overflowElements.length} элементов выходят за границы`, success);
+                
+                if (overflowElements.length > 0) {
+                    log(`⚠️ Элементы выходящие за границы:`, 'warning');
+                    overflowElements.forEach(el => log(`  - ${el}`, 'warning'));
+                }
+                
+                return { success, overflowElements };
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования границ: ${error.message}`, 'error');
+                updateStatus('boundariesStatus', '❌ Ошибка тестирования', 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function runFullClickabilityTest() {
+            log('🔍 Запуск полного теста кликабельности...', 'info');
+            updateStatus('overallStatus', '🔄 Тестирование...', 'info');
+            
+            const results = {
+                buttons: await testButtonClickability(),
+                zindex: await new Promise(resolve => {
+                    testZIndexIssues();
+                    setTimeout(() => resolve({ success: true }), 500);
+                }),
+                pointer: await testPointerEvents(),
+                boundaries: await testMiniAppBoundaries()
+            };
+            
+            const allPassed = Object.values(results).every(r => r.success);
+            
+            log(`📊 Результаты теста кликабельности:`, 'info');
+            log(`  - Кнопки: ${results.buttons.success ? '✅' : '❌'}`, results.buttons.success ? 'success' : 'error');
+            log(`  - Z-index: ${results.zindex.success ? '✅' : '❌'}`, results.zindex.success ? 'success' : 'error');
+            log(`  - Pointer events: ${results.pointer.success ? '✅' : '❌'}`, results.pointer.success ? 'success' : 'error');
+            log(`  - Boundaries: ${results.boundaries.success ? '✅' : '❌'}`, results.boundaries.success ? 'success' : 'error');
+            
+            updateStatus('overallStatus', 
+                allPassed ? '✅ Все тесты пройдены' : '❌ Есть проблемы с кликабельностью',
+                allPassed ? 'success' : 'error'
+            );
+            
+            return results;
+        }
+
+        function openMainApp() {
+            log('📱 Открытие основного приложения...', 'info');
+            window.open('/index.html', '_blank');
+        }
+
+        function showOverlay() {
+            document.getElementById('overlayTest').style.display = 'block';
+        }
+
+        function closeOverlay() {
+            document.getElementById('overlayTest').style.display = 'none';
+        }
+
+        // Автозапуск тестов
+        window.addEventListener('load', () => {
+            log('🖱️ UI Clickability Test загружен', 'info');
+            setTimeout(() => {
+                runFullClickabilityTest();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

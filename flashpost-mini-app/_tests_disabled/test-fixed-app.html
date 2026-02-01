@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Тест исправленного FlashPost App</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Дополнительные стили для тестирования */
+        .test-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            max-width: 300px;
+        }
+        
+        .test-status {
+            margin: 5px 0;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .test-status.success {
+            background: #4CAF50;
+        }
+        
+        .test-status.error {
+            background: #f44336;
+        }
+        
+        .test-status.warning {
+            background: #ff9800;
+        }
+        
+        .test-button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .test-button:hover {
+            background: #1976D2;
+        }
+        
+        #loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            z-index: 9999;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        #app {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран загрузки -->
+    <div id="loading">
+        <div>
+            <div>🚀 FlashPost AI</div>
+            <div style="font-size: 14px; margin-top: 10px; text-align: center;">Загрузка исправленной версии...</div>
+        </div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="app"></div>
+
+    <!-- Панель тестирования -->
+    <div class="test-panel">
+        <div style="font-weight: bold; margin-bottom: 10px;">🧪 Тест панель</div>
+        <div id="moduleStatus"></div>
+        <div style="margin: 10px 0;">
+            <button class="test-button" onclick="testModules()">Тест модулей</button>
+            <button class="test-button" onclick="testStateManager()">Тест State</button>
+            <button class="test-button" onclick="testRenderer()">Тест Renderer</button>
+            <button class="test-button" onclick="testEditor()">Тест Editor</button>
+        </div>
+        <div style="margin: 10px 0;">
+            <button class="test-button" onclick="testCallbacks()">Тест колбэков</button>
+            <button class="test-button" onclick="testMemoryLeaks()">Тест памяти</button>
+            <button class="test-button" onclick="clearTests()">Очистить</button>
+        </div>
+        <div id="testResults"></div>
+    </div>
+
+    <!-- Загрузка модулей в правильном порядке -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/templates.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        // Тестовые функции
+        function addTestResult(message, type = 'success') {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-status ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+            
+            // Ограничиваем количество результатов
+            if (results.children.length > 10) {
+                results.removeChild(results.firstChild);
+            }
+        }
+
+        function clearTests() {
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('moduleStatus').innerHTML = '';
+        }
+
+        function testModules() {
+            clearTests();
+            addTestResult('🔍 Проверка загрузки модулей...', 'warning');
+            
+            const modules = [
+                { name: 'StateManager', obj: window.StateManager },
+                { name: 'Renderer', obj: window.Renderer },
+                { name: 'Editor', obj: window.Editor },
+                { name: 'DragManager', obj: window.DragManager },
+                { name: 'ExportManager', obj: window.ExportManager },
+                { name: 'AIManager', obj: window.AIManager },
+                { name: 'TemplateManager', obj: window.TemplateManager },
+                { name: 'FlashPostApp', obj: window.FlashPostApp }
+            ];
+            
+            let loaded = 0;
+            modules.forEach(module => {
+                if (module.obj) {
+                    addTestResult(`✅ ${module.name} загружен`);
+                    loaded++;
+                } else {
+                    addTestResult(`❌ ${module.name} НЕ загружен`, 'error');
+                }
+            });
+            
+            addTestResult(`📊 Загружено ${loaded}/${modules.length} модулей`, loaded === modules.length ? 'success' : 'error');
+        }
+
+        function testStateManager() {
+            addTestResult('🔍 Тестирование StateManager...', 'warning');
+            
+            try {
+                if (!window.flashPostApp || !window.flashPostApp.state) {
+                    addTestResult('❌ StateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const state = window.flashPostApp.state;
+                
+                // Тест создания слайда
+                const slide = state.createSlide({ title: 'Тест слайд' });
+                if (slide && slide.id) {
+                    addTestResult('✅ Создание слайда работает');
+                } else {
+                    addTestResult('❌ Ошибка создания слайда', 'error');
+                }
+                
+                // Тест создания текстового блока
+                const block = state.createTextBlock(slide.id, { text: 'Тест блок' });
+                if (block && block.id) {
+                    addTestResult('✅ Создание текстового блока работает');
+                } else {
+                    addTestResult('❌ Ошибка создания текстового блока', 'error');
+                }
+                
+                // Тест обновления свойств
+                const updated = state.updateTextBlockProperty(block.id, 'color', '#ff0000');
+                if (updated) {
+                    addTestResult('✅ Обновление свойств работает');
+                } else {
+                    addTestResult('❌ Ошибка обновления свойств', 'error');
+                }
+                
+                // Тест колбэков
+                let callbackCalled = false;
+                state.setPropertyChangeCallback(() => {
+                    callbackCalled = true;
+                });
+                
+                state.updateTextBlockProperty(block.id, 'size', 24);
+                
+                setTimeout(() => {
+                    if (callbackCalled) {
+                        addTestResult('✅ Система колбэков работает');
+                    } else {
+                        addTestResult('❌ Колбэки не вызываются', 'error');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                addTestResult(`❌ Ошибка StateManager: ${error.message}`, 'error');
+            }
+        }
+
+        function testRenderer() {
+            addTestResult('🔍 Тестирование Renderer...', 'warning');
+            
+            try {
+                if (!window.flashPostApp || !window.flashPostApp.renderer) {
+                    addTestResult('❌ Renderer не инициализирован', 'error');
+                    return;
+                }
+                
+                const renderer = window.flashPostApp.renderer;
+                
+                // Тест рендеринга
+                renderer.render();
+                addTestResult('✅ Рендеринг выполнен без ошибок');
+                
+                // Проверяем, что DOM создался
+                const app = document.getElementById('app');
+                if (app && app.children.length > 0) {
+                    addTestResult('✅ DOM элементы созданы');
+                } else {
+                    addTestResult('❌ DOM не создан', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult(`❌ Ошибка Renderer: ${error.message}`, 'error');
+            }
+        }
+
+        function testEditor() {
+            addTestResult('🔍 Тестирование Editor...', 'warning');
+            
+            try {
+                if (!window.flashPostApp || !window.flashPostApp.editor) {
+                    addTestResult('❌ Editor не инициализирован', 'error');
+                    return;
+                }
+                
+                const editor = window.flashPostApp.editor;
+                
+                // Проверяем, что Editor получил зависимости
+                if (editor.state && editor.renderer) {
+                    addTestResult('✅ Editor получил зависимости');
+                } else {
+                    addTestResult('❌ Editor не получил зависимости', 'error');
+                }
+                
+                // Тест очистки ресурсов
+                if (typeof editor.cleanupEventHandlers === 'function') {
+                    editor.cleanupEventHandlers();
+                    addTestResult('✅ Очистка ресурсов работает');
+                } else {
+                    addTestResult('❌ Метод очистки не найден', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult(`❌ Ошибка Editor: ${error.message}`, 'error');
+            }
+        }
+
+        function testCallbacks() {
+            addTestResult('🔍 Тестирование системы колбэков...', 'warning');
+            
+            try {
+                if (!window.flashPostApp) {
+                    addTestResult('❌ Приложение не инициализировано', 'error');
+                    return;
+                }
+                
+                const state = window.flashPostApp.state;
+                let callbacksWorking = 0;
+                
+                // Тест колбэка изменения свойств
+                state.setPropertyChangeCallback((hookData) => {
+                    if (hookData && hookData.blockId && hookData.property) {
+                        callbacksWorking++;
+                        addTestResult(`✅ Колбэк свойства: ${hookData.property}`);
+                    }
+                });
+                
+                // Тест колбэка изменения режима
+                state.setModeChangeCallback((newMode, oldMode) => {
+                    if (newMode && oldMode !== undefined) {
+                        callbacksWorking++;
+                        addTestResult(`✅ Колбэк режима: ${oldMode} → ${newMode}`);
+                    }
+                });
+                
+                // Создаем тестовые данные
+                const slide = state.createSlide({ title: 'Тест колбэков' });
+                const block = state.createTextBlock(slide.id, { text: 'Тест' });
+                
+                // Вызываем изменения
+                state.updateTextBlockProperty(block.id, 'color', '#00ff00');
+                state.setMode('preview');
+                
+                setTimeout(() => {
+                    if (callbacksWorking >= 2) {
+                        addTestResult('✅ Система колбэков полностью работает');
+                    } else {
+                        addTestResult(`⚠️ Работает ${callbacksWorking}/2 колбэков`, 'warning');
+                    }
+                }, 200);
+                
+            } catch (error) {
+                addTestResult(`❌ Ошибка колбэков: ${error.message}`, 'error');
+            }
+        }
+
+        function testMemoryLeaks() {
+            addTestResult('🔍 Тестирование утечек памяти...', 'warning');
+            
+            try {
+                const editor = window.flashPostApp?.editor;
+                if (!editor) {
+                    addTestResult('❌ Editor недоступен', 'error');
+                    return;
+                }
+                
+                // Тест очистки обработчиков
+                if (typeof editor.destroy === 'function') {
+                    editor.destroy();
+                    addTestResult('✅ Метод destroy() существует');
+                } else {
+                    addTestResult('❌ Метод destroy() не найден', 'error');
+                }
+                
+                // Проверяем очистку колбэков
+                const state = window.flashPostApp.state;
+                state.setPropertyChangeCallback(null);
+                state.setModeChangeCallback(null);
+                addTestResult('✅ Колбэки очищены');
+                
+                // Проверяем очистку стилей эффектов
+                const renderer = window.flashPostApp.renderer;
+                if (typeof renderer.cleanupTextBlockEffects === 'function') {
+                    renderer.cleanupTextBlockEffects('test-block-id');
+                    addTestResult('✅ Очистка стилей эффектов работает');
+                } else {
+                    addTestResult('❌ Очистка стилей не найдена', 'error');
+                }
+                
+            } catch (error) {
+                addTestResult(`❌ Ошибка тестирования памяти: ${error.message}`, 'error');
+            }
+        }
+
+        // Обновление статуса модулей
+        function updateModuleStatus() {
+            const status = document.getElementById('moduleStatus');
+            const app = window.flashPostApp;
+            
+            if (app) {
+                status.innerHTML = `
+                    <div class="test-status success">✅ App: Инициализирован</div>
+                    <div class="test-status ${app.state ? 'success' : 'error'}">
+                        ${app.state ? '✅' : '❌'} State: ${app.state ? 'OK' : 'Ошибка'}
+                    </div>
+                    <div class="test-status ${app.renderer ? 'success' : 'error'}">
+                        ${app.renderer ? '✅' : '❌'} Renderer: ${app.renderer ? 'OK' : 'Ошибка'}
+                    </div>
+                    <div class="test-status ${app.editor ? 'success' : 'error'}">
+                        ${app.editor ? '✅' : '❌'} Editor: ${app.editor ? 'OK' : 'Ошибка'}
+                    </div>
+                `;
+            } else {
+                status.innerHTML = '<div class="test-status error">❌ Приложение не загружено</div>';
+            }
+        }
+
+        // Запуск тестов при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                updateModuleStatus();
+                addTestResult('🚀 Тестовая панель готова');
+                
+                // Автоматический тест модулей
+                setTimeout(() => {
+                    testModules();
+                }, 1000);
+            }, 2000);
+        });
+
+        // Обновляем статус каждые 5 секунд
+        setInterval(updateModuleStatus, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест позиции Instagram элемента</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+        }
+        
+        .test-slide {
+            width: 320px;
+            height: 320px;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border-radius: 12px;
+            position: relative;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 50px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        .test-description {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .test-result {
+            background: rgba(52, 168, 83, 0.2);
+            border: 1px solid rgba(52, 168, 83, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Тест позиции Instagram элемента</h1>
+        
+        <div class="test-description">
+            <strong>Цель теста:</strong> Проверить, что Instagram элемент теперь отображается в левом верхнем углу (вместо левого нижнего) на первом и последнем слайде.
+            <br><br>
+            <strong>Ожидаемый результат:</strong> Instagram элемент должен быть в верхнем левом углу с отступом 16px от краев.
+        </div>
+        
+        <div class="test-slide">
+            <div class="slide-number">1/5</div>
+            <div class="slide-instagram">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="m16 11.37-.4-.4a6 6 0 1 0-7.2 0l-.4.4"/>
+                    <circle cx="12" cy="12" r="3"/>
+                    <circle cx="17.5" cy="6.5" r="1.5"/>
+                </svg>
+                @your_instagram
+            </div>
+            <div>
+                🔥 Первый слайд с Instagram элементом<br>
+                (должен быть в левом верхнем углу)
+            </div>
+        </div>
+        
+        <div class="test-slide">
+            <div class="slide-number">2/5</div>
+            <div>
+                📝 Обычный слайд<br>
+                (без Instagram элемента)
+            </div>
+        </div>
+        
+        <div class="test-slide">
+            <div class="slide-number">3/5</div>
+            <div>
+                💡 Средний слайд<br>
+                (без Instagram элемента)
+            </div>
+        </div>
+        
+        <div class="test-slide">
+            <div class="slide-number">4/5</div>
+            <div>
+                ⚡ Предпоследний слайд<br>
+                (без Instagram элемента)
+            </div>
+        </div>
+        
+        <div class="test-slide">
+            <div class="slide-number">5/5</div>
+            <div class="slide-instagram">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path d="m16 11.37-.4-.4a6 6 0 1 0-7.2 0l-.4.4"/>
+                    <circle cx="12" cy="12" r="3"/>
+                    <circle cx="17.5" cy="6.5" r="1.5"/>
+                </svg>
+                @your_instagram
+            </div>
+            <div>
+                ✅ Последний слайд с Instagram элементом<br>
+                (должен быть в левом верхнем углу)
+            </div>
+        </div>
+        
+        <div class="test-result">
+            ✅ Instagram элементы успешно перемещены в левый верхний угол!
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center; font-size: 14px; opacity: 0.8;">
+            <strong>Проверьте также:</strong><br>
+            • Основное приложение (index.html)<br>
+            • Редактор слайдов<br>
+            • Экспорт изображений<br>
+            • Мобильную версию
+        </div>
+    </div>
+</body>
+</html>

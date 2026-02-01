@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Emergency Diagnosis - FlashPost</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            height: 100%; 
+            background: #0f0f14; 
+            color: #fff; 
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .warning { background: #5f4a1a; border: 2px solid #ffc107; color: #000; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .test-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0056b3; }
+        .btn.success { background: #28a745; }
+        .btn.danger { background: #dc3545; }
+        .log {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        #app {
+            min-height: 100vh;
+            background: #0f0f14;
+            color: #fff;
+            display: block;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Emergency Diagnosis - FlashPost</h1>
+        
+        <div id="overallStatus" class="status info">
+            🔄 Запуск диагностики...
+        </div>
+
+        <div class="test-grid">
+            <!-- DOM Structure Test -->
+            <div class="test-card">
+                <h3>🏗️ DOM Structure</h3>
+                <div id="domStatus" class="status info">Проверка...</div>
+                <button class="btn" onclick="testDOM()">Проверить DOM</button>
+                <div id="domLog" class="log"></div>
+            </div>
+
+            <!-- CSS Loading Test -->
+            <div class="test-card">
+                <h3>🎨 CSS Loading</h3>
+                <div id="cssStatus" class="status info">Проверка...</div>
+                <button class="btn" onclick="testCSS()">Проверить CSS</button>
+                <div id="cssLog" class="log"></div>
+            </div>
+
+            <!-- JavaScript Modules Test -->
+            <div class="test-card">
+                <h3>📦 JavaScript Modules</h3>
+                <div id="jsStatus" class="status info">Проверка...</div>
+                <button class="btn" onclick="testJS()">Проверить JS</button>
+                <div id="jsLog" class="log"></div>
+            </div>
+
+            <!-- FlashPost App Test -->
+            <div class="test-card">
+                <h3>🚀 FlashPost App</h3>
+                <div id="appStatus" class="status info">Проверка...</div>
+                <button class="btn" onclick="testApp()">Проверить App</button>
+                <div id="appLog" class="log"></div>
+            </div>
+
+            <!-- Render Test -->
+            <div class="test-card">
+                <h3>🖼️ Render Test</h3>
+                <div id="renderStatus" class="status info">Проверка...</div>
+                <button class="btn" onclick="testRender()">Тест рендера</button>
+                <button class="btn success" onclick="forceRender()">Принудительный рендер</button>
+                <div id="renderLog" class="log"></div>
+            </div>
+
+            <!-- Network Test -->
+            <div class="test-card">
+                <h3>🌐 Network & Server</h3>
+                <div id="networkStatus" class="status info">Проверка...</div>
+                <button class="btn" onclick="testNetwork()">Проверить сеть</button>
+                <div id="networkLog" class="log"></div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h3>🔧 Emergency Actions</h3>
+            <button class="btn danger" onclick="emergencyReset()">Сброс состояния</button>
+            <button class="btn success" onclick="emergencyRender()">Экстренный рендер</button>
+            <button class="btn" onclick="runFullDiagnosis()">Полная диагностика</button>
+            <button class="btn" onclick="openMainApp()">Открыть основное приложение</button>
+        </div>
+
+        <!-- Emergency App Container -->
+        <div id="emergencyApp" style="display: none; margin-top: 20px; padding: 20px; background: #2a2a2a; border-radius: 8px;">
+            <h3>🆘 Emergency FlashPost Interface</h3>
+            <div id="emergencyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let diagnosticLog = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            diagnosticLog.push({timestamp, message, type});
+            console.log(logEntry);
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        function updateLog(logId, message) {
+            const logElement = document.getElementById(logId);
+            logElement.innerHTML += message + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // DOM Structure Test
+        function testDOM() {
+            log('Тестирование DOM структуры...');
+            updateLog('domLog', 'Проверка DOM элементов...');
+            
+            const tests = [
+                {name: 'document.body', element: document.body},
+                {name: '#app', element: document.getElementById('app')},
+                {name: 'html element', element: document.documentElement}
+            ];
+            
+            let passed = 0;
+            tests.forEach(test => {
+                if (test.element) {
+                    updateLog('domLog', `✅ ${test.name}: найден`);
+                    passed++;
+                } else {
+                    updateLog('domLog', `❌ ${test.name}: НЕ найден`);
+                }
+            });
+            
+            if (passed === tests.length) {
+                updateStatus('domStatus', '✅ DOM структура в порядке', 'success');
+            } else {
+                updateStatus('domStatus', `❌ Проблемы с DOM (${passed}/${tests.length})`, 'error');
+            }
+        }
+
+        // CSS Loading Test
+        function testCSS() {
+            log('Тестирование загрузки CSS...');
+            updateLog('cssLog', 'Проверка CSS стилей...');
+            
+            const bodyStyles = window.getComputedStyle(document.body);
+            const backgroundColor = bodyStyles.backgroundColor;
+            const color = bodyStyles.color;
+            
+            updateLog('cssLog', `Background: ${backgroundColor}`);
+            updateLog('cssLog', `Color: ${color}`);
+            
+            // Проверяем загрузку app.css
+            fetch('/app.css')
+                .then(response => {
+                    if (response.ok) {
+                        updateLog('cssLog', '✅ app.css загружен успешно');
+                        updateStatus('cssStatus', '✅ CSS загружен', 'success');
+                    } else {
+                        updateLog('cssLog', `❌ app.css ошибка: ${response.status}`);
+                        updateStatus('cssStatus', '❌ Ошибка загрузки CSS', 'error');
+                    }
+                })
+                .catch(error => {
+                    updateLog('cssLog', `❌ Ошибка сети: ${error.message}`);
+                    updateStatus('cssStatus', '❌ Сетевая ошибка CSS', 'error');
+                });
+        }
+
+        // JavaScript Modules Test
+        function testJS() {
+            log('Тестирование JavaScript модулей...');
+            updateLog('jsLog', 'Проверка JS модулей...');
+            
+            const modules = [
+                '/src/state.js',
+                '/src/renderer.js', 
+                '/src/editor.js',
+                '/src/app.js'
+            ];
+            
+            let loadedModules = 0;
+            modules.forEach(module => {
+                fetch(module)
+                    .then(response => {
+                        if (response.ok) {
+                            updateLog('jsLog', `✅ ${module}: загружен`);
+                            loadedModules++;
+                            if (loadedModules === modules.length) {
+                                updateStatus('jsStatus', '✅ Все модули загружены', 'success');
+                            }
+                        } else {
+                            updateLog('jsLog', `❌ ${module}: ошибка ${response.status}`);
+                            updateStatus('jsStatus', '❌ Ошибки загрузки модулей', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        updateLog('jsLog', `❌ ${module}: ${error.message}`);
+                        updateStatus('jsStatus', '❌ Сетевые ошибки модулей', 'error');
+                    });
+            });
+        }
+
+        // FlashPost App Test
+        function testApp() {
+            log('Тестирование FlashPost приложения...');
+            updateLog('appLog', 'Проверка FlashPost App...');
+            
+            if (typeof window.FlashPostApp !== 'undefined') {
+                updateLog('appLog', '✅ FlashPostApp класс найден');
+                
+                if (window.flashPostApp) {
+                    updateLog('appLog', '✅ flashPostApp экземпляр существует');
+                    updateStatus('appStatus', '✅ FlashPost App инициализирован', 'success');
+                } else {
+                    updateLog('appLog', '❌ flashPostApp экземпляр НЕ найден');
+                    updateStatus('appStatus', '❌ App не инициализирован', 'error');
+                }
+            } else {
+                updateLog('appLog', '❌ FlashPostApp класс НЕ найден');
+                updateStatus('appStatus', '❌ App класс не загружен', 'error');
+            }
+        }
+
+        // Render Test
+        function testRender() {
+            log('Тестирование рендеринга...');
+            updateLog('renderLog', 'Проверка рендеринга...');
+            
+            const appElement = document.getElementById('app');
+            if (appElement) {
+                const content = appElement.innerHTML;
+                updateLog('renderLog', `Содержимое #app: ${content.length} символов`);
+                
+                if (content.trim().length > 0) {
+                    updateLog('renderLog', '✅ #app содержит контент');
+                    updateStatus('renderStatus', '✅ Рендер работает', 'success');
+                } else {
+                    updateLog('renderLog', '❌ #app пустой');
+                    updateStatus('renderStatus', '❌ #app пустой', 'error');
+                }
+            } else {
+                updateLog('renderLog', '❌ #app элемент не найден');
+                updateStatus('renderStatus', '❌ #app не найден', 'error');
+            }
+        }
+
+        // Force Render
+        function forceRender() {
+            log('Принудительный рендер...');
+            updateLog('renderLog', 'Принудительная вставка контента...');
+            
+            const appElement = document.getElementById('app');
+            if (appElement) {
+                appElement.innerHTML = `
+                    <div style="min-height:100vh;background:#0f0f14;color:#fff;padding:20px;text-align:center;">
+                        <h1 style="color:#4CAF50;font-size:32px;margin:20px 0;">🔴 EMERGENCY RENDER WORKS</h1>
+                        <p style="font-size:18px;margin:10px 0;">Принудительный рендер успешен</p>
+                        <p style="font-size:14px;color:#ccc;">Время: ${new Date().toLocaleTimeString()}</p>
+                        <button onclick="openMainApp()" style="background:#007bff;color:white;border:none;padding:15px 30px;border-radius:5px;font-size:16px;margin:20px;cursor:pointer;">
+                            Открыть основное приложение
+                        </button>
+                    </div>
+                `;
+                updateLog('renderLog', '✅ Принудительный рендер выполнен');
+                updateStatus('renderStatus', '✅ Принудительный рендер работает', 'success');
+            }
+        }
+
+        // Network Test
+        function testNetwork() {
+            log('Тестирование сети...');
+            updateLog('networkLog', 'Проверка сетевого соединения...');
+            
+            fetch('/app.css')
+                .then(response => {
+                    updateLog('networkLog', `✅ Сервер отвечает: ${response.status}`);
+                    updateStatus('networkStatus', '✅ Сеть работает', 'success');
+                })
+                .catch(error => {
+                    updateLog('networkLog', `❌ Сетевая ошибка: ${error.message}`);
+                    updateStatus('networkStatus', '❌ Проблемы с сетью', 'error');
+                });
+        }
+
+        // Emergency Actions
+        function emergencyReset() {
+            log('Экстренный сброс состояния...');
+            localStorage.clear();
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        function emergencyRender() {
+            log('Экстренный рендер интерфейса...');
+            const emergencyApp = document.getElementById('emergencyApp');
+            const emergencyContent = document.getElementById('emergencyContent');
+            
+            emergencyContent.innerHTML = `
+                <div style="text-align:center;padding:20px;">
+                    <h2 style="color:#4CAF50;">🆘 Emergency FlashPost Interface</h2>
+                    <p>Экстренный интерфейс активирован</p>
+                    <button onclick="location.href='/index.html'" style="background:#28a745;color:white;border:none;padding:15px 30px;border-radius:5px;margin:10px;cursor:pointer;">
+                        Перезагрузить основное приложение
+                    </button>
+                </div>
+            `;
+            emergencyApp.style.display = 'block';
+        }
+
+        function runFullDiagnosis() {
+            log('Запуск полной диагностики...');
+            updateStatus('overallStatus', '🔄 Выполняется полная диагностика...', 'info');
+            
+            setTimeout(() => testDOM(), 100);
+            setTimeout(() => testCSS(), 500);
+            setTimeout(() => testJS(), 1000);
+            setTimeout(() => testApp(), 1500);
+            setTimeout(() => testRender(), 2000);
+            setTimeout(() => testNetwork(), 2500);
+            
+            setTimeout(() => {
+                updateStatus('overallStatus', '✅ Диагностика завершена', 'success');
+            }, 3000);
+        }
+
+        function openMainApp() {
+            window.open('/index.html', '_blank');
+        }
+
+        // Auto-run diagnosis on load
+        window.addEventListener('load', () => {
+            setTimeout(runFullDiagnosis, 1000);
+        });
+    </script>
+</body>
+</html>

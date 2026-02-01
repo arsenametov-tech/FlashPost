@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Comprehensive Error Check</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1a1a2e; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .test-card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; }
+        .btn { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; margin: 10px; }
+        .log { background: #2a2a2a; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; margin: 10px 0; }
+        .status { padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .warning { background: #5f4a1a; border: 2px solid #ffc107; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .test-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; }
+        iframe { width: 100%; height: 400px; border: 1px solid #444; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Comprehensive Error Check</h1>
+        <p>Полная проверка приложения на ошибки и проблемы</p>
+        
+        <div id="overallStatus" class="status warning">🔄 Проверка в процессе...</div>
+        
+        <div class="test-card">
+            <h2>🚀 Быстрые тесты</h2>
+            <button class="btn" onclick="runFullErrorCheck()">🔍 Полная проверка ошибок</button>
+            <button class="btn" onclick="testMainApp()">📱 Тест основного приложения</button>
+            <button class="btn" onclick="testWorkingApp()">🎯 Тест рабочей версии</button>
+            <button class="btn" onclick="testClickability()">🖱️ Тест кликабельности</button>
+        </div>
+
+        <div class="grid">
+            <div class="test-item">
+                <h3>📱 Основное приложение</h3>
+                <div id="mainAppStatus">Не проверено</div>
+                <iframe id="mainAppFrame" src="index.html" style="display: none;"></iframe>
+            </div>
+            
+            <div class="test-item">
+                <h3>🎯 Рабочая версия</h3>
+                <div id="workingAppStatus">Не проверено</div>
+                <iframe id="workingAppFrame" src="working-app.html" style="display: none;"></iframe>
+            </div>
+            
+            <div class="test-item">
+                <h3>🖱️ Кликабельность</h3>
+                <div id="clickabilityStatus">Не проверено</div>
+                <iframe id="clickabilityFrame" src="test-clickability-fixed.html" style="display: none;"></iframe>
+            </div>
+            
+            <div class="test-item">
+                <h3>🔧 Модульная система</h3>
+                <div id="modulesStatus">Не проверено</div>
+                <div id="modulesResults"></div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>📋 Лог проверки</h2>
+            <div id="errorLog" class="log">Начинаем проверку...<br></div>
+        </div>
+        
+        <div class="test-card">
+            <h2>📊 Детальные результаты</h2>
+            <div id="detailedResults" class="log">Ожидание результатов...<br></div>
+        </div>
+    </div>
+
+    <script>
+        let errorLog = document.getElementById('errorLog');
+        let detailedResults = document.getElementById('detailedResults');
+        let errorCount = 0;
+        let warningCount = 0;
+        let testResults = {};
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#74c0fc';
+            
+            errorLog.innerHTML += `<span style="color: ${color}">[${timestamp}] ${icon} ${message}</span><br>`;
+            errorLog.scrollTop = errorLog.scrollHeight;
+            
+            if (type === 'error') errorCount++;
+            if (type === 'warning') warningCount++;
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.className = `status ${type}`;
+                element.textContent = message;
+            }
+        }
+
+        function detailed(message) {
+            detailedResults.innerHTML += message + '<br>';
+            detailedResults.scrollTop = detailedResults.scrollHeight;
+        }
+
+        async function testMainApp() {
+            log('📱 Тестирование основного приложения...', 'info');
+            updateStatus('mainAppStatus', '🔄 Тестируем...', 'warning');
+            
+            try {
+                const frame = document.getElementById('mainAppFrame');
+                frame.style.display = 'block';
+                
+                await new Promise(resolve => {
+                    frame.onload = resolve;
+                    setTimeout(resolve, 5000); // Таймаут 5 сек
+                });
+                
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const frameWindow = frame.contentWindow;
+                
+                // Проверяем консольные ошибки
+                let consoleErrors = [];
+                const originalError = frameWindow.console.error;
+                frameWindow.console.error = function(...args) {
+                    consoleErrors.push(args.join(' '));
+                    originalError.apply(console, args);
+                };
+                
+                // Проверяем загрузку элементов
+                const title = frameDoc.querySelector('.title');
+                const generateBtn = frameDoc.querySelector('#generateBtn');
+                const topicInput = frameDoc.querySelector('#topicInput');
+                
+                let issues = [];
+                
+                if (!title) issues.push('Заголовок не найден');
+                if (!generateBtn) issues.push('Кнопка генерации не найдена');
+                if (!topicInput) issues.push('Поле ввода темы не найдено');
+                
+                // Проверяем JavaScript ошибки
+                setTimeout(() => {
+                    if (consoleErrors.length > 0) {
+                        issues.push(`Консольные ошибки: ${consoleErrors.length}`);
+                        consoleErrors.forEach(err => log(`JS Error: ${err}`, 'error'));
+                    }
+                    
+                    const success = issues.length === 0;
+                    updateStatus('mainAppStatus', success ? '✅ Работает корректно' : '❌ Есть проблемы', success ? 'success' : 'error');
+                    
+                    if (issues.length > 0) {
+                        log(`❌ Проблемы в основном приложении: ${issues.join(', ')}`, 'error');
+                    } else {
+                        log('✅ Основное приложение работает корректно', 'success');
+                    }
+                    
+                    testResults.mainApp = { success, issues };
+                    detailed(`📱 Основное приложение: ${success ? 'OK' : 'ПРОБЛЕМЫ'} - ${issues.join(', ')}`);
+                }, 2000);
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования основного приложения: ${error.message}`, 'error');
+                updateStatus('mainAppStatus', '❌ Ошибка тестирования', 'error');
+                testResults.mainApp = { success: false, error: error.message };
+            }
+        }
+
+        async function testWorkingApp() {
+            log('🎯 Тестирование рабочей версии...', 'info');
+            updateStatus('workingAppStatus', '🔄 Тестируем...', 'warning');
+            
+            try {
+                const frame = document.getElementById('workingAppFrame');
+                frame.style.display = 'block';
+                
+                await new Promise(resolve => {
+                    frame.onload = resolve;
+                    setTimeout(resolve, 5000);
+                });
+                
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const frameWindow = frame.contentWindow;
+                
+                // Проверяем функциональность
+                const generateBtn = frameDoc.querySelector('#generateBtn');
+                const manualBtn = frameDoc.querySelector('#manualBtn');
+                const topicInput = frameDoc.querySelector('#topicInput');
+                const manualInput = frameDoc.querySelector('#manualInput');
+                
+                let issues = [];
+                
+                if (!generateBtn) issues.push('Кнопка генерации отсутствует');
+                if (!manualBtn) issues.push('Кнопка ручного ввода отсутствует');
+                if (!topicInput) issues.push('Поле темы отсутствует');
+                if (!manualInput) issues.push('Поле ручного ввода отсутствует');
+                
+                // Проверяем кликабельность
+                if (generateBtn) {
+                    const style = frameWindow.getComputedStyle(generateBtn);
+                    if (style.pointerEvents === 'none') {
+                        issues.push('Кнопка генерации не кликабельна');
+                    }
+                }
+                
+                // Проверяем шрифты
+                const fontLinks = frameDoc.querySelectorAll('link[href*="fonts.googleapis.com"]');
+                if (fontLinks.length === 0) {
+                    issues.push('Google Fonts не подключены');
+                }
+                
+                const success = issues.length === 0;
+                updateStatus('workingAppStatus', success ? '✅ Работает корректно' : '❌ Есть проблемы', success ? 'success' : 'error');
+                
+                if (issues.length > 0) {
+                    log(`❌ Проблемы в рабочей версии: ${issues.join(', ')}`, 'error');
+                } else {
+                    log('✅ Рабочая версия работает корректно', 'success');
+                }
+                
+                testResults.workingApp = { success, issues };
+                detailed(`🎯 Рабочая версия: ${success ? 'OK' : 'ПРОБЛЕМЫ'} - ${issues.join(', ')}`);
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования рабочей версии: ${error.message}`, 'error');
+                updateStatus('workingAppStatus', '❌ Ошибка тестирования', 'error');
+                testResults.workingApp = { success: false, error: error.message };
+            }
+        }
+
+        async function testClickability() {
+            log('🖱️ Тестирование кликабельности...', 'info');
+            updateStatus('clickabilityStatus', '🔄 Тестируем...', 'warning');
+            
+            try {
+                const frame = document.getElementById('clickabilityFrame');
+                frame.style.display = 'block';
+                
+                await new Promise(resolve => {
+                    frame.onload = resolve;
+                    setTimeout(resolve, 3000);
+                });
+                
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const frameWindow = frame.contentWindow;
+                
+                // Проверяем все кнопки в тестовом файле
+                const buttons = frameDoc.querySelectorAll('button, [onclick]');
+                let clickableCount = 0;
+                let issues = [];
+                
+                buttons.forEach((btn, index) => {
+                    const style = frameWindow.getComputedStyle(btn);
+                    const isClickable = style.pointerEvents !== 'none' && 
+                                      style.cursor === 'pointer' && 
+                                      !btn.disabled;
+                    
+                    if (isClickable) {
+                        clickableCount++;
+                    } else {
+                        issues.push(`Кнопка ${index + 1} не кликабельна`);
+                    }
+                });
+                
+                const success = issues.length === 0;
+                updateStatus('clickabilityStatus', success ? '✅ Все элементы кликабельны' : '❌ Есть проблемы', success ? 'success' : 'error');
+                
+                log(`📊 Кликабельность: ${clickableCount}/${buttons.length} элементов`, success ? 'success' : 'warning');
+                
+                testResults.clickability = { success, clickableCount, total: buttons.length, issues };
+                detailed(`🖱️ Кликабельность: ${clickableCount}/${buttons.length} OK - ${issues.join(', ')}`);
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования кликабельности: ${error.message}`, 'error');
+                updateStatus('clickabilityStatus', '❌ Ошибка тестирования', 'error');
+                testResults.clickability = { success: false, error: error.message };
+            }
+        }
+
+        async function testModules() {
+            log('🔧 Тестирование модульной системы...', 'info');
+            updateStatus('modulesStatus', '🔄 Тестируем...', 'warning');
+            
+            try {
+                // Проверяем наличие модулей
+                const modules = [
+                    'src/app.js',
+                    'src/state.js', 
+                    'src/renderer.js',
+                    'src/editor.js',
+                    'src/drag.js',
+                    'src/export.js',
+                    'src/ai.js'
+                ];
+                
+                let moduleResults = [];
+                
+                for (const module of modules) {
+                    try {
+                        const response = await fetch(module);
+                        if (response.ok) {
+                            const content = await response.text();
+                            const hasExports = content.includes('window.') || content.includes('export');
+                            moduleResults.push({
+                                name: module,
+                                exists: true,
+                                hasExports,
+                                size: content.length
+                            });
+                        } else {
+                            moduleResults.push({
+                                name: module,
+                                exists: false,
+                                error: `HTTP ${response.status}`
+                            });
+                        }
+                    } catch (error) {
+                        moduleResults.push({
+                            name: module,
+                            exists: false,
+                            error: error.message
+                        });
+                    }
+                }
+                
+                const existingModules = moduleResults.filter(m => m.exists);
+                const success = existingModules.length >= 5; // Минимум 5 модулей должно быть
+                
+                updateStatus('modulesStatus', success ? '✅ Модули в порядке' : '❌ Проблемы с модулями', success ? 'success' : 'error');
+                
+                let resultsHtml = '';
+                moduleResults.forEach(m => {
+                    const status = m.exists ? '✅' : '❌';
+                    const info = m.exists ? `${(m.size/1024).toFixed(1)}KB` : m.error;
+                    resultsHtml += `${status} ${m.name}: ${info}<br>`;
+                });
+                document.getElementById('modulesResults').innerHTML = resultsHtml;
+                
+                log(`📊 Модули: ${existingModules.length}/${modules.length} найдено`, success ? 'success' : 'warning');
+                
+                testResults.modules = { success, found: existingModules.length, total: modules.length, results: moduleResults };
+                detailed(`🔧 Модули: ${existingModules.length}/${modules.length} найдено`);
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования модулей: ${error.message}`, 'error');
+                updateStatus('modulesStatus', '❌ Ошибка тестирования', 'error');
+                testResults.modules = { success: false, error: error.message };
+            }
+        }
+
+        async function runFullErrorCheck() {
+            log('🔍 Запуск полной проверки ошибок...', 'info');
+            errorCount = 0;
+            warningCount = 0;
+            testResults = {};
+            
+            // Запускаем все тесты параллельно
+            await Promise.all([
+                testMainApp(),
+                testWorkingApp(), 
+                testClickability(),
+                testModules()
+            ]);
+            
+            // Ждем завершения всех тестов
+            setTimeout(() => {
+                const allTests = Object.values(testResults);
+                const successfulTests = allTests.filter(t => t.success).length;
+                const totalTests = allTests.length;
+                
+                const overallSuccess = errorCount === 0 && successfulTests === totalTests;
+                
+                updateStatus('overallStatus', 
+                    overallSuccess ? '✅ Все проверки пройдены успешно' : 
+                    `❌ Найдено проблем: ${errorCount} ошибок, ${warningCount} предупреждений`,
+                    overallSuccess ? 'success' : 'error'
+                );
+                
+                log(`📊 Итоговый результат: ${successfulTests}/${totalTests} тестов пройдено`, overallSuccess ? 'success' : 'error');
+                log(`📈 Статистика: ${errorCount} ошибок, ${warningCount} предупреждений`, errorCount > 0 ? 'error' : 'info');
+                
+                detailed(`<br>📊 ИТОГОВЫЙ ОТЧЕТ:`);
+                detailed(`✅ Успешных тестов: ${successfulTests}/${totalTests}`);
+                detailed(`❌ Ошибок: ${errorCount}`);
+                detailed(`⚠️ Предупреждений: ${warningCount}`);
+                detailed(`🎯 Общий статус: ${overallSuccess ? 'УСПЕШНО' : 'ТРЕБУЕТ ВНИМАНИЯ'}`);
+                
+            }, 5000);
+        }
+
+        // Автозапуск проверки
+        window.addEventListener('load', () => {
+            log('🔍 Comprehensive Error Check загружен', 'info');
+            setTimeout(runFullErrorCheck, 1000);
+        });
+    </script>
+</body>
+</html>

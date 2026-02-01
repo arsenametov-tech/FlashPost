@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal FlashPost Test</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; color: #fff; font-family: Arial; }
+        #app { min-height: 100vh; background: #0f0f14; color: #fff; display: block; position: relative; }
+        .test { padding: 20px; text-align: center; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="test">
+            <h1>🔴 MINIMAL TEST</h1>
+            <p>Если ты видишь этот текст - DOM работает</p>
+            <button class="btn" onclick="testMainApp()">Тест основного приложения</button>
+            <button class="btn" onclick="testRender()">Тест рендера</button>
+            <div id="result" style="margin-top: 20px; padding: 20px; background: #2a2a2a; border-radius: 5px;"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const result = document.getElementById('result');
+            result.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+
+        function testMainApp() {
+            log('🔄 Тестирование основного приложения...');
+            
+            // Проверяем доступность файлов
+            fetch('/index.html')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ index.html доступен');
+                        return fetch('/src/app.js');
+                    } else {
+                        throw new Error('index.html недоступен');
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ app.js доступен');
+                        log('🎯 Основные файлы загружаются');
+                        log('<a href="/index.html" target="_blank" style="color:#4CAF50;">👉 ОТКРЫТЬ ОСНОВНОЕ ПРИЛОЖЕНИЕ</a>');
+                    } else {
+                        throw new Error('app.js недоступен');
+                    }
+                })
+                .catch(error => {
+                    log('❌ Ошибка: ' + error.message);
+                });
+        }
+
+        function testRender() {
+            log('🔄 Тестирование рендера...');
+            
+            // Принудительная вставка контента
+            const testDiv = document.createElement('div');
+            testDiv.innerHTML = `
+                <div style="background:#1a5f1a;padding:15px;border-radius:5px;margin:10px 0;">
+                    <h3>✅ РЕНДЕР РАБОТАЕТ</h3>
+                    <p>DOM манипуляции функционируют</p>
+                </div>
+            `;
+            document.getElementById('result').appendChild(testDiv);
+            log('✅ Рендер DOM элементов работает');
+        }
+
+        // Автотест при загрузке
+        window.addEventListener('load', () => {
+            log('🚀 Minimal Test загружен');
+            log('📍 URL: ' + window.location.href);
+            log('🔧 Готов к тестированию');
+        });
+    </script>
+</body>
+</html>

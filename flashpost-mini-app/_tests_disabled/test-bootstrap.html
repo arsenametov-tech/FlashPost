@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Test - FlashPost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .app-frame {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .app-frame iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Bootstrap Test</h1>
+        <p>Тестирование инициализации и первого рендера приложения</p>
+        
+        <div id="status-container">
+            <div class="status info">⏳ Готов к тестированию...</div>
+        </div>
+        
+        <div>
+            <button onclick="testBootstrap()">🚀 Тест Bootstrap</button>
+            <button onclick="testMainApp()">📱 Тест Main App</button>
+            <button onclick="clearLog()">🧹 Очистить лог</button>
+        </div>
+        
+        <div class="log" id="test-log">
+            Логи появятся здесь...
+        </div>
+        
+        <div class="app-frame" id="app-frame" style="display: none;">
+            <iframe id="main-app-iframe" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            testResults.push({ timestamp, message, type });
+            
+            const logContainer = document.getElementById('test-log');
+            const logDiv = document.createElement('div');
+            logDiv.style.color = type === 'error' ? '#dc3545' : 
+                               type === 'success' ? '#28a745' : 
+                               type === 'warning' ? '#ffc107' : '#17a2b8';
+            logDiv.textContent = logEntry;
+            
+            logContainer.appendChild(logDiv);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            console.log(`[BOOTSTRAP-TEST] ${message}`);
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusContainer = document.getElementById('status-container');
+            statusContainer.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+        
+        async function testBootstrap() {
+            log('🚀 Начинаем тест bootstrap...', 'info');
+            updateStatus('⏳ Тестирование bootstrap...', 'info');
+            
+            try {
+                // Тест 1: Проверка модулей
+                log('1️⃣ Проверяем загрузку модулей...', 'info');
+                
+                const requiredModules = [
+                    'StateManager', 'Renderer', 'Editor', 
+                    'DragManager', 'ExportManager', 'AIManager', 'TemplateManager'
+                ];
+                
+                const testFrame = document.createElement('iframe');
+                testFrame.style.display = 'none';
+                document.body.appendChild(testFrame);
+                
+                const frameDoc = testFrame.contentDocument;
+                frameDoc.open();
+                frameDoc.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <script>
+                            window.testResults = {
+                                modulesLoaded: {},
+                                appInitialized: false,
+                                errors: [],
+                                timeline: []
+                            };
+                            
+                            function logEvent(event) {
+                                window.testResults.timeline.push({
+                                    timestamp: Date.now(),
+                                    event: event
+                                });
+                                console.log('[TEST]', event);
+                            }
+                            
+                            // Перехватываем ошибки
+                            window.onerror = function(msg, url, line, col, error) {
+                                window.testResults.errors.push({
+                                    message: msg,
+                                    url: url,
+                                    line: line,
+                                    error: error ? error.toString() : 'Unknown'
+                                });
+                                return false;
+                            };
+                            
+                            logEvent('Frame initialized');
+                        </script>
+                    </head>
+                    <body>
+                        <div id="loading">Loading...</div>
+                        <div id="app" style="display: none;"></div>
+                        
+                        <!-- Загружаем модули -->
+                        <script src="src/state.js"></script>
+                        <script src="src/renderer.js"></script>
+                        <script src="src/editor.js"></script>
+                        <script src="src/drag.js"></script>
+                        <script src="src/export.js"></script>
+                        <script src="src/ai.js"></script>
+                        <script src="src/template-manager.js"></script>
+                        <script src="src/app.js"></script>
+                        
+                        <script>
+                            logEvent('Scripts loaded');
+                            
+                            // Проверяем модули
+                            const modules = ['StateManager', 'Renderer', 'Editor', 'DragManager', 'ExportManager', 'AIManager', 'TemplateManager'];
+                            modules.forEach(module => {
+                                window.testResults.modulesLoaded[module] = typeof window[module] !== 'undefined';
+                                logEvent(\`Module \${module}: \${window.testResults.modulesLoaded[module] ? 'OK' : 'MISSING'}\`);
+                            });
+                            
+                            // Ждем инициализации приложения
+                            let checkCount = 0;
+                            function checkApp() {
+                                checkCount++;
+                                if (window.flashPostApp) {
+                                    window.testResults.appInitialized = true;
+                                    logEvent('App initialized successfully');
+                                    
+                                    // Проверяем состояние
+                                    try {
+                                        const mode = window.flashPostApp.state.getMode();
+                                        const slidesCount = window.flashPostApp.state.getSlidesCount();
+                                        logEvent(\`App state - Mode: \${mode}, Slides: \${slidesCount}\`);
+                                    } catch (e) {
+                                        window.testResults.errors.push({
+                                            message: 'Error checking app state: ' + e.message,
+                                            error: e.toString()
+                                        });
+                                    }
+                                } else if (checkCount < 50) {
+                                    setTimeout(checkApp, 100);
+                                } else {
+                                    logEvent('App initialization timeout');
+                                }
+                            }
+                            
+                            setTimeout(checkApp, 100);
+                        </script>
+                    </body>
+                    </html>
+                `);
+                frameDoc.close();
+                
+                // Ждем результатов
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                
+                const results = testFrame.contentWindow.testResults;
+                
+                // Анализируем результаты
+                let modulesOK = 0;
+                let modulesTotal = requiredModules.length;
+                
+                requiredModules.forEach(module => {
+                    const loaded = results.modulesLoaded[module];
+                    if (loaded) {
+                        modulesOK++;
+                        log(`✅ ${module} загружен`, 'success');
+                    } else {
+                        log(`❌ ${module} не загружен`, 'error');
+                    }
+                });
+                
+                log(`📊 Модули: ${modulesOK}/${modulesTotal}`, modulesOK === modulesTotal ? 'success' : 'error');
+                
+                if (results.appInitialized) {
+                    log('✅ Приложение инициализировано', 'success');
+                } else {
+                    log('❌ Приложение не инициализировано', 'error');
+                }
+                
+                if (results.errors.length > 0) {
+                    log(`❌ Обнаружено ошибок: ${results.errors.length}`, 'error');
+                    results.errors.forEach(error => {
+                        log(`   ${error.message}`, 'error');
+                    });
+                } else {
+                    log('✅ Ошибок не обнаружено', 'success');
+                }
+                
+                // Показываем timeline
+                log('📋 Timeline событий:', 'info');
+                results.timeline.forEach(event => {
+                    log(`   ${event.event}`, 'info');
+                });
+                
+                // Итоговый статус
+                const success = modulesOK === modulesTotal && results.appInitialized && results.errors.length === 0;
+                
+                if (success) {
+                    updateStatus('✅ Bootstrap тест пройден успешно!', 'success');
+                    log('🎉 Bootstrap тест завершен успешно!', 'success');
+                } else {
+                    updateStatus('❌ Bootstrap тест не пройден', 'error');
+                    log('💥 Bootstrap тест завершен с ошибками', 'error');
+                }
+                
+                document.body.removeChild(testFrame);
+                
+            } catch (error) {
+                log(`❌ Критическая ошибка теста: ${error.message}`, 'error');
+                updateStatus('❌ Критическая ошибка теста', 'error');
+            }
+        }
+        
+        function testMainApp() {
+            log('📱 Загружаем основное приложение...', 'info');
+            updateStatus('📱 Тестирование основного приложения...', 'info');
+            
+            const appFrame = document.getElementById('app-frame');
+            const iframe = document.getElementById('main-app-iframe');
+            
+            appFrame.style.display = 'block';
+            iframe.src = '/index.html';
+            
+            iframe.onload = function() {
+                log('✅ Основное приложение загружено в iframe', 'success');
+                updateStatus('✅ Основное приложение загружено', 'success');
+            };
+            
+            iframe.onerror = function() {
+                log('❌ Ошибка загрузки основного приложения', 'error');
+                updateStatus('❌ Ошибка загрузки приложения', 'error');
+            };
+        }
+        
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = 'Логи очищены...';
+            testResults = [];
+        }
+        
+        // Автоматический запуск при загрузке
+        window.addEventListener('load', () => {
+            log('🔧 Bootstrap тест готов к запуску', 'info');
+        });
+    </script>
+</body>
+</html>

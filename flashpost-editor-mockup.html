@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FlashPost Editor - Редактор слайдов</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .editor-container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            background: white;
+        }
+        
+        /* Header */
+        .editor-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .back-button:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        
+        .slides-navigation {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .slides-label {
+            font-weight: 600;
+            color: #374151;
+            margin-right: 8px;
+        }
+        
+        .slide-tab {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 32px;
+            text-align: center;
+        }
+        
+        .slide-tab.active {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .slide-tab:hover:not(.active) {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        .add-slide-button {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .add-slide-button:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #475569;
+        }
+        
+        /* Main Content */
+        .editor-main {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        /* Preview Area */
+        .preview-area {
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+        }
+        
+        .slide-preview {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .slide-text {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            padding: 40px;
+            line-height: 1.3;
+            cursor: move;
+            user-select: none;
+        }
+        
+        .slide-text.dragging {
+            cursor: grabbing;
+        }
+        
+        .swipe-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .navigation-arrows {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+        }
+        
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .nav-button {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 18px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-button:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #374151;
+        }
+        
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Controls Panel */
+        .controls-panel {
+            background: white;
+            border-left: 1px solid #e2e8f0;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .controls-section {
+            margin-bottom: 32px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.2s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #833ab4;
+            box-shadow: 0 0 0 3px rgba(131, 58, 180, 0.1);
+        }
+        
+        .select-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .select-input:focus {
+            outline: none;
+            border-color: #833ab4;
+        }
+        
+        .range-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .range-input {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .range-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 40px;
+            text-align: right;
+        }
+        
+        .color-input {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            background: none;
+        }
+        
+        .color-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+        
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .toggle-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .toggle-checkbox.checked {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border-color: transparent;
+        }
+        
+        .toggle-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .toggle-label {
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        .add-text-button {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .add-text-button:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #475569;
+        }
+        
+        /* Footer */
+        .editor-footer {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .template-button {
+            background: #f8fafc;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .template-button:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        .apply-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .apply-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .download-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .download-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .editor-main {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+            }
+            
+            .controls-panel {
+                border-left: none;
+                border-top: 1px solid #e2e8f0;
+                max-height: 300px;
+            }
+            
+            .preview-area {
+                padding: 20px;
+            }
+            
+            .slide-preview {
+                width: 300px;
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .editor-header {
+                padding: 8px 16px;
+            }
+            
+            .slides-navigation {
+                overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .slides-navigation::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .slide-preview {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .slide-text {
+                font-size: 20px;
+                padding: 30px;
+            }
+            
+            .controls-panel {
+                padding: 16px;
+            }
+            
+            .editor-footer {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Header -->
+        <div class="editor-header">
+            <button class="back-button" id="backButton">←</button>
+            <div class="slides-navigation">
+                <span class="slides-label">Слайды:</span>
+                <div class="slide-tab active" data-slide="1">1</div>
+                <div class="slide-tab" data-slide="2">2</div>
+                <div class="slide-tab" data-slide="3">3</div>
+                <div class="slide-tab" data-slide="4">4</div>
+                <div class="slide-tab" data-slide="5">5</div>
+                <div class="slide-tab" data-slide="6">6</div>
+                <div class="slide-tab" data-slide="7">7</div>
+                <div class="slide-tab" data-slide="8">8</div>
+                <div class="add-slide-button" id="addSlideButton">(+)</div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="editor-main">
+            <!-- Preview Area -->
+            <div class="preview-area">
+                <div class="slide-preview" id="slidePreview">
+                    <div class="slide-text" id="slideText">
+                        Как заработать первый миллион в 25 лет
+                    </div>
+                    <div class="swipe-indicator">⬅ Листай</div>
+                    <div class="navigation-arrows">➡</div>
+                </div>
+                
+                <div class="preview-controls">
+                    <button class="nav-button" id="prevSlide">⬅</button>
+                    <button class="nav-button" id="nextSlide">➡</button>
+                </div>
+            </div>
+            
+            <!-- Controls Panel -->
+            <div class="controls-panel">
+                <div class="controls-section">
+                    <div class="section-title">ТЕКСТ</div>
+                    
+                    <div class="control-group">
+                        <textarea class="text-input" id="textInput" placeholder="Введите текст слайда...">Как заработать первый миллион в 25 лет</textarea>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Шрифт</label>
+                        <select class="select-input" id="fontSelect">
+                            <option value="Inter">Inter</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Playfair Display">Playfair Display</option>
+                            <option value="Bebas Neue">Bebas Neue</option>
+                            <option value="Space Grotesk">Space Grotesk</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Размер</label>
+                        <div class="range-control">
+                            <input type="range" class="range-input" id="fontSizeRange" min="16" max="48" value="24">
+                            <span class="range-value" id="fontSizeValue">24px</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Цвет</label>
+                        <input type="color" class="color-input" id="textColor" value="#ffffff">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Ширина</label>
+                        <div class="range-control">
+                            <input type="range" class="range-input" id="textWidthRange" min="50" max="100" value="90">
+                            <span class="range-value" id="textWidthValue">90%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="toggle-group">
+                            <div class="toggle-option" id="glowToggle">
+                                <div class="toggle-checkbox" id="glowCheckbox"></div>
+                                <span class="toggle-label">✨ Свечение</span>
+                            </div>
+                            <div class="toggle-option" id="keywordsToggle">
+                                <div class="toggle-checkbox" id="keywordsCheckbox"></div>
+                                <span class="toggle-label">🔑 Ключевые</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="add-text-button" id="addTextButton">
+                        <span>+</span>
+                        <span>Текст ниже</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="editor-footer">
+            <button class="footer-button template-button" id="templateButton">
+                <span>💾</span>
+                <span>Шаблон</span>
+            </button>
+            <button class="footer-button apply-button" id="applyButton">
+                <span>🎨</span>
+                <span>Применить</span>
+            </button>
+            <button class="footer-button download-button" id="downloadButton">
+                <span>⬇</span>
+                <span>Скачать</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Current slide state
+        let currentSlide = 1;
+        let slides = {
+            1: {
+                text: "Как заработать первый миллион в 25 лет",
+                font: "Inter",
+                fontSize: 24,
+                color: "#ffffff",
+                width: 90,
+                glow: false,
+                keywords: false
+            }
+        };
+
+        // DOM elements
+        const slideText = document.getElementById('slideText');
+        const textInput = document.getElementById('textInput');
+        const fontSelect = document.getElementById('fontSelect');
+        const fontSizeRange = document.getElementById('fontSizeRange');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        const textColor = document.getElementById('textColor');
+        const textWidthRange = document.getElementById('textWidthRange');
+        const textWidthValue = document.getElementById('textWidthValue');
+        const glowCheckbox = document.getElementById('glowCheckbox');
+        const keywordsCheckbox = document.getElementById('keywordsCheckbox');
+
+        // Initialize
+        function init() {
+            updateSlidePreview();
+            bindEvents();
+        }
+
+        // Update slide preview
+        function updateSlidePreview() {
+            const slide = slides[currentSlide];
+            if (!slide) return;
+
+            slideText.textContent = slide.text;
+            slideText.style.fontFamily = slide.font;
+            slideText.style.fontSize = slide.fontSize + 'px';
+            slideText.style.color = slide.color;
+            slideText.style.width = slide.width + '%';
+            
+            // Update controls
+            textInput.value = slide.text;
+            fontSelect.value = slide.font;
+            fontSizeRange.value = slide.fontSize;
+            fontSizeValue.textContent = slide.fontSize + 'px';
+            textColor.value = slide.color;
+            textWidthRange.value = slide.width;
+            textWidthValue.textContent = slide.width + '%';
+            
+            // Update checkboxes
+            glowCheckbox.classList.toggle('checked', slide.glow);
+            keywordsCheckbox.classList.toggle('checked', slide.keywords);
+        }
+
+        // Save current slide
+        function saveCurrentSlide() {
+            slides[currentSlide] = {
+                text: textInput.value,
+                font: fontSelect.value,
+                fontSize: parseInt(fontSizeRange.value),
+                color: textColor.value,
+                width: parseInt(textWidthRange.value),
+                glow: glowCheckbox.classList.contains('checked'),
+                keywords: keywordsCheckbox.classList.contains('checked')
+            };
+        }
+
+        // Switch slide
+        function switchSlide(slideNumber) {
+            saveCurrentSlide();
+            
+            // Update active tab
+            document.querySelectorAll('.slide-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-slide="${slideNumber}"]`).classList.add('active');
+            
+            currentSlide = slideNumber;
+            
+            // Create slide if doesn't exist
+            if (!slides[slideNumber]) {
+                slides[slideNumber] = {
+                    text: `Слайд ${slideNumber}`,
+                    font: "Inter",
+                    fontSize: 24,
+                    color: "#ffffff",
+                    width: 90,
+                    glow: false,
+                    keywords: false
+                };
+            }
+            
+            updateSlidePreview();
+        }
+
+        // Bind events
+        function bindEvents() {
+            // Slide tabs
+            document.querySelectorAll('.slide-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const slideNumber = parseInt(tab.dataset.slide);
+                    switchSlide(slideNumber);
+                });
+            });
+
+            // Text input
+            textInput.addEventListener('input', () => {
+                slideText.textContent = textInput.value;
+            });
+
+            // Font select
+            fontSelect.addEventListener('change', () => {
+                slideText.style.fontFamily = fontSelect.value;
+            });
+
+            // Font size
+            fontSizeRange.addEventListener('input', () => {
+                const size = fontSizeRange.value;
+                slideText.style.fontSize = size + 'px';
+                fontSizeValue.textContent = size + 'px';
+            });
+
+            // Text color
+            textColor.addEventListener('input', () => {
+                slideText.style.color = textColor.value;
+            });
+
+            // Text width
+            textWidthRange.addEventListener('input', () => {
+                const width = textWidthRange.value;
+                slideText.style.width = width + '%';
+                textWidthValue.textContent = width + '%';
+            });
+
+            // Toggle checkboxes
+            document.getElementById('glowToggle').addEventListener('click', () => {
+                glowCheckbox.classList.toggle('checked');
+            });
+
+            document.getElementById('keywordsToggle').addEventListener('click', () => {
+                keywordsCheckbox.classList.toggle('checked');
+            });
+
+            // Navigation
+            document.getElementById('prevSlide').addEventListener('click', () => {
+                if (currentSlide > 1) {
+                    switchSlide(currentSlide - 1);
+                }
+            });
+
+            document.getElementById('nextSlide').addEventListener('click', () => {
+                if (currentSlide < 8) {
+                    switchSlide(currentSlide + 1);
+                }
+            });
+
+            // Add slide
+            document.getElementById('addSlideButton').addEventListener('click', () => {
+                const nextSlide = Math.max(...Object.keys(slides).map(Number)) + 1;
+                if (nextSlide <= 15) {
+                    switchSlide(nextSlide);
+                }
+            });
+
+            // Footer buttons
+            document.getElementById('templateButton').addEventListener('click', () => {
+                alert('Сохранение как шаблон');
+            });
+
+            document.getElementById('applyButton').addEventListener('click', () => {
+                alert('Применение ко всем слайдам');
+            });
+
+            document.getElementById('downloadButton').addEventListener('click', () => {
+                alert('Скачивание карусели');
+            });
+
+            // Back button
+            document.getElementById('backButton').addEventListener('click', () => {
+                alert('Возврат к главному экрану');
+            });
+
+            // Drag functionality for text
+            let isDragging = false;
+            let startX, startY, startLeft, startTop;
+
+            slideText.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                slideText.classList.add('dragging');
+                
+                const rect = slideText.parentElement.getBoundingClientRect();
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = slideText.offsetLeft;
+                startTop = slideText.offsetTop;
+                
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                slideText.style.left = (startLeft + deltaX) + 'px';
+                slideText.style.top = (startTop + deltaY) + 'px';
+                slideText.style.position = 'absolute';
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    slideText.classList.remove('dragging');
+                }
+            });
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>

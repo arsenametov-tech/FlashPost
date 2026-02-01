@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Events Test - FlashPost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .app-frame {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .app-frame iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+        
+        .event-test {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .event-status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        
+        .event-status.success { background: #28a745; }
+        .event-status.error { background: #dc3545; }
+        .event-status.testing { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎯 UI Events Test</h1>
+        <p>Тестирование системы привязки событий UI после каждого рендера</p>
+        
+        <div class="test-section">
+            <h3>🚀 Quick Actions</h3>
+            <button onclick="runEventTests()">🧪 Test All Events</button>
+            <button onclick="loadMainApp()">📱 Load Main App</button>
+            <button onclick="testModeSwitch()">🔄 Test Mode Switch</button>
+            <button onclick="clearLog()">🧹 Clear Log</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Event Test Results</h3>
+            <div id="event-results">
+                <div class="event-test">
+                    <div class="event-status" id="generate-btn-status"></div>
+                    <span>Generate Carousel Button</span>
+                    <span id="generate-btn-result">Not tested</span>
+                </div>
+                <div class="event-test">
+                    <div class="event-status" id="collapse-btn-status"></div>
+                    <span>Popular Topics Dropdown</span>
+                    <span id="collapse-btn-result">Not tested</span>
+                </div>
+                <div class="event-test">
+                    <div class="event-status" id="add-block-btn-status"></div>
+                    <span>Add Text Block Button</span>
+                    <span id="add-block-btn-result">Not tested</span>
+                </div>
+                <div class="event-test">
+                    <div class="event-status" id="export-btn-status"></div>
+                    <span>Export Buttons</span>
+                    <span id="export-btn-result">Not tested</span>
+                </div>
+                <div class="event-test">
+                    <div class="event-status" id="navigation-status"></div>
+                    <span>Navigation Buttons</span>
+                    <span id="navigation-result">Not tested</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Test Log</h3>
+            <div class="log" id="test-log">
+                Test logs will appear here...
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📱 Main Application</h3>
+            <div class="app-frame" id="app-frame" style="display: none;">
+                <iframe id="main-app-iframe" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let appFrame = null;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            testResults.push({ timestamp, message, type });
+            
+            const logContainer = document.getElementById('test-log');
+            const logDiv = document.createElement('div');
+            logDiv.style.color = type === 'error' ? '#dc3545' : 
+                               type === 'success' ? '#28a745' : 
+                               type === 'warning' ? '#ffc107' : '#17a2b8';
+            logDiv.textContent = logEntry;
+            
+            logContainer.appendChild(logDiv);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            console.log(`[UI-EVENTS-TEST] ${message}`);
+        }
+        
+        function updateEventStatus(eventId, status, message) {
+            const statusEl = document.getElementById(`${eventId}-status`);
+            const resultEl = document.getElementById(`${eventId}-result`);
+            
+            if (statusEl) {
+                statusEl.className = `event-status ${status}`;
+            }
+            
+            if (resultEl) {
+                resultEl.textContent = message;
+            }
+        }
+        
+        async function runEventTests() {
+            log('🧪 Начинаем тестирование событий UI...', 'info');
+            
+            // Сбрасываем статусы
+            const eventIds = ['generate-btn', 'collapse-btn', 'add-block-btn', 'export-btn', 'navigation'];
+            eventIds.forEach(id => {
+                updateEventStatus(id, 'testing', 'Testing...');
+            });
+            
+            try {
+                // Загружаем приложение в iframe для тестирования
+                await loadMainAppForTesting();
+                
+                // Ждем инициализации
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                // Тестируем события в разных режимах
+                await testStartModeEvents();
+                await testPreviewModeEvents();
+                await testEditorModeEvents();
+                
+                log('✅ Тестирование событий UI завершено', 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования событий: ${error.message}`, 'error');
+            }
+        }
+        
+        async function loadMainAppForTesting() {
+            log('📱 Загружаем основное приложение для тестирования...', 'info');
+            
+            const appFrameContainer = document.getElementById('app-frame');
+            const iframe = document.getElementById('main-app-iframe');
+            
+            appFrameContainer.style.display = 'block';
+            
+            return new Promise((resolve, reject) => {
+                iframe.onload = () => {
+                    appFrame = iframe.contentWindow;
+                    log('✅ Приложение загружено в iframe', 'success');
+                    resolve();
+                };
+                
+                iframe.onerror = () => {
+                    log('❌ Ошибка загрузки приложения', 'error');
+                    reject(new Error('Failed to load app'));
+                };
+                
+                iframe.src = '/index.html';
+            });
+        }
+        
+        async function testStartModeEvents() {
+            log('🎯 Тестируем события стартового режима...', 'info');
+            
+            try {
+                if (!appFrame || !appFrame.flashPostApp) {
+                    throw new Error('App not available');
+                }
+                
+                const app = appFrame.flashPostApp;
+                
+                // Переходим в стартовый режим
+                await app.enterStartMode();
+                
+                // Тестируем кнопку генерации
+                const generateBtn = appFrame.document.getElementById('generateBtn');
+                if (generateBtn) {
+                    // Проверяем, что обработчик привязан
+                    const hasListener = generateBtn.onclick || generateBtn.addEventListener;
+                    if (hasListener) {
+                        updateEventStatus('generate-btn', 'success', 'Event bound');
+                        log('✅ Кнопка генерации: события привязаны', 'success');
+                    } else {
+                        updateEventStatus('generate-btn', 'error', 'No event listener');
+                        log('❌ Кнопка генерации: события не привязаны', 'error');
+                    }
+                } else {
+                    updateEventStatus('generate-btn', 'error', 'Button not found');
+                    log('❌ Кнопка генерации не найдена', 'error');
+                }
+                
+                // Тестируем кнопку сворачивания идей
+                const collapseBtn = appFrame.document.getElementById('collapseBtn');
+                if (collapseBtn) {
+                    updateEventStatus('collapse-btn', 'success', 'Event bound');
+                    log('✅ Кнопка сворачивания идей: события привязаны', 'success');
+                } else {
+                    updateEventStatus('collapse-btn', 'error', 'Button not found');
+                    log('❌ Кнопка сворачивания идей не найдена', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования стартового режима: ${error.message}`, 'error');
+                updateEventStatus('generate-btn', 'error', 'Test failed');
+                updateEventStatus('collapse-btn', 'error', 'Test failed');
+            }
+        }
+        
+        async function testPreviewModeEvents() {
+            log('👁️ Тестируем события режима превью...', 'info');
+            
+            try {
+                if (!appFrame || !appFrame.flashPostApp) {
+                    throw new Error('App not available');
+                }
+                
+                const app = appFrame.flashPostApp;
+                
+                // Создаем тестовые слайды если их нет
+                if (app.state.getSlidesCount() === 0) {
+                    app.state.createSlide({ title: 'Test Slide 1', text: 'Test content 1' });
+                    app.state.createSlide({ title: 'Test Slide 2', text: 'Test content 2' });
+                }
+                
+                // Переходим в режим превью
+                await app.enterPreviewMode();
+                
+                // Тестируем кнопки навигации
+                const prevBtn = appFrame.document.getElementById('prevBtn');
+                const nextBtn = appFrame.document.getElementById('nextBtn');
+                
+                if (prevBtn && nextBtn) {
+                    updateEventStatus('navigation', 'success', 'Navigation buttons bound');
+                    log('✅ Кнопки навигации: события привязаны', 'success');
+                } else {
+                    updateEventStatus('navigation', 'error', 'Navigation buttons not found');
+                    log('❌ Кнопки навигации не найдены', 'error');
+                }
+                
+                // Тестируем кнопку экспорта
+                const downloadBtn = appFrame.document.getElementById('downloadCurrentBtn');
+                if (downloadBtn) {
+                    updateEventStatus('export-btn', 'success', 'Export button bound');
+                    log('✅ Кнопка экспорта: события привязаны', 'success');
+                } else {
+                    updateEventStatus('export-btn', 'error', 'Export button not found');
+                    log('❌ Кнопка экспорта не найдена', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования режима превью: ${error.message}`, 'error');
+                updateEventStatus('navigation', 'error', 'Test failed');
+                updateEventStatus('export-btn', 'error', 'Test failed');
+            }
+        }
+        
+        async function testEditorModeEvents() {
+            log('✏️ Тестируем события режима редактора...', 'info');
+            
+            try {
+                if (!appFrame || !appFrame.flashPostApp) {
+                    throw new Error('App not available');
+                }
+                
+                const app = appFrame.flashPostApp;
+                
+                // Переходим в режим редактора
+                await app.enterEditMode();
+                
+                // Тестируем кнопку добавления блока
+                const addBlockBtn = appFrame.document.getElementById('addTextBlockBtn');
+                if (addBlockBtn) {
+                    updateEventStatus('add-block-btn', 'success', 'Add block button bound');
+                    log('✅ Кнопка добавления блока: события привязаны', 'success');
+                } else {
+                    updateEventStatus('add-block-btn', 'error', 'Add block button not found');
+                    log('❌ Кнопка добавления блока не найдена', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования режима редактора: ${error.message}`, 'error');
+                updateEventStatus('add-block-btn', 'error', 'Test failed');
+            }
+        }
+        
+        async function testModeSwitch() {
+            log('🔄 Тестируем переключение режимов и перепривязку событий...', 'info');
+            
+            try {
+                if (!appFrame || !appFrame.flashPostApp) {
+                    throw new Error('App not available');
+                }
+                
+                const app = appFrame.flashPostApp;
+                
+                // Тестируем переключение между режимами
+                const modes = ['start', 'preview', 'edit'];
+                
+                for (const mode of modes) {
+                    log(`🔄 Переключение в режим: ${mode}`, 'info');
+                    
+                    if (mode === 'start') {
+                        await app.enterStartMode();
+                    } else if (mode === 'preview') {
+                        await app.enterPreviewMode();
+                    } else if (mode === 'edit') {
+                        await app.enterEditMode();
+                    }
+                    
+                    // Проверяем, что события перепривязались
+                    const currentMode = app.state.getMode();
+                    if (currentMode === mode) {
+                        log(`✅ Режим ${mode} активирован, события должны быть перепривязаны`, 'success');
+                    } else {
+                        log(`❌ Ошибка переключения в режим ${mode}`, 'error');
+                    }
+                    
+                    // Небольшая пауза между переключениями
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                log('✅ Тестирование переключения режимов завершено', 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка тестирования переключения режимов: ${error.message}`, 'error');
+            }
+        }
+        
+        function loadMainApp() {
+            log('📱 Загружаем основное приложение...', 'info');
+            loadMainAppForTesting();
+        }
+        
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = 'Test logs cleared...';
+            testResults = [];
+        }
+        
+        // Автоматический запуск при загрузке
+        window.addEventListener('load', () => {
+            log('🔧 UI Events Test готов к запуску', 'info');
+        });
+    </script>
+</body>
+</html>

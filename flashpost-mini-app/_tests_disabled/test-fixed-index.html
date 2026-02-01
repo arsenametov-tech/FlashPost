@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Fixed Index</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; color: #fff; font-family: Arial; }
+        #app { min-height: 100vh; background: #0f0f14; color: #fff; display: block; position: relative; }
+        .test { padding: 20px; text-align: center; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin: 10px; font-size: 16px; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="test">
+            <h1>🔧 Test Fixed Index</h1>
+            <p>Тестирование исправленного index.html</p>
+            
+            <div id="domTest" class="status">🔄 Проверка DOM...</div>
+            <div id="jsTest" class="status">🔄 Проверка JS...</div>
+            
+            <button class="btn" onclick="testDOM()">Тест DOM</button>
+            <button class="btn" onclick="testJS()">Тест JS модулей</button>
+            <button class="btn" onclick="openFixedApp()">Открыть исправленное приложение</button>
+            
+            <div id="result" style="margin-top: 20px; padding: 20px; background: #2a2a2a; border-radius: 5px; text-align: left; font-family: monospace; font-size: 12px;"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const result = document.getElementById('result');
+            result.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+        }
+
+        function testDOM() {
+            log('🔄 Тестирование DOM структуры...');
+            
+            const appElement = document.getElementById('app');
+            if (appElement) {
+                document.getElementById('domTest').className = 'status success';
+                document.getElementById('domTest').textContent = '✅ #app элемент найден';
+                log('✅ #app элемент существует и доступен');
+                log('✅ DOM структура исправлена');
+            } else {
+                document.getElementById('domTest').className = 'status error';
+                document.getElementById('domTest').textContent = '❌ #app элемент НЕ найден';
+                log('❌ #app элемент все еще отсутствует');
+            }
+        }
+
+        function testJS() {
+            log('🔄 Тестирование загрузки JS модулей...');
+            
+            const modules = [
+                '/src/state.js',
+                '/src/renderer.js', 
+                '/src/editor.js',
+                '/src/app.js'
+            ];
+            
+            let loadedCount = 0;
+            modules.forEach(module => {
+                fetch(module)
+                    .then(response => {
+                        if (response.ok) {
+                            log(`✅ ${module}: доступен`);
+                            loadedCount++;
+                            if (loadedCount === modules.length) {
+                                document.getElementById('jsTest').className = 'status success';
+                                document.getElementById('jsTest').textContent = '✅ Все JS модули доступны';
+                                log('✅ Все модули загружаются успешно');
+                            }
+                        } else {
+                            log(`❌ ${module}: ошибка ${response.status}`);
+                            document.getElementById('jsTest').className = 'status error';
+                            document.getElementById('jsTest').textContent = '❌ Ошибки загрузки модулей';
+                        }
+                    })
+                    .catch(error => {
+                        log(`❌ ${module}: ${error.message}`);
+                        document.getElementById('jsTest').className = 'status error';
+                        document.getElementById('jsTest').textContent = '❌ Сетевые ошибки модулей';
+                    });
+            });
+        }
+
+        function openFixedApp() {
+            log('🚀 Открытие исправленного приложения...');
+            window.open('/index.html', '_blank');
+        }
+
+        // Автотест при загрузке
+        window.addEventListener('load', () => {
+            log('🚀 Test Fixed Index загружен');
+            setTimeout(testDOM, 500);
+            setTimeout(testJS, 1000);
+        });
+    </script>
+</body>
+</html>

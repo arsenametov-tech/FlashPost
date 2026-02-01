@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Test</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #0f0f14;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .instant-launcher {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .instant-btn {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .instant-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="instant-launcher">
+        <h1>⚡ Instant Test</h1>
+        <p>Быстрое открытие тестов рендеринга</p>
+        
+        <div>
+            <button class="instant-btn" onclick="openInstantTests()">
+                🚀 Open All Tests
+            </button>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 14px; opacity: 0.8;">
+            Откроет: Visual Diagnosis, Simple RenderApp, Main App
+        </div>
+    </div>
+
+    <script>
+        function openInstantTests() {
+            console.log('⚡ Opening instant tests...');
+            
+            const tests = [
+                'visual-white-screen-diagnosis.html',
+                'test-render-app-simple.html', 
+                'index.html'
+            ];
+            
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    const newWindow = window.open(test, '_blank', 'width=1200,height=800');
+                    if (newWindow) {
+                        console.log('✅ Opened:', test);
+                    } else {
+                        console.error('❌ Failed to open:', test);
+                    }
+                }, index * 500);
+            });
+            
+            // Обновляем текст кнопки
+            const btn = event.target;
+            btn.textContent = '✅ Tests Opened';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = '🚀 Open All Tests';
+                btn.disabled = false;
+            }, 3000);
+        }
+        
+        // Автоматическое открытие через 2 секунды
+        setTimeout(() => {
+            console.log('🔄 Auto-opening tests in 2 seconds...');
+            const autoOpen = confirm('Автоматически открыть тесты рендеринга?');
+            if (autoOpen) {
+                openInstantTests();
+            }
+        }, 2000);
+        
+        console.log('⚡ Instant Test ready');
+    </script>
+</body>
+</html>

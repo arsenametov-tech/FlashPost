@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🔍 Console Error Check - FlashPost</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            height: 100vh;
+            height: 100dvh;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 4s ease infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+            font-size: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .app {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+        
+        /* Console Error Monitor */
+        .error-monitor {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 20000;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            font-size: 12px;
+            border: 2px solid #00ff00;
+        }
+        
+        .error-monitor h3 {
+            color: #ffff00;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .error-log {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        
+        .error-critical {
+            background: rgba(255, 0, 0, 0.2);
+            border-left-color: #ff0000;
+            color: #ff6666;
+        }
+        
+        .error-warning {
+            background: rgba(255, 255, 0, 0.2);
+            border-left-color: #ffff00;
+            color: #ffff99;
+        }
+        
+        .error-info {
+            background: rgba(0, 255, 0, 0.2);
+            border-left-color: #00ff00;
+            color: #99ff99;
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .status-item {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .status-pass { color: #00ff00; }
+        .status-fail { color: #ff0000; }
+        .status-pending { color: #ffff00; }
+        
+        .toggle-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-icon">🔍</div>
+        <div class="loading-text">Checking Console Errors</div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app" id="app">
+        <!-- Content will be loaded by renderApp() -->
+    </div>
+
+    <!-- Console Error Monitor -->
+    <div class="error-monitor" id="errorMonitor">
+        <button class="toggle-btn" onclick="toggleMonitor()">❌</button>
+        <h3>🔍 CONSOLE ERROR MONITOR</h3>
+        
+        <div class="status-panel">
+            <div class="status-item">
+                <span>DOM Ready:</span>
+                <span id="domStatus" class="status-pending">⏳ Checking...</span>
+            </div>
+            <div class="status-item">
+                <span>Modules Loaded:</span>
+                <span id="modulesStatus" class="status-pending">⏳ Checking...</span>
+            </div>
+            <div class="status-item">
+                <span>App Initialized:</span>
+                <span id="appStatus" class="status-pending">⏳ Checking...</span>
+            </div>
+            <div class="status-item">
+                <span>UI Visible:</span>
+                <span id="uiStatus" class="status-pending">⏳ Checking...</span>
+            </div>
+            <div class="status-item">
+                <span>Console Errors:</span>
+                <span id="errorCount" class="status-pass">0</span>
+            </div>
+        </div>
+        
+        <div id="errorLogs"></div>
+    </div>
+
+    <!-- Main App Styles -->
+    <link rel="stylesheet" href="app.css">
+    
+    <script>
+        // 🔍 CONSOLE ERROR MONITORING SYSTEM
+        
+        let errorCount = 0;
+        let warningCount = 0;
+        let logs = [];
+        
+        function addLog(message, type = 'info', details = '') {
+            const timestamp = new Date().toLocaleTimeString();
+            const log = {
+                timestamp,
+                message,
+                type,
+                details
+            };
+            
+            logs.push(log);
+            updateErrorDisplay();
+            
+            if (type === 'error') {
+                errorCount++;
+                updateErrorCount();
+            } else if (type === 'warning') {
+                warningCount++;
+            }
+        }
+        
+        function updateErrorDisplay() {
+            const container = document.getElementById('errorLogs');
+            container.innerHTML = logs.slice(-10).map(log => `
+                <div class="error-log error-${log.type}">
+                    [${log.timestamp}] ${log.message}
+                    ${log.details ? `<br><small>${log.details}</small>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function updateErrorCount() {
+            const counter = document.getElementById('errorCount');
+            counter.textContent = errorCount;
+            counter.className = errorCount === 0 ? 'status-pass' : 'status-fail';
+        }
+        
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            element.textContent = text;
+            element.className = `status-${status}`;
+        }
+        
+        function toggleMonitor() {
+            const monitor = document.getElementById('errorMonitor');
+            monitor.style.display = monitor.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Перехватываем все ошибки консоли
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        const originalLog = console.log;
+        
+        console.error = function(...args) {
+            const message = args.join(' ');
+            addLog(`ERROR: ${message}`, 'error');
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            const message = args.join(' ');
+            addLog(`WARN: ${message}`, 'warning');
+            originalWarn.apply(console, args);
+        };
+        
+        // Перехватываем глобальные ошибки
+        window.addEventListener('error', (event) => {
+            const message = `${event.message} at ${event.filename}:${event.lineno}:${event.colno}`;
+            addLog(`RUNTIME ERROR: ${message}`, 'error', event.error?.stack || '');
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            addLog(`PROMISE REJECTION: ${event.reason}`, 'error', event.reason?.stack || '');
+        });
+        
+        // Мониторинг состояния приложения
+        function checkAppStatus() {
+            // DOM Ready
+            if (document.readyState === 'complete') {
+                updateStatus('domStatus', 'pass', '✅ Ready');
+            } else {
+                updateStatus('domStatus', 'pending', '⏳ Loading...');
+            }
+            
+            // Modules Loaded
+            const requiredModules = ['StateManager', 'Renderer', 'Editor', 'DragManager', 'ExportManager', 'AIManager', 'TemplateManager'];
+            const loadedModules = requiredModules.filter(module => typeof window[module] !== 'undefined');
+            
+            if (loadedModules.length === requiredModules.length) {
+                updateStatus('modulesStatus', 'pass', `✅ ${loadedModules.length}/${requiredModules.length}`);
+            } else {
+                updateStatus('modulesStatus', 'pending', `⏳ ${loadedModules.length}/${requiredModules.length}`);
+            }
+            
+            // App Initialized
+            if (window.flashPostApp) {
+                updateStatus('appStatus', 'pass', '✅ Initialized');
+                
+                // UI Visible
+                const app = document.getElementById('app');
+                const loading = document.getElementById('loading');
+                
+                if (app && window.getComputedStyle(app).display !== 'none') {
+                    updateStatus('uiStatus', 'pass', '✅ Visible');
+                } else if (loading && window.getComputedStyle(loading).display !== 'none') {
+                    updateStatus('uiStatus', 'pending', '⏳ Loading...');
+                } else {
+                    updateStatus('uiStatus', 'fail', '❌ Hidden');
+                }
+            } else {
+                updateStatus('appStatus', 'pending', '⏳ Initializing...');
+                updateStatus('uiStatus', 'pending', '⏳ Waiting...');
+            }
+        }
+        
+        // Проверяем статус каждые 500мс
+        const statusInterval = setInterval(checkAppStatus, 500);
+        
+        // Останавливаем мониторинг через 30 секунд
+        setTimeout(() => {
+            clearInterval(statusInterval);
+            addLog('Monitoring stopped after 30 seconds', 'info');
+        }, 30000);
+        
+        // Начальная проверка
+        addLog('Console error monitoring started', 'info');
+        checkAppStatus();
+        
+        // Проверяем критические ошибки
+        setTimeout(() => {
+            if (errorCount > 0) {
+                addLog(`❌ CRITICAL: ${errorCount} console errors detected!`, 'error');
+                addLog('UI may not appear due to JavaScript errors', 'error');
+            } else {
+                addLog('✅ No console errors detected', 'info');
+            }
+        }, 5000);
+    </script>
+    
+    <!-- Modular Architecture -->
+    <script src="src/state.js" defer></script>
+    <script src="src/renderer.js" defer></script>
+    <script src="src/editor.js" defer></script>
+    <script src="src/drag.js" defer></script>
+    <script src="src/export.js" defer></script>
+    <script src="src/ai.js" defer></script>
+    <script src="src/template-manager.js" defer></script>
+    <script src="src/app.js" defer></script>
+</body>
+</html>

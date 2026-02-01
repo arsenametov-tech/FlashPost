@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест единого рендеринга - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Стили для демонстрации режимов */
+        .render-indicator {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(131, 58, 180, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10000;
+            text-transform: uppercase;
+        }
+        
+        .render-controls {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+        }
+        
+        .render-controls h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .render-controls button {
+            margin: 3px;
+            padding: 8px 12px;
+            border: 1px solid #833ab4;
+            background: white;
+            color: #833ab4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            display: block;
+            width: 100%;
+        }
+        
+        .render-controls button:hover {
+            background: #833ab4;
+            color: white;
+        }
+        
+        .render-controls button.active {
+            background: #833ab4;
+            color: white;
+        }
+        
+        .render-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-family: monospace;
+            z-index: 10000;
+            max-width: 300px;
+        }
+        
+        .render-info h4 {
+            margin: 0 0 10px 0;
+            color: #4ecdc4;
+        }
+        
+        .render-info .info-item {
+            margin: 5px 0;
+        }
+        
+        .render-info .info-value {
+            color: #ffeb3b;
+        }
+        
+        .static-indicator {
+            color: #4caf50;
+        }
+        
+        .interactive-indicator {
+            color: #ff9800;
+        }
+        
+        /* Стили для статичных элементов */
+        .slide-text-block-static {
+            cursor: default !important;
+            pointer-events: none !important;
+            user-select: none !important;
+        }
+        
+        .export-slide-preview-static {
+            cursor: default !important;
+            pointer-events: none !important;
+        }
+        
+        .slide-mini-static {
+            cursor: default !important;
+            pointer-events: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Загрузка FlashPost...</div>
+    </div>
+
+    <div id="app" class="app"></div>
+    
+    <!-- Индикатор режима рендеринга -->
+    <div class="render-indicator" id="renderIndicator">START</div>
+    
+    <!-- Контролы для переключения режимов -->
+    <div class="render-controls">
+        <h4>🎨 Режимы рендеринга</h4>
+        <button id="startRenderBtn" class="active">Start</button>
+        <button id="previewRenderBtn">Preview (Static)</button>
+        <button id="editRenderBtn">Edit (Interactive)</button>
+        <button id="exportRenderBtn">Export (Static)</button>
+        <hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">
+        <button id="createTestDataBtn">Создать тестовые данные</button>
+        <button id="validateRenderBtn">Проверить рендер</button>
+    </div>
+    
+    <!-- Информация о рендеринге -->
+    <div class="render-info" id="renderInfo">
+        <h4>📊 Информация о рендере</h4>
+        <div class="info-item">Режим: <span class="info-value" id="currentRenderMode">start</span></div>
+        <div class="info-item">Метод: <span class="info-value" id="renderMethod">renderStart()</span></div>
+        <div class="info-item">Интерактивность: <span id="interactivityStatus" class="static-indicator">Статичный</span></div>
+        <div class="info-item">Элементов: <span class="info-value" id="elementsCount">0</span></div>
+        <div class="info-item">Обработчиков: <span class="info-value" id="handlersCount">0</span></div>
+        <div class="info-item">HTML2Canvas: <span id="html2canvasReady" class="static-indicator">Готов</span></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        const app = new FlashPostApp();
+        
+        // Создание тестовых данных
+        function createTestData() {
+            // Очищаем проект
+            app.project.slides = [];
+            app.project.activeSlideId = null;
+            app.project.activeTextBlockId = null;
+            
+            // Создаем тестовые слайды
+            for (let i = 0; i < 3; i++) {
+                const slide = app.createSlide({
+                    title: `Тестовый слайд ${i + 1}`,
+                    text: `Это содержимое тестового слайда номер ${i + 1}`,
+                    background: {
+                        type: 'color',
+                        color: ['#833ab4', '#fd1d1d', '#28a745'][i],
+                        x: 50,
+                        y: 50,
+                        brightness: 100
+                    }
+                });
+                
+                // Создаем текстовые блоки
+                app.createTextBlock(slide.id, {
+                    text: `Заголовок слайда ${i + 1}`,
+                    x: 50,
+                    y: 30,
+                    width: 80,
+                    font: 'Montserrat',
+                    size: 24,
+                    weight: 700,
+                    color: '#ffffff'
+                });
+                
+                app.createTextBlock(slide.id, {
+                    text: `Подзаголовок для слайда ${i + 1}`,
+                    x: 50,
+                    y: 70,
+                    width: 70,
+                    font: 'Inter',
+                    size: 16,
+                    weight: 400,
+                    color: '#f0f0f0'
+                });
+            }
+            
+            // Устанавливаем первый слайд как активный
+            if (app.project.slides.length > 0) {
+                app.setActiveSlideByIndex(0);
+            }
+            
+            console.log('🧪 Созданы тестовые данные:', app.project);
+            updateRenderInfo();
+        }
+        
+        // Валидация рендеринга
+        function validateRender() {
+            const mode = app.project.mode;
+            const appElement = document.getElementById('app');
+            
+            let isValid = true;
+            let issues = [];
+            
+            // Проверяем статичность в preview/export
+            if (mode === 'preview' || mode === 'export') {
+                // Проверяем отсутствие input элементов
+                const inputs = appElement.querySelectorAll('input, textarea, select');
+                if (inputs.length > 0) {
+                    isValid = false;
+                    issues.push(`Найдены input элементы в ${mode} режиме: ${inputs.length}`);
+                }
+                
+                // Проверяем отсутствие draggable элементов
+                const draggables = appElement.querySelectorAll('[draggable="true"]');
+                if (draggables.length > 0) {
+                    isValid = false;
+                    issues.push(`Найдены draggable элементы в ${mode} режиме: ${draggables.length}`);
+                }
+                
+                // Проверяем статичные классы
+                const staticElements = appElement.querySelectorAll('.slide-text-block-static, .export-slide-preview-static');
+                console.log(`✅ Статичных элементов: ${staticElements.length}`);
+            }
+            
+            // Проверяем интерактивность в edit режиме
+            if (mode === 'edit') {
+                const interactiveElements = appElement.querySelectorAll('.preview-text-block, input, textarea, button');
+                console.log(`✅ Интерактивных элементов: ${interactiveElements.length}`);
+            }
+            
+            if (isValid) {
+                console.log(`✅ Рендер режима ${mode} валиден`);
+                alert(`✅ Рендер режима ${mode} валиден для html2canvas`);
+            } else {
+                console.error(`❌ Проблемы в рендере режима ${mode}:`, issues);
+                alert(`❌ Проблемы в рендере:\n${issues.join('\n')}`);
+            }
+            
+            return isValid;
+        }
+        
+        // Обновление информации о рендере
+        function updateRenderInfo() {
+            const mode = app.project.mode;
+            const appElement = document.getElementById('app');
+            
+            document.getElementById('renderIndicator').textContent = mode.toUpperCase();
+            document.getElementById('currentRenderMode').textContent = mode;
+            
+            // Определяем метод рендеринга
+            let renderMethod = '';
+            switch (mode) {
+                case 'start': renderMethod = 'renderStart()'; break;
+                case 'preview': renderMethod = 'renderPreview()'; break;
+                case 'edit': renderMethod = 'renderEditor()'; break;
+                case 'export': renderMethod = 'renderExport()'; break;
+            }
+            document.getElementById('renderMethod').textContent = renderMethod;
+            
+            // Определяем интерактивность
+            const isInteractive = mode === 'edit' || mode === 'start';
+            const interactivityElement = document.getElementById('interactivityStatus');
+            if (isInteractive) {
+                interactivityElement.textContent = 'Интерактивный';
+                interactivityElement.className = 'interactive-indicator';
+            } else {
+                interactivityElement.textContent = 'Статичный';
+                interactivityElement.className = 'static-indicator';
+            }
+            
+            // Подсчитываем элементы
+            const allElements = appElement.querySelectorAll('*');
+            document.getElementById('elementsCount').textContent = allElements.length;
+            
+            // Подсчитываем обработчики (приблизительно)
+            const interactiveElements = appElement.querySelectorAll('button, input, textarea, [onclick], [data-index]');
+            document.getElementById('handlersCount').textContent = interactiveElements.length;
+            
+            // HTML2Canvas готовность
+            const html2canvasElement = document.getElementById('html2canvasReady');
+            if (mode === 'preview' || mode === 'export') {
+                html2canvasElement.textContent = 'Готов';
+                html2canvasElement.className = 'static-indicator';
+            } else {
+                html2canvasElement.textContent = 'Не готов';
+                html2canvasElement.className = 'interactive-indicator';
+            }
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.render-controls button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const activeBtn = document.getElementById(mode + 'RenderBtn');
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+        
+        // Переопределяем render для отслеживания
+        const originalRender = app.render.bind(app);
+        app.render = function() {
+            console.log(`🎨 Рендеринг режима: ${this.project.mode}`);
+            const result = originalRender();
+            setTimeout(updateRenderInfo, 100);
+            return result;
+        };
+        
+        // Обработчики кнопок
+        document.getElementById('startRenderBtn').addEventListener('click', () => {
+            app.enterStartMode();
+        });
+        
+        document.getElementById('previewRenderBtn').addEventListener('click', () => {
+            if (app.project.slides.length === 0) {
+                alert('Сначала создайте тестовые данные!');
+                return;
+            }
+            app.enterPreviewMode();
+        });
+        
+        document.getElementById('editRenderBtn').addEventListener('click', () => {
+            if (app.project.slides.length === 0) {
+                alert('Сначала создайте тестовые данные!');
+                return;
+            }
+            app.enterEditMode();
+        });
+        
+        document.getElementById('exportRenderBtn').addEventListener('click', () => {
+            if (app.project.slides.length === 0) {
+                alert('Сначала создайте тестовые данные!');
+                return;
+            }
+            app.enterExportMode();
+        });
+        
+        document.getElementById('createTestDataBtn').addEventListener('click', createTestData);
+        document.getElementById('validateRenderBtn').addEventListener('click', validateRender);
+        
+        // Обновляем информацию каждые 2 секунды
+        setInterval(updateRenderInfo, 2000);
+        
+        // Начальное обновление
+        setTimeout(updateRenderInfo, 1000);
+        
+        console.log('🧪 Тест единого рендеринга запущен');
+        console.log('🎨 Проверяем статичность preview/export режимов');
+        console.log('🔧 Проверяем интерактивность edit режима');
+        console.log('📸 Проверяем готовность для html2canvas');
+    </script>
+</body>
+</html>

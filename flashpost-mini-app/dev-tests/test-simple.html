@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test - FlashPost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .results {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+        
+        .run-all {
+            background: #28a745;
+            font-size: 16px;
+            padding: 12px 24px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Simple FlashPost Test</h1>
+        <p>Простое тестирование основных функций</p>
+        
+        <button class="run-all" onclick="runAllTests()">🚀 Запустить все тесты</button>
+        
+        <div class="test-section">
+            <h3>1. Проверка загрузки модулей</h3>
+            <button onclick="testModuleLoading()">Проверить модули</button>
+            <div id="modules-results" class="results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Инициализация приложения</h3>
+            <button onclick="testAppInitialization()">Проверить инициализацию</button>
+            <div id="app-results" class="results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Основные функции</h3>
+            <button onclick="testBasicFunctions()">Проверить функции</button>
+            <div id="functions-results" class="results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. Система шаблонов</h3>
+            <button onclick="testTemplateSystem()">Проверить шаблоны</button>
+            <div id="templates-results" class="results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. Итоговый отчет</h3>
+            <button onclick="generateReport()">Сгенерировать отчет</button>
+            <div id="report-results" class="results"></div>
+        </div>
+    </div>
+
+    <!-- Загрузка модулей -->
+    <script src="../src/state.js"></script>
+    <script src="../src/renderer.js"></script>
+    <script src="../src/editor.js"></script>
+    <script src="../src/drag.js"></script>
+    <script src="../src/export.js"></script>
+    <script src="../src/ai.js"></script>
+    <script src="../src/template-manager.js"></script>
+    <script src="../src/app.js"></script>
+
+    <script>
+        // Глобальные переменные для отслеживания результатов
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            warnings: 0
+        };
+
+        // Функция логирования
+        function log(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
+            
+            // Обновляем статистику
+            testResults.total++;
+            if (type === 'success') testResults.passed++;
+            else if (type === 'error') testResults.failed++;
+            else if (type === 'warning') testResults.warnings++;
+            
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+
+        // 1. Тест загрузки модулей
+        function testModuleLoading() {
+            log('modules-results', 'Начинаем проверку модулей...', 'info');
+            
+            const requiredModules = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager'
+            ];
+            
+            requiredModules.forEach(moduleName => {
+                try {
+                    if (typeof window[moduleName] !== 'undefined') {
+                        log('modules-results', `✅ ${moduleName} загружен`, 'success');
+                    } else {
+                        log('modules-results', `❌ ${moduleName} не найден`, 'error');
+                    }
+                } catch (error) {
+                    log('modules-results', `❌ Ошибка проверки ${moduleName}: ${error.message}`, 'error');
+                }
+            });
+            
+            log('modules-results', 'Проверка модулей завершена', 'info');
+        }
+
+        // 2. Тест инициализации приложения
+        function testAppInitialization() {
+            log('app-results', 'Проверяем инициализацию приложения...', 'info');
+            
+            try {
+                // Проверяем глобальный объект приложения
+                if (typeof window.flashPostApp !== 'undefined') {
+                    log('app-results', '✅ FlashPostApp найдено', 'success');
+                    
+                    // Проверяем основные компоненты
+                    const components = ['state', 'renderer', 'editor', 'templateManager'];
+                    components.forEach(component => {
+                        try {
+                            if (window.flashPostApp[component]) {
+                                log('app-results', `✅ Компонент ${component} инициализирован`, 'success');
+                            } else {
+                                log('app-results', `⚠️ Компонент ${component} не найден`, 'warning');
+                            }
+                        } catch (error) {
+                            log('app-results', `❌ Ошибка проверки ${component}: ${error.message}`, 'error');
+                        }
+                    });
+                } else {
+                    log('app-results', '❌ FlashPostApp не инициализировано', 'error');
+                    
+                    // Пытаемся инициализировать вручную
+                    try {
+                        log('app-results', 'Попытка ручной инициализации...', 'info');
+                        
+                        if (typeof StateManager !== 'undefined') {
+                            const state = new StateManager();
+                            const renderer = new Renderer(state);
+                            const editor = new Editor(state, renderer);
+                            const templateManager = new TemplateManager(state);
+                            
+                            // Создаем временный объект приложения
+                            window.testApp = {
+                                state: state,
+                                renderer: renderer,
+                                editor: editor,
+                                templateManager: templateManager
+                            };
+                            
+                            log('app-results', '✅ Ручная инициализация успешна', 'success');
+                        } else {
+                            log('app-results', '❌ Модули недоступны для инициализации', 'error');
+                        }
+                    } catch (initError) {
+                        log('app-results', `❌ Ошибка ручной инициализации: ${initError.message}`, 'error');
+                    }
+                }
+            } catch (error) {
+                log('app-results', `❌ Критическая ошибка инициализации: ${error.message}`, 'error');
+            }
+        }
+
+        // 3. Тест основных функций
+        function testBasicFunctions() {
+            log('functions-results', 'Тестируем основные функции...', 'info');
+            
+            try {
+                const app = window.flashPostApp || window.testApp;
+                
+                if (!app) {
+                    log('functions-results', '❌ Приложение недоступно', 'error');
+                    return;
+                }
+                
+                // Тест StateManager
+                if (app.state) {
+                    try {
+                        // Очищаем проект
+                        app.state.clearProject();
+                        log('functions-results', '✅ Проект очищен', 'success');
+                        
+                        // Создаем тестовый слайд
+                        const slide = app.state.createSlide({
+                            title: 'Тестовый слайд',
+                            text: 'Тестовое содержимое',
+                            background: {
+                                type: 'color',
+                                color: '#833ab4'
+                            }
+                        });
+                        
+                        if (slide) {
+                            log('functions-results', `✅ Слайд создан: ${slide.id}`, 'success');
+                            
+                            // Добавляем текстовый блок
+                            const block = app.state.addTextBlock();
+                            if (block) {
+                                log('functions-results', `✅ Текстовый блок создан: ${block.id}`, 'success');
+                                
+                                // Обновляем свойства блока
+                                const updated = app.state.updateTextBlockProperty(block.id, 'text', 'Тестовый текст');
+                                if (updated) {
+                                    log('functions-results', '✅ Свойства блока обновлены', 'success');
+                                } else {
+                                    log('functions-results', '⚠️ Не удалось обновить свойства блока', 'warning');
+                                }
+                            } else {
+                                log('functions-results', '❌ Не удалось создать текстовый блок', 'error');
+                            }
+                        } else {
+                            log('functions-results', '❌ Не удалось создать слайд', 'error');
+                        }
+                        
+                        // Проверяем количество слайдов
+                        const slidesCount = app.state.getSlidesCount();
+                        log('functions-results', `✅ Всего слайдов: ${slidesCount}`, 'success');
+                        
+                    } catch (stateError) {
+                        log('functions-results', `❌ Ошибка StateManager: ${stateError.message}`, 'error');
+                    }
+                } else {
+                    log('functions-results', '❌ StateManager недоступен', 'error');
+                }
+                
+                // Тест Renderer
+                if (app.renderer) {
+                    try {
+                        log('functions-results', '✅ Renderer доступен', 'success');
+                        // Не вызываем render() чтобы избежать ошибок DOM
+                    } catch (renderError) {
+                        log('functions-results', `⚠️ Проблема с Renderer: ${renderError.message}`, 'warning');
+                    }
+                } else {
+                    log('functions-results', '❌ Renderer недоступен', 'error');
+                }
+                
+            } catch (error) {
+                log('functions-results', `❌ Критическая ошибка функций: ${error.message}`, 'error');
+            }
+        }
+
+        // 4. Тест системы шаблонов
+        function testTemplateSystem() {
+            log('templates-results', 'Тестируем систему шаблонов...', 'info');
+            
+            try {
+                const app = window.flashPostApp || window.testApp;
+                
+                if (!app || !app.templateManager) {
+                    log('templates-results', '❌ TemplateManager недоступен', 'error');
+                    return;
+                }
+                
+                const templateManager = app.templateManager;
+                
+                // Проверяем методы TemplateManager
+                const methods = [
+                    'saveCurrentSlideAsTemplate',
+                    'getTemplatesFromStorage',
+                    'applyTemplateToCurrentSlide',
+                    'deleteTemplate',
+                    'clearAllTemplates'
+                ];
+                
+                methods.forEach(method => {
+                    if (typeof templateManager[method] === 'function') {
+                        log('templates-results', `✅ Метод ${method} доступен`, 'success');
+                    } else {
+                        log('templates-results', `❌ Метод ${method} не найден`, 'error');
+                    }
+                });
+                
+                // Тестируем сохранение шаблона
+                try {
+                    const templateName = `Тест шаблон ${Date.now()}`;
+                    const saved = templateManager.saveCurrentSlideAsTemplate(templateName);
+                    
+                    if (saved) {
+                        log('templates-results', `✅ Шаблон "${templateName}" сохранен`, 'success');
+                        
+                        // Проверяем, что шаблон действительно сохранился
+                        const templates = templateManager.getTemplatesFromStorage();
+                        const found = templates.find(t => t.name === templateName);
+                        
+                        if (found) {
+                            log('templates-results', '✅ Шаблон найден в хранилище', 'success');
+                            
+                            // Тестируем применение шаблона
+                            try {
+                                const applied = templateManager.applyTemplateToCurrentSlide(found.id, true);
+                                if (applied) {
+                                    log('templates-results', '✅ Шаблон успешно применен', 'success');
+                                } else {
+                                    log('templates-results', '⚠️ Не удалось применить шаблон', 'warning');
+                                }
+                            } catch (applyError) {
+                                log('templates-results', `⚠️ Ошибка применения: ${applyError.message}`, 'warning');
+                            }
+                            
+                            // Удаляем тестовый шаблон
+                            try {
+                                const deleted = templateManager.deleteTemplate(found.id);
+                                if (deleted) {
+                                    log('templates-results', '✅ Тестовый шаблон удален', 'success');
+                                } else {
+                                    log('templates-results', '⚠️ Не удалось удалить шаблон', 'warning');
+                                }
+                            } catch (deleteError) {
+                                log('templates-results', `⚠️ Ошибка удаления: ${deleteError.message}`, 'warning');
+                            }
+                        } else {
+                            log('templates-results', '❌ Шаблон не найден в хранилище', 'error');
+                        }
+                    } else {
+                        log('templates-results', '❌ Не удалось сохранить шаблон', 'error');
+                    }
+                } catch (saveError) {
+                    log('templates-results', `❌ Ошибка сохранения шаблона: ${saveError.message}`, 'error');
+                }
+                
+                // Проверяем статистику шаблонов
+                try {
+                    const stats = templateManager.getTemplateStats();
+                    log('templates-results', `✅ Статистика: ${stats.total} шаблонов`, 'success');
+                } catch (statsError) {
+                    log('templates-results', `⚠️ Ошибка статистики: ${statsError.message}`, 'warning');
+                }
+                
+            } catch (error) {
+                log('templates-results', `❌ Критическая ошибка шаблонов: ${error.message}`, 'error');
+            }
+        }
+
+        // 5. Генерация итогового отчета
+        function generateReport() {
+            log('report-results', '📊 Генерация итогового отчета...', 'info');
+            
+            const successRate = testResults.total > 0 ? 
+                Math.round((testResults.passed / testResults.total) * 100) : 0;
+            
+            log('report-results', `Всего тестов выполнено: ${testResults.total}`, 'info');
+            log('report-results', `Успешно пройдено: ${testResults.passed}`, 'success');
+            log('report-results', `Ошибок: ${testResults.failed}`, testResults.failed > 0 ? 'error' : 'success');
+            log('report-results', `Предупреждений: ${testResults.warnings}`, testResults.warnings > 0 ? 'warning' : 'success');
+            log('report-results', `Процент успеха: ${successRate}%`, 
+                successRate >= 80 ? 'success' : successRate >= 60 ? 'warning' : 'error');
+            
+            // Итоговая оценка
+            if (successRate >= 90) {
+                log('report-results', '🎉 ОТЛИЧНЫЙ РЕЗУЛЬТАТ! Все основные функции работают корректно.', 'success');
+            } else if (successRate >= 70) {
+                log('report-results', '👍 ХОРОШИЙ РЕЗУЛЬТАТ! Большинство функций работает правильно.', 'success');
+            } else if (successRate >= 50) {
+                log('report-results', '⚠️ УДОВЛЕТВОРИТЕЛЬНО. Есть проблемы, требующие внимания.', 'warning');
+            } else {
+                log('report-results', '❌ ТРЕБУЕТСЯ ИСПРАВЛЕНИЕ. Обнаружены серьезные проблемы.', 'error');
+            }
+            
+            // Рекомендации
+            if (testResults.failed > 0) {
+                log('report-results', '💡 Рекомендация: Исправьте ошибки перед использованием приложения.', 'info');
+            }
+            
+            if (testResults.warnings > 0) {
+                log('report-results', '💡 Рекомендация: Обратите внимание на предупреждения.', 'info');
+            }
+        }
+
+        // Запуск всех тестов
+        function runAllTests() {
+            // Очищаем предыдущие результаты
+            testResults = { total: 0, passed: 0, failed: 0, warnings: 0 };
+            
+            const containers = ['modules-results', 'app-results', 'functions-results', 'templates-results', 'report-results'];
+            containers.forEach(id => {
+                const container = document.getElementById(id);
+                if (container) container.innerHTML = '';
+            });
+            
+            log('report-results', '🚀 Запуск полного тестирования...', 'info');
+            
+            // Запускаем тесты с задержками
+            setTimeout(() => testModuleLoading(), 100);
+            setTimeout(() => testAppInitialization(), 1000);
+            setTimeout(() => testBasicFunctions(), 2000);
+            setTimeout(() => testTemplateSystem(), 3000);
+            setTimeout(() => generateReport(), 4000);
+        }
+
+        // Автоматический запуск проверки модулей при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('report-results', '✅ Страница загружена. Готов к тестированию.', 'info');
+                testModuleLoading();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

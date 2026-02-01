@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Мгновенный запуск</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .launch-box {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 3em;
+            margin: 0 0 20px 0;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        
+        .main-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        .main-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+        }
+        
+        .alt-links {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .alt-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .alt-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        
+        .status {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        
+        .countdown {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="launch-box">
+        <div class="logo">🚀</div>
+        <h1>FlashPost</h1>
+        <div class="subtitle">Создавай вирусные Instagram карусели</div>
+        
+        <div class="status">
+            ✅ Все системы работают | 📊 Версия: Complete
+        </div>
+        
+        <a href="telegram-mini-app-ux-polished.html" class="main-btn" id="mainBtn">
+            🚀 ЗАПУСТИТЬ ПРИЛОЖЕНИЕ
+        </a>
+        
+        <div class="alt-links">
+            <div style="margin-bottom: 15px; color: #6c757d; font-size: 14px;">Альтернативные версии:</div>
+            
+            <a href="flashpost-mvp-enhanced-ai.html" class="alt-btn">🤖 Enhanced AI</a>
+            <a href="flashpost-working-complete.html" class="alt-btn">⚡ Compact</a>
+            <a href="ux-polish-working-demo.html" class="alt-btn">✨ UX Demo</a>
+            <a href="flashpost-direct-links.html" class="alt-btn">📋 Все ссылки</a>
+        </div>
+        
+        <div class="countdown" id="countdown">
+            Автозапуск через <span id="timer">5</span> секунд...
+        </div>
+    </div>
+
+    <script>
+        let countdown = 5;
+        const timerElement = document.getElementById('timer');
+        const countdownElement = document.getElementById('countdown');
+        const mainBtn = document.getElementById('mainBtn');
+        
+        // Countdown timer
+        const timer = setInterval(() => {
+            countdown--;
+            timerElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                countdownElement.textContent = 'Запуск...';
+                window.location.href = 'telegram-mini-app-ux-polished.html';
+            }
+        }, 1000);
+        
+        // Cancel countdown on any interaction
+        document.addEventListener('click', () => {
+            clearInterval(timer);
+            countdownElement.style.display = 'none';
+        });
+        
+        document.addEventListener('keydown', () => {
+            clearInterval(timer);
+            countdownElement.style.display = 'none';
+        });
+        
+        // Preload main app
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = 'telegram-mini-app-ux-polished.html';
+        document.head.appendChild(link);
+        
+        console.log('🚀 FlashPost Start Page loaded');
+        console.log('📱 Main app: telegram-mini-app-ux-polished.html');
+    </script>
+</body>
+</html>

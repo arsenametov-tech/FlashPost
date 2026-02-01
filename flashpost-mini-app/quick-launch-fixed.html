@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Быстрый запуск (исправленная версия)</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Bebas+Neue:wght@400&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-indicator {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status-error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status-warning {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .console {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🚀 FlashPost - Быстрый запуск</h1>
+        
+        <!-- Статус системы -->
+        <div class="status">
+            <div class="status-title">📊 Статус системы</div>
+            <div class="status-item">
+                <span>Модули загружены</span>
+                <span class="status-indicator" id="modules-status">ПРОВЕРКА</span>
+            </div>
+            <div class="status-item">
+                <span>DOM готов</span>
+                <span class="status-indicator status-success">ГОТОВ</span>
+            </div>
+            <div class="status-item">
+                <span>Шрифты загружены</span>
+                <span class="status-indicator" id="fonts-status">ПРОВЕРКА</span>
+            </div>
+            <div class="status-item">
+                <span>Telegram API</span>
+                <span class="status-indicator" id="telegram-status">ПРОВЕРКА</span>
+            </div>
+        </div>
+        
+        <!-- Консоль диагностики -->
+        <div class="console" id="console"></div>
+        
+        <!-- Кнопки действий -->
+        <button class="btn" onclick="runDiagnostics()">🔧 Запустить диагностику</button>
+        <button class="btn btn-secondary" onclick="openMainApp()">📱 Открыть основное приложение</button>
+        <button class="btn btn-secondary" onclick="openWorkingApp()">✅ Открыть рабочую версию</button>
+        <button class="btn btn-secondary" onclick="openVerificationTests()">🧪 Открыть тесты верификации</button>
+    </div>
+
+    <script>
+        // Утилиты для логирования
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : '#00ff00';
+            console.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.className = `status-indicator status-${status}`;
+                element.textContent = text;
+            }
+        }
+        
+        // Проверка модулей
+        function checkModules() {
+            log('Проверяем загрузку модулей...');
+            
+            const requiredClasses = [
+                'StateManager', 'Renderer', 'Editor', 'FlashPostApp',
+                'DOMUpdateQueue', 'EventManager'
+            ];
+            
+            let loadedCount = 0;
+            
+            requiredClasses.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    log(`✅ ${className} загружен`, 'success');
+                    loadedCount++;
+                } else {
+                    log(`❌ ${className} не найден`, 'error');
+                }
+            });
+            
+            if (loadedCount === requiredClasses.length) {
+                updateStatus('modules-status', 'success', 'ЗАГРУЖЕНЫ');
+                log(`✅ Все ${loadedCount} модулей загружены успешно`, 'success');
+                return true;
+            } else {
+                updateStatus('modules-status', 'warning', `${loadedCount}/${requiredClasses.length}`);
+                log(`⚠️ Загружено только ${loadedCount}/${requiredClasses.length} модулей`, 'warning');
+                return false;
+            }
+        }
+        
+        // Проверка шрифтов
+        function checkFonts() {
+            log('Проверяем загрузку шрифтов...');
+            
+            const fonts = ['Inter', 'Playfair Display', 'Bebas Neue'];
+            let fontsLoaded = 0;
+            
+            fonts.forEach(font => {
+                if (document.fonts.check(`16px "${font}"`)) {
+                    log(`✅ Шрифт ${font} загружен`, 'success');
+                    fontsLoaded++;
+                } else {
+                    log(`⚠️ Шрифт ${font} не загружен`, 'warning');
+                }
+            });
+            
+            if (fontsLoaded >= 2) {
+                updateStatus('fonts-status', 'success', 'ЗАГРУЖЕНЫ');
+                return true;
+            } else {
+                updateStatus('fonts-status', 'warning', `${fontsLoaded}/${fonts.length}`);
+                return false;
+            }
+        }
+        
+        // Проверка Telegram API
+        function checkTelegram() {
+            log('Проверяем Telegram WebApp API...');
+            
+            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                log('✅ Telegram WebApp API доступен', 'success');
+                updateStatus('telegram-status', 'success', 'ДОСТУПЕН');
+                return true;
+            } else {
+                log('⚠️ Telegram WebApp API недоступен (нормально для браузера)', 'warning');
+                updateStatus('telegram-status', 'warning', 'MOCK');
+                return false;
+            }
+        }
+        
+        // Полная диагностика
+        function runDiagnostics() {
+            log('🔧 Запускаем полную диагностику системы...', 'info');
+            
+            setTimeout(() => {
+                const modulesOk = checkModules();
+                const fontsOk = checkFonts();
+                const telegramOk = checkTelegram();
+                
+                log('📊 Результаты диагностики:', 'info');
+                log(`   Модули: ${modulesOk ? '✅' : '❌'}`, modulesOk ? 'success' : 'error');
+                log(`   Шрифты: ${fontsOk ? '✅' : '⚠️'}`, fontsOk ? 'success' : 'warning');
+                log(`   Telegram: ${telegramOk ? '✅' : '⚠️'}`, telegramOk ? 'success' : 'warning');
+                
+                if (modulesOk && fontsOk) {
+                    log('🎉 Система готова к работе!', 'success');
+                } else {
+                    log('⚠️ Система работает с ограничениями', 'warning');
+                }
+            }, 500);
+        }
+        
+        // Функции открытия приложений
+        function openMainApp() {
+            log('📱 Открываем основное приложение...', 'info');
+            window.open('index.html', '_blank');
+        }
+        
+        function openWorkingApp() {
+            log('✅ Открываем рабочую версию...', 'info');
+            window.open('working-app.html', '_blank');
+        }
+        
+        function openVerificationTests() {
+            log('🧪 Открываем тесты верификации...', 'info');
+            window.open('STAGE-1-VERIFICATION-TEST.html', '_blank');
+        }
+        
+        // Автозапуск при загрузке
+        window.addEventListener('load', () => {
+            log('🚀 FlashPost Quick Launch загружен', 'success');
+            
+            // Автоматически запускаем базовые проверки
+            setTimeout(() => {
+                checkFonts();
+                checkTelegram();
+            }, 1000);
+            
+            // Показываем приветствие
+            setTimeout(() => {
+                log('👋 Добро пожаловать в FlashPost!', 'success');
+                log('💡 Нажмите "Запустить диагностику" для полной проверки', 'info');
+            }, 1500);
+        });
+        
+        // Проверяем доступность модулей при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            // Пытаемся загрузить модули если они не загружены
+            if (typeof window.StateManager === 'undefined') {
+                log('⚠️ Модули не загружены, используем SAFE MODE', 'warning');
+                updateStatus('modules-status', 'warning', 'SAFE MODE');
+            }
+        });
+    </script>
+</body>
+</html>

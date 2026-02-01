@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Debug Test - FlashPost App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        
+        .console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        #app {
+            min-height: 200px;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Test - FlashPost App</h1>
+    
+    <div class="debug-panel">
+        <h3>Статус загрузки модулей</h3>
+        <div id="moduleStatus">Проверка...</div>
+        <button onclick="checkModules()">Проверить модули</button>
+        <button onclick="initApp()">Инициализировать приложение</button>
+        <button onclick="clearConsole()">Очистить консоль</button>
+    </div>
+    
+    <div class="debug-panel">
+        <h3>Консоль отладки</h3>
+        <div id="debugConsole" class="console-output">Ожидание загрузки...\n</div>
+    </div>
+    
+    <div class="debug-panel">
+        <h3>Приложение</h3>
+        <div id="app">Приложение будет загружено здесь...</div>
+    </div>
+
+    <script>
+        // Перехватываем console.log для отображения в debug панели
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToDebugConsole(message, type = 'log') {
+            const console = document.getElementById('debugConsole');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '📝';
+            console.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToDebugConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToDebugConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToDebugConsole(args.join(' '), 'warn');
+        };
+        
+        function clearConsole() {
+            document.getElementById('debugConsole').textContent = '';
+        }
+        
+        function checkModules() {
+            const statusDiv = document.getElementById('moduleStatus');
+            statusDiv.innerHTML = '';
+            
+            const modules = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager',
+                'FlashPostApp'
+            ];
+            
+            let loadedCount = 0;
+            
+            modules.forEach(moduleName => {
+                const isLoaded = window[moduleName] !== undefined;
+                const statusClass = isLoaded ? 'success' : 'error';
+                const statusText = isLoaded ? '✅ Загружен' : '❌ Не загружен';
+                
+                statusDiv.innerHTML += `<div class="${statusClass}">${moduleName}: ${statusText}</div>`;
+                
+                if (isLoaded) loadedCount++;
+            });
+            
+            const overallStatus = loadedCount === modules.length ? 'success' : 'error';
+            statusDiv.innerHTML += `<div class="${overallStatus}">Итого: ${loadedCount}/${modules.length} модулей загружено</div>`;
+            
+            console.log(`Проверка модулей завершена: ${loadedCount}/${modules.length}`);
+        }
+        
+        function initApp() {
+            try {
+                console.log('Попытка инициализации приложения...');
+                
+                if (window.flashPostApp) {
+                    console.log('✅ Приложение уже инициализировано');
+                    return;
+                }
+                
+                if (!window.FlashPostApp) {
+                    console.error('❌ FlashPostApp класс не найден');
+                    return;
+                }
+                
+                console.log('🚀 Создание экземпляра FlashPostApp...');
+                window.flashPostApp = new FlashPostApp();
+                
+                console.log('✅ Приложение успешно инициализировано');
+                
+            } catch (error) {
+                console.error('❌ Ошибка инициализации:', error.message);
+                console.error('Stack trace:', error.stack);
+            }
+        }
+        
+        // Обработчик ошибок
+        window.addEventListener('error', function(event) {
+            console.error('Глобальная ошибка:', event.error?.message || event.message);
+            if (event.error?.stack) {
+                console.error('Stack:', event.error.stack);
+            }
+        });
+        
+        // Проверяем модули при загрузке страницы
+        window.addEventListener('load', function() {
+            console.log('Страница загружена, проверяем модули...');
+            setTimeout(() => {
+                checkModules();
+                
+                // Автоматически пытаемся инициализировать если все модули загружены
+                setTimeout(() => {
+                    const loadedModules = Object.keys(window).filter(key => 
+                        ['StateManager', 'Renderer', 'Editor', 'DragManager', 'ExportManager', 'AIManager', 'TemplateManager', 'FlashPostApp'].includes(key)
+                    ).length;
+                    
+                    if (loadedModules >= 8) {
+                        console.log('Все модули загружены, автоинициализация...');
+                        initApp();
+                    } else {
+                        console.warn(`Загружено только ${loadedModules}/8 модулей, автоинициализация отменена`);
+                    }
+                }, 1000);
+            }, 500);
+        });
+    </script>
+    
+    <!-- Загружаем модули БЕЗ defer для отладки -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/templates.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>

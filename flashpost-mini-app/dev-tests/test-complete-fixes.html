@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Комплексное решение всех проблем - FlashPost</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .fixes-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .fix-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .fix-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .fix-description {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary { background: #833ab4; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        
+        .btn:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔧 Комплексное решение всех проблем FlashPost</h1>
+        
+        <div class="fixes-overview">
+            <div class="fix-card">
+                <div class="fix-title">✅ Независимые текстовые блоки</div>
+                <div class="fix-description">Каждый слайд имеет свои уникальные textBlocks</div>
+            </div>
+            
+            <div class="fix-card">
+                <div class="fix-title">✅ Исправлен drag & drop</div>
+                <div class="fix-description">Правильный пересчет координат и границы</div>
+            </div>
+            
+            <div class="fix-card">
+                <div class="fix-title">✅ Система ключевых слов</div>
+                <div class="fix-description">Автоматическое выделение с двухэтапной генерацией</div>
+            </div>
+            
+            <div class="fix-card">
+                <div class="fix-title">✅ Система шаблонов</div>
+                <div class="fix-description">Сохранение в localStorage с клонированием</div>
+            </div>
+            
+            <div class="fix-card">
+                <div class="fix-title">✅ Чистый экспорт</div>
+                <div class="fix-description">Режим export для html2canvas без интерфейса</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="testTextBlocks()">🧪 Тест текстовых блоков</button>
+            <button class="btn btn-success" onclick="testDragDrop()">🧪 Тест drag & drop</button>
+            <button class="btn btn-info" onclick="testKeywords()">🧪 Тест ключевых слов</button>
+            <button class="btn btn-warning" onclick="testTemplates()">🧪 Тест шаблонов</button>
+            <button class="btn btn-primary" onclick="testExport()">🧪 Тест экспорта</button>
+            <button class="btn btn-success" onclick="runAllTests()">⚡ Запустить все тесты</button>
+        </div>
+        
+        <div id="testResults" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        console.log('🔧 Комплексное решение всех проблем загружено');
+        
+        function testTextBlocks() {
+            window.open('test-independent-text-blocks-fixed.html', '_blank');
+        }
+        
+        function testDragDrop() {
+            window.open('test-drag-drop-fixed.html', '_blank');
+        }
+        
+        function testKeywords() {
+            window.open('test-auto-keywords-system.html', '_blank');
+        }
+        
+        function testTemplates() {
+            window.open('test-templates-system.html', '_blank');
+        }
+        
+        function testExport() {
+            window.open('test-export-clean-system.html', '_blank');
+        }
+        
+        function runAllTests() {
+            const tests = [
+                'test-independent-text-blocks-fixed.html',
+                'test-drag-drop-fixed.html', 
+                'test-auto-keywords-system.html',
+                'test-templates-system.html',
+                'test-export-clean-system.html'
+            ];
+            
+            tests.forEach(test => {
+                setTimeout(() => window.open(test, '_blank'), 500);
+            });
+        }
+    </script>
+</body>
+</html>

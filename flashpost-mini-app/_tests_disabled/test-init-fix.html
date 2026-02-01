@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Init Fix - FlashPost</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .log {
+            background: #2a2a2a;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+            font-size: 12px;
+        }
+        .error { border-left-color: #ff0000; color: #ff6666; }
+        .success { border-left-color: #00ff00; color: #66ff66; }
+        .warning { border-left-color: #ffaa00; color: #ffcc66; }
+    </style>
+</head>
+<body>
+    <!-- Элементы которые нужны для инициализации -->
+    <div id="loading" style="display: none;">Loading...</div>
+    <div id="app" style="display: none;">App</div>
+
+    <h1>🔍 Test Init Fix</h1>
+    <div id="logs"></div>
+
+    <script>
+        const logs = document.getElementById('logs');
+        
+        function addLog(message, type = 'log') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(div);
+            console.log(message);
+        }
+
+        // Перехват всех console.log из app.js
+        const originalLog = console.log;
+        console.log = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('FlashPost') || message.includes('модул') || message.includes('DOM')) {
+                if (message.includes('❌')) {
+                    addLog(message, 'error');
+                } else if (message.includes('✅')) {
+                    addLog(message, 'success');
+                } else if (message.includes('⏳') || message.includes('⚠️')) {
+                    addLog(message, 'warning');
+                } else {
+                    addLog(message, 'log');
+                }
+            }
+            originalLog.apply(console, args);
+        };
+
+        // Перехват ошибок
+        window.addEventListener('error', (event) => {
+            addLog(`❌ ERROR: ${event.message} at ${event.filename}:${event.lineno}`, 'error');
+        });
+
+        addLog('🚀 Начинаем тест инициализации...');
+        
+        // Проверяем каждые 500мс статус инициализации
+        const checkInterval = setInterval(() => {
+            if (typeof window.flashPostApp !== 'undefined') {
+                addLog('✅ window.flashPostApp СОЗДАН!', 'success');
+                addLog(`📱 Тип: ${typeof window.flashPostApp}`, 'success');
+                
+                if (window.flashPostApp.state) {
+                    addLog('✅ state доступен', 'success');
+                    addLog(`🎯 Режим: ${window.flashPostApp.state.getMode()}`, 'success');
+                } else {
+                    addLog('❌ state НЕ доступен', 'error');
+                }
+                
+                clearInterval(checkInterval);
+            } else {
+                addLog('⏳ Ждем инициализации...', 'warning');
+            }
+        }, 500);
+        
+        // Останавливаем проверку через 10 секунд
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            if (typeof window.flashPostApp === 'undefined') {
+                addLog('❌ ИНИЦИАЛИЗАЦИЯ НЕ УДАЛАСЬ за 10 секунд', 'error');
+            }
+        }, 10000);
+    </script>
+
+    <!-- Загружаем модули в том же порядке что и в index.html -->
+    <script src="src/state.js" defer></script>
+    <script src="src/renderer.js" defer></script>
+    <script src="src/editor.js" defer></script>
+    <script src="src/drag.js" defer></script>
+    <script src="src/export.js" defer></script>
+    <script src="src/ai.js" defer></script>
+    <script src="src/template-manager.js" defer></script>
+    <script src="src/app.js" defer></script>
+</body>
+</html>

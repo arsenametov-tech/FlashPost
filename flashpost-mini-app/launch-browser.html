@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Launch FlashPost App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .launcher {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+        }
+        
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 28px;
+            font-weight: 800;
+        }
+        
+        .status {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .launch-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 15px 30px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .launch-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        
+        .primary:hover {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="launcher">
+        <h1>🚀 FlashPost Mini App</h1>
+        <p>Сервер запущен и готов к работе!</p>
+        
+        <div class="status">
+            ✅ Server: http://localhost:8080<br>
+            🔒 Stable Bootstrap: ACTIVE<br>
+            🏗️ Modular Architecture: READY
+        </div>
+        
+        <div>
+            <a href="http://localhost:8080/index.html" target="_blank" class="launch-btn primary">
+                🎯 Открыть основное приложение
+            </a>
+        </div>
+        
+        <div>
+            <a href="http://localhost:8080/test-stable-bootstrap.html" target="_blank" class="launch-btn">
+                🔒 Тест Bootstrap системы
+            </a>
+            
+            <a href="http://localhost:8080/open-app.html" target="_blank" class="launch-btn">
+                📋 Панель быстрого доступа
+            </a>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 12px; opacity: 0.8;">
+            Все системы готовы • Stable Bootstrap гарантирует стабильную работу
+        </p>
+    </div>
+    
+    <script>
+        // Автоматически открываем основное приложение через 2 секунды
+        setTimeout(() => {
+            if (confirm('Открыть основное приложение FlashPost?')) {
+                window.open('http://localhost:8080/index.html', '_blank');
+            }
+        }, 2000);
+        
+        // Проверяем доступность сервера
+        fetch('http://localhost:8080/index.html')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ Сервер доступен и готов');
+                    document.querySelector('.status').innerHTML += '<br>🌐 Connection: OK';
+                }
+            })
+            .catch(error => {
+                console.error('❌ Ошибка подключения:', error);
+                document.querySelector('.status').innerHTML += '<br>❌ Connection: ERROR';
+            });
+    </script>
+</body>
+</html>

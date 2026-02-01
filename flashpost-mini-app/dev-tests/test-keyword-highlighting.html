@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Test Keyword Highlighting</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Oswald:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Bebas+Neue:wght@400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="app.css">
+    
+    <style>
+        .demo-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            z-index: 10000;
+            max-width: 320px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .demo-panel h3 {
+            margin-bottom: 15px;
+            color: #ff6b6b;
+            text-align: center;
+        }
+        
+        .demo-example {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid #ff6b6b;
+        }
+        
+        .demo-label {
+            font-size: 11px;
+            color: #ccc;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .demo-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .demo-keyword {
+            color: #ff6b6b;
+            font-weight: 800;
+            text-shadow: 0 0 8px #ff6b6b40;
+        }
+        
+        .demo-instructions {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <!-- Демонстрационная панель -->
+    <div class="demo-panel">
+        <h3>🎨 Keyword Highlighting</h3>
+        
+        <div class="demo-example">
+            <div class="demo-label">Исходный текст:</div>
+            <div class="demo-text">Увеличь *продажи* на *300%* за *30 дней*</div>
+        </div>
+        
+        <div class="demo-example">
+            <div class="demo-label">Результат:</div>
+            <div class="demo-text">Увеличь <span class="demo-keyword">продажи</span> на <span class="demo-keyword">300%</span> за <span class="demo-keyword">30 дней</span></div>
+        </div>
+        
+        <div class="demo-instructions">
+            <strong>Инструкция:</strong><br>
+            1. Используйте *слово* для выделения<br>
+            2. Выберите цвет в редакторе<br>
+            3. Включите/выключите подсветку<br>
+            4. Настройте эффекты
+        </div>
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="loading-content">
+            <div class="loading-logo">⚡</div>
+            <div class="loading-text">FlashPost AI</div>
+            <div class="loading-subtitle">Загрузка подсветки...</div>
+        </div>
+    </div>
+
+    <div id="app" class="app" style="display: none;"></div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        window.app = new FlashPostApp();
+        
+        // Тестовые данные для демонстрации подсветки ключевых слов
+        setTimeout(() => {
+            console.log('🎨 Testing keyword highlighting functionality...');
+            
+            // Создаем тестовые слайды с ключевыми словами
+            app.slides = [
+                { text: "Увеличь *продажи* на *300%*" },
+                { text: "Секрет *успеха* в *деталях*" },
+                { text: "*Результат* за *24 часа*" },
+                { text: "Топ *стратегии* для *роста*" }
+            ];
+            
+            // Инициализируем стили слайдов
+            app.initializeSlideStyles();
+            
+            // Настраиваем каждый слайд с разными примерами подсветки
+            app.slideStyles[0].textBlocks[0] = {
+                id: 'highlight_demo_1',
+                text: 'Увеличь *продажи* на *300%*\nза *30 дней* без *вложений*',
+                font: 'Montserrat',
+                size: 18,
+                weight: 700,
+                color: '#ffffff',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 85,
+                keywordColor: '#ff6b6b',
+                highlightEnabled: true
+            };
+            
+            app.slideStyles[1].textBlocks[0] = {
+                id: 'highlight_demo_2',
+                text: 'Секрет *успеха* кроется\nв *мелких деталях*',
+                font: 'Playfair Display',
+                size: 16,
+                weight: 600,
+                color: '#ffffff',
+                glow: true,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 80,
+                keywordColor: '#4ecdc4',
+                highlightEnabled: true
+            };
+            
+            app.slideStyles[2].textBlocks[0] = {
+                id: 'highlight_demo_3',
+                text: '*РЕЗУЛЬТАТ* ВИДЕН УЖЕ\nЧЕРЕЗ *24 ЧАСА*',
+                font: 'Oswald',
+                size: 20,
+                weight: 600,
+                color: '#ffffff',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 90,
+                keywordColor: '#f9ca24',
+                highlightEnabled: true
+            };
+            
+            app.slideStyles[3].textBlocks[0] = {
+                id: 'highlight_demo_4',
+                text: 'ТОП *СТРАТЕГИИ* ДЛЯ\n*БЫСТРОГО РОСТА*',
+                font: 'Bebas Neue',
+                size: 22,
+                weight: 400,
+                color: '#ffffff',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 85,
+                keywordColor: '#a55eea',
+                highlightEnabled: true
+            };
+            
+            // Добавляем дополнительные блоки для демонстрации
+            app.slideStyles[0].textBlocks.push({
+                id: 'sub_demo_1',
+                text: 'Проверенная *методика*',
+                font: 'Inter',
+                size: 14,
+                weight: 500,
+                color: '#f0f0f0',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 75 },
+                width: 60,
+                keywordColor: '#26de81',
+                highlightEnabled: true
+            });
+            
+            app.slideStyles[1].textBlocks.push({
+                id: 'sub_demo_2',
+                text: 'Без *подсветки* обычный текст',
+                font: 'Inter',
+                size: 12,
+                weight: 400,
+                color: '#cccccc',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 75 },
+                width: 70,
+                keywordColor: '#ff6b6b',
+                highlightEnabled: false // Отключена подсветка
+            });
+            
+            console.log('✅ Keyword highlighting demo initialized');
+            console.log('📝 Test parsing:', app.parseTextWithKeywords('Тест *подсветки* слов', '#ff6b6b', true));
+            console.log('🔢 Keywords count:', app.countKeywords('Слово *один* и *два* и *три*'));
+            console.log('📋 Keywords list:', app.getKeywordsList('Список *ключевых* и *важных* слов'));
+            
+            // Показываем редактор для тестирования
+            app.openEditor();
+            
+        }, 2000);
+    </script>
+</body>
+</html>

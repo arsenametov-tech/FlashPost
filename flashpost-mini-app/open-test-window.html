@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Test Window</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #0f0f14;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+        }
+        
+        .launcher {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .launcher-card {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            margin: 0 0 30px 0;
+            font-size: 32px;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .test-btn:active {
+            transform: translateY(0);
+        }
+        
+        .priority { 
+            background: linear-gradient(135deg, #28a745, #20c997);
+            font-size: 18px;
+        }
+        
+        .diagnostic { 
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+        }
+        
+        .advanced { 
+            background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(40, 167, 69, 0.2);
+            border-left: 4px solid #28a745;
+        }
+        
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="launcher">
+        <div class="launcher-card">
+            <h1>🚀 Test Window Launcher</h1>
+            
+            <div class="status">
+                <strong>🎯 Цель:</strong> Открыть тесты в новом окне для проверки рендеринга
+            </div>
+            
+            <div class="test-grid">
+                <!-- Приоритетные тесты -->
+                <button class="test-btn priority" onclick="openTest('visual-white-screen-diagnosis.html')">
+                    🔍 Visual Diagnosis<br>
+                    <small>Полная диагностика белого экрана</small>
+                </button>
+                
+                <button class="test-btn priority" onclick="openTest('test-render-app-simple.html')">
+                    🔴 Simple RenderApp<br>
+                    <small>Базовый тест рендеринга</small>
+                </button>
+                
+                <button class="test-btn priority" onclick="openTest('index.html')">
+                    🎯 Main App<br>
+                    <small>Основное приложение</small>
+                </button>
+                
+                <!-- Диагностические тесты -->
+                <button class="test-btn diagnostic" onclick="openTest('test-telegram-expand.html')">
+                    📱 Telegram Expand<br>
+                    <small>Тест expand() метода</small>
+                </button>
+                
+                <button class="test-btn diagnostic" onclick="openTest('test-position-fix.html')">
+                    🔧 Position Fix<br>
+                    <small>Тест CSS позиционирования</small>
+                </button>
+                
+                <button class="test-btn diagnostic" onclick="openTest('white-screen-diagnosis.html')">
+                    🔍 White Screen Diagnosis<br>
+                    <small>Общая диагностика</small>
+                </button>
+                
+                <!-- Продвинутые тесты -->
+                <button class="test-btn advanced" onclick="openTest('dev-tests/test-complete-functionality.html')">
+                    🧪 Complete Tests<br>
+                    <small>Полное тестирование функций</small>
+                </button>
+                
+                <button class="test-btn advanced" onclick="openTest('test-stable-bootstrap.html')">
+                    🔒 Bootstrap Test<br>
+                    <small>Тест стабильного bootstrap</small>
+                </button>
+            </div>
+            
+            <div>
+                <button class="test-btn" onclick="openAllPriority()" style="
+                    background: linear-gradient(135deg, #dc3545, #fd7e14);
+                    margin: 10px;
+                ">
+                    🚀 Open All Priority Tests
+                </button>
+                
+                <button class="test-btn" onclick="runQuickTest()" style="
+                    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+                    margin: 10px;
+                ">
+                    ⚡ Quick Render Test
+                </button>
+            </div>
+            
+            <div class="instructions">
+                <h3>📋 Инструкции по тестированию:</h3>
+                <ol>
+                    <li><strong>Начните с "🔍 Visual Diagnosis"</strong> - полная диагностика</li>
+                    <li><strong>Если белый экран</strong> - нажмите "🔴 Add Red Debug" в панели</li>
+                    <li><strong>Проверьте Console</strong> - должны быть логи без ошибок</li>
+                    <li><strong>Тест "🔴 Simple RenderApp"</strong> - базовая проверка DOM</li>
+                    <li><strong>Основное приложение</strong> - финальная проверка</li>
+                </ol>
+                
+                <h4>🔍 Что искать:</h4>
+                <ul>
+                    <li>✅ <strong>Красный текст</strong> - DOM рендеринг работает</li>
+                    <li>✅ <strong>Темный фон</strong> - CSS применяется</li>
+                    <li>✅ <strong>Полная высота</strong> - layout корректный</li>
+                    <li>❌ <strong>Белый экран</strong> - проблема с рендерингом</li>
+                </ul>
+            </div>
+            
+            <div id="testResults" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        let openedWindows = [];
+        
+        function openTest(testFile) {
+            console.log('🚀 Opening test:', testFile);
+            
+            const windowFeatures = 'width=1200,height=800,scrollbars=yes,resizable=yes';
+            const newWindow = window.open(testFile, '_blank', windowFeatures);
+            
+            if (newWindow) {
+                openedWindows.push({
+                    window: newWindow,
+                    file: testFile,
+                    openTime: new Date().toLocaleTimeString()
+                });
+                
+                updateTestResults(`✅ Opened: ${testFile}`);
+                
+                // Фокус на новом окне
+                newWindow.focus();
+                
+                console.log('✅ Test window opened:', testFile);
+            } else {
+                updateTestResults(`❌ Failed to open: ${testFile} (popup blocked?)`);
+                console.error('❌ Failed to open test window:', testFile);
+            }
+        }
+        
+        function openAllPriority() {
+            console.log('🚀 Opening all priority tests...');
+            
+            const priorityTests = [
+                'visual-white-screen-diagnosis.html',
+                'test-render-app-simple.html',
+                'index.html'
+            ];
+            
+            priorityTests.forEach((test, index) => {
+                setTimeout(() => {
+                    openTest(test);
+                }, index * 500); // Задержка между открытиями
+            });
+            
+            updateTestResults(`🚀 Opening ${priorityTests.length} priority tests...`);
+        }
+        
+        function runQuickTest() {
+            console.log('⚡ Running quick render test...');
+            
+            // Создаем временное окно с быстрым тестом
+            const quickTestHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Quick Render Test</title>
+                    <style>
+                        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; }
+                        #app { min-height: 100vh; background: #0f0f14; color: #fff; display: block; }
+                    </style>
+                </head>
+                <body>
+                    <div id="app"></div>
+                    <script>
+                        console.log('⚡ Quick render test starting...');
+                        
+                        setTimeout(() => {
+                            document.getElementById('app').innerHTML = \`
+                                <div style="
+                                    min-height: 100vh;
+                                    background: #0f0f14;
+                                    color: red;
+                                    font-size: 24px;
+                                    padding: 20px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    text-align: center;
+                                    flex-direction: column;
+                                ">
+                                    🔴 QUICK RENDER TEST SUCCESS
+                                    <div style="font-size: 16px; color: white; margin-top: 20px;">
+                                        ✅ DOM accessible<br>
+                                        ✅ CSS applying<br>
+                                        ✅ JavaScript executing<br>
+                                        ✅ Full height working<br>
+                                        <div style="margin-top: 15px; font-size: 14px; opacity: 0.8;">
+                                            Time: \${new Date().toLocaleTimeString()}<br>
+                                            Viewport: \${window.innerWidth}x\${window.innerHeight}
+                                        </div>
+                                    </div>
+                                </div>
+                            \`;
+                            
+                            console.log('✅ Quick render test completed');
+                        }, 500);
+                    </script>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([quickTestHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const quickWindow = window.open(url, '_blank', 'width=800,height=600');
+            if (quickWindow) {
+                openedWindows.push({
+                    window: quickWindow,
+                    file: 'quick-test',
+                    openTime: new Date().toLocaleTimeString()
+                });
+                
+                updateTestResults('⚡ Quick render test opened');
+                
+                // Очищаем URL через 5 секунд
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 5000);
+            }
+        }
+        
+        function updateTestResults(message) {
+            const resultsEl = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            resultsEl.innerHTML = `
+                <div style="
+                    background: rgba(255,255,255,0.1);
+                    padding: 10px;
+                    border-radius: 6px;
+                    margin-top: 10px;
+                    font-size: 14px;
+                ">
+                    <strong>[${timestamp}]</strong> ${message}
+                </div>
+            ` + resultsEl.innerHTML;
+        }
+        
+        // Мониторинг открытых окон
+        function monitorWindows() {
+            openedWindows = openedWindows.filter(item => {
+                if (item.window.closed) {
+                    console.log('🔒 Window closed:', item.file);
+                    return false;
+                }
+                return true;
+            });
+            
+            if (openedWindows.length > 0) {
+                console.log(`📊 Active test windows: ${openedWindows.length}`);
+            }
+        }
+        
+        // Закрытие всех окон при закрытии launcher
+        window.addEventListener('beforeunload', () => {
+            openedWindows.forEach(item => {
+                if (!item.window.closed) {
+                    item.window.close();
+                }
+            });
+        });
+        
+        // Периодический мониторинг
+        setInterval(monitorWindows, 2000);
+        
+        // Инициализация
+        window.addEventListener('load', () => {
+            console.log('🚀 Test Window Launcher ready');
+            updateTestResults('🎯 Launcher готов к тестированию');
+            
+            // Показываем инструкции
+            setTimeout(() => {
+                updateTestResults('💡 Начните с "🔍 Visual Diagnosis" для полной диагностики');
+            }, 1000);
+        });
+        
+        // Глобальные функции для консоли
+        window.openTest = openTest;
+        window.openAllPriority = openAllPriority;
+        window.runQuickTest = runQuickTest;
+        
+        console.log('💡 Available commands: openTest("filename.html"), openAllPriority(), runQuickTest()');
+    </script>
+</body>
+</html>

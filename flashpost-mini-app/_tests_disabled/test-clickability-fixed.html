@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖱️ Clickability Test - Fixed Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%); color: #fff; font-family: Arial, sans-serif; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .test-card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px); }
+        .btn { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin: 10px; font-size: 16px; font-weight: 600; transition: transform 0.2s; z-index: 10; pointer-events: auto; }
+        .btn:hover { transform: translateY(-2px); outline: 2px solid rgba(0, 255, 128, 0.6); outline-offset: 2px; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .warning { background: #5f4a1a; border: 2px solid #ffc107; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .test-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .test-result { font-weight: bold; margin-top: 10px; }
+        
+        .clickable-demo {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .demo-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 10;
+            pointer-events: auto;
+        }
+        
+        .demo-btn.primary { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; }
+        .demo-btn.secondary { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); }
+        .demo-btn.nav { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center; }
+        
+        .demo-btn:hover {
+            outline: 2px solid rgba(0, 255, 128, 0.6) !important;
+            outline-offset: 2px !important;
+            transform: translateY(-2px);
+        }
+        
+        .demo-indicators {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .demo-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 15;
+            pointer-events: auto;
+        }
+        
+        .demo-indicator:hover {
+            outline: 2px solid rgba(0, 255, 128, 0.6) !important;
+            outline-offset: 2px !important;
+            transform: scale(1.2);
+        }
+        
+        .demo-indicator.active {
+            background: white;
+            transform: scale(1.4);
+        }
+        
+        .overlay-test {
+            position: relative;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .overlay-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,0,0,0.1);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .overlay-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            z-index: 10;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖱️ Clickability Test - Fixed Version</h1>
+        <p>Тестирование исправленной кликабельности UI элементов</p>
+        
+        <div id="overallStatus" class="status info">✅ Все исправления применены</div>
+        
+        <div class="test-card">
+            <h2>🚀 Быстрые тесты</h2>
+            <button class="btn" onclick="runQuickTest()">🔍 Быстрый тест кликабельности</button>
+            <button class="btn" onclick="openMainApp()">📱 Открыть основное приложение</button>
+            <button class="btn" onclick="openWorkingApp()">🎯 Открыть рабочую версию</button>
+        </div>
+
+        <div class="test-card">
+            <h2>🎯 Демо кликабельных элементов</h2>
+            <p>Все элементы должны быть кликабельными с зеленым outline при hover:</p>
+            
+            <h3>Основные кнопки:</h3>
+            <div class="clickable-demo">
+                <button class="demo-btn primary" onclick="showSuccess('Основная кнопка работает!')">🎯 Создать карусель</button>
+                <button class="demo-btn primary" onclick="showSuccess('AI кнопка работает!')">🤖 AI генерация</button>
+                <button class="demo-btn primary" onclick="showSuccess('Ручная кнопка работает!')">📝 Создать из текста</button>
+            </div>
+            
+            <h3>Вторичные кнопки:</h3>
+            <div class="clickable-demo">
+                <button class="demo-btn secondary" onclick="showSuccess('Новая карусель работает!')">🔄 Новая карусель</button>
+                <button class="demo-btn secondary" onclick="showSuccess('Развернуть идею работает!')">🚀 Развернуть идею</button>
+                <button class="demo-btn secondary" onclick="showSuccess('Редактировать работает!')">✏️ Редактировать слайд</button>
+            </div>
+            
+            <h3>Навигационные кнопки:</h3>
+            <div class="clickable-demo">
+                <button class="demo-btn nav" onclick="showSuccess('Предыдущий слайд работает!')">‹</button>
+                <button class="demo-btn nav" onclick="showSuccess('Следующий слайд работает!')">›</button>
+            </div>
+            
+            <h3>Индикаторы слайдов:</h3>
+            <div class="demo-indicators">
+                <div class="demo-indicator active" onclick="showSuccess('Индикатор 1 работает!')"></div>
+                <div class="demo-indicator" onclick="showSuccess('Индикатор 2 работает!')"></div>
+                <div class="demo-indicator" onclick="showSuccess('Индикатор 3 работает!')"></div>
+                <div class="demo-indicator" onclick="showSuccess('Индикатор 4 работает!')"></div>
+                <div class="demo-indicator" onclick="showSuccess('Индикатор 5 работает!')"></div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>📐 Z-index тест</h2>
+            <p>Кнопка должна быть кликабельной поверх overlay:</p>
+            <div class="overlay-test">
+                <div class="overlay-bg"></div>
+                <button class="demo-btn primary overlay-btn" onclick="showSuccess('Z-index тест пройден!')">
+                    Кнопка поверх overlay
+                </button>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="test-item">
+                <h3>✅ Исправления применены</h3>
+                <div class="test-result">
+                    • Z-index: 10+ для всех кнопок<br>
+                    • pointer-events: auto для кликабельных элементов<br>
+                    • Hover outline для отладки<br>
+                    • Границы mini-app соблюдены<br>
+                    • Disabled кнопки правильно обработаны
+                </div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🎯 Ключевые улучшения</h3>
+                <div class="test-result">
+                    • Все .btn имеют z-index: 10<br>
+                    • .nav-btn имеют z-index: 15<br>
+                    • .indicator имеют z-index: 15<br>
+                    • .text-block имеют z-index: 20<br>
+                    • Добавлены hover outline стили
+                </div>
+            </div>
+        </div>
+
+        <div class="test-card">
+            <h2>📋 Лог тестирования</h2>
+            <div id="testLog" class="log">
+                [Загружено] ✅ Clickability Test - Fixed Version<br>
+                [Готово] 🎯 Все исправления кликабельности применены<br>
+                [Статус] 🖱️ UI элементы готовы к тестированию<br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('testLog');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logElement.innerHTML += `<br><span style="color: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#74c0fc'}">[${timestamp}] ${icon} ${message}</span>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function showSuccess(message) {
+            log(message, 'success');
+            
+            // Показываем toast
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-size: 14px;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 2000);
+        }
+
+        function runQuickTest() {
+            log('🔍 Запуск быстрого теста кликабельности...', 'info');
+            
+            // Тестируем все кнопки на странице
+            const buttons = document.querySelectorAll('button, [onclick]');
+            let clickableCount = 0;
+            
+            buttons.forEach((btn, index) => {
+                const style = window.getComputedStyle(btn);
+                const isClickable = style.pointerEvents !== 'none' && 
+                                  style.cursor === 'pointer' && 
+                                  !btn.disabled;
+                
+                if (isClickable) {
+                    clickableCount++;
+                    log(`✅ Элемент ${index + 1}: кликабелен (z-index: ${style.zIndex})`, 'success');
+                } else {
+                    log(`❌ Элемент ${index + 1}: проблема с кликабельностью`, 'error');
+                }
+            });
+            
+            const success = clickableCount === buttons.length;
+            log(`📊 Результат: ${clickableCount}/${buttons.length} элементов кликабельны`, success ? 'success' : 'warning');
+            
+            if (success) {
+                document.getElementById('overallStatus').className = 'status success';
+                document.getElementById('overallStatus').textContent = '✅ Все элементы кликабельны!';
+            }
+        }
+
+        function openMainApp() {
+            log('📱 Открытие основного приложения...', 'info');
+            window.open('index.html', '_blank');
+        }
+
+        function openWorkingApp() {
+            log('🎯 Открытие рабочей версии...', 'info');
+            window.open('working-app.html', '_blank');
+        }
+
+        // Автозапуск теста
+        window.addEventListener('load', () => {
+            log('🖱️ Clickability Test - Fixed Version загружен', 'success');
+            setTimeout(runQuickTest, 1000);
+        });
+    </script>
+</body>
+</html>

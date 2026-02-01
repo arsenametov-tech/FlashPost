@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI-State Sync Test - FlashPost</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #4CAF50;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .console-output {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status-error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status-warning {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .ui-elements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .ui-element-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .ui-element-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        
+        .ui-element-status {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .ui-element-preview {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔧 UI-State Sync Test</h1>
+        
+        <!-- Тест 1: Проверка создания UI элементов -->
+        <div class="test-section">
+            <div class="test-title">
+                1. Проверка создания UI элементов редактора
+                <span class="status-indicator status-warning" id="ui-creation-status">ОЖИДАНИЕ</span>
+            </div>
+            <p>Тестируем создание всех расширенных UI элементов в режиме редактора</p>
+            <button class="test-button" onclick="testUICreation()">🔧 Тест создания UI</button>
+            <div class="console-output" id="ui-creation-console"></div>
+        </div>
+        
+        <!-- Тест 2: Проверка отображения контролов шаблонов -->
+        <div class="test-section">
+            <div class="test-title">
+                2. Контролы системы шаблонов
+                <span class="status-indicator status-warning" id="template-controls-status">ОЖИДАНИЕ</span>
+            </div>
+            <p>Проверяем отображение кнопок сохранения и применения шаблонов</p>
+            <button class="test-button" onclick="testTemplateControls()">💾 Тест шаблонов</button>
+            <div class="console-output" id="template-controls-console"></div>
+        </div>
+        
+        <!-- Тест 3: Проверка AI расширенных опций -->
+        <div class="test-section">
+            <div class="test-title">
+                3. AI расширенные опции
+                <span class="status-indicator status-warning" id="ai-options-status">ОЖИДАНИЕ</span>
+            </div>
+            <p>Тестируем отображение AI функций улучшения текста</p>
+            <button class="test-button" onclick="testAIOptions()">🤖 Тест AI опций</button>
+            <div class="console-output" id="ai-options-console"></div>
+        </div>
+        
+        <!-- Тест 4: Проверка ручных текстовых блоков -->
+        <div class="test-section">
+            <div class="test-title">
+                4. Управление текстовыми блоками
+                <span class="status-indicator status-warning" id="text-blocks-status">ОЖИДАНИЕ</span>
+            </div>
+            <p>Проверяем кнопки добавления, дублирования и удаления блоков</p>
+            <button class="test-button" onclick="testTextBlockControls()">📝 Тест текстовых блоков</button>
+            <div class="console-output" id="text-blocks-console"></div>
+        </div>
+        
+        <!-- Тест 5: Полная синхронизация UI с состоянием -->
+        <div class="test-section">
+            <div class="test-title">
+                5. Полная синхронизация UI ↔ State
+                <span class="status-indicator status-warning" id="full-sync-status">ОЖИДАНИЕ</span>
+            </div>
+            <p>Комплексный тест соответствия UI и состояния приложения</p>
+            <button class="test-button" onclick="testFullSync()">🔄 Полный тест синхронизации</button>
+            <div class="console-output" id="full-sync-console"></div>
+        </div>
+        
+        <!-- Визуальная проверка UI элементов -->
+        <div class="test-section">
+            <div class="test-title">6. Визуальная проверка UI элементов</div>
+            <p>Проверяем отображение всех расширенных функций</p>
+            <button class="test-button" onclick="createVisualTest()">👁️ Создать визуальный тест</button>
+            
+            <div class="ui-elements-grid" id="uiElementsGrid" style="display: none;">
+                <!-- Здесь будут созданы UI элементы для визуальной проверки -->
+            </div>
+        </div>
+        
+        <!-- Общий статус -->
+        <div class="test-section">
+            <div class="test-title">
+                ✅ Общий статус тестирования
+                <span class="status-indicator status-warning" id="overall-status">ОЖИДАНИЕ</span>
+            </div>
+            <button class="test-button" onclick="runAllTests()">🚀 Запустить все тесты</button>
+            <button class="test-button" onclick="openMainApp()">📱 Открыть основное приложение</button>
+        </div>
+    </div>
+
+    <!-- Загружаем модули для тестирования -->
+    <script src="src/dom-update-queue.js"></script>
+    <script src="src/event-manager.js"></script>
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+
+    <script>
+        // Глобальные переменные для тестирования
+        let testResults = {
+            uiCreation: false,
+            templateControls: false,
+            aiOptions: false,
+            textBlocks: false,
+            fullSync: false
+        };
+        
+        // Утилиты для логирования
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                const timestamp = new Date().toLocaleTimeString();
+                const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : '#00ff00';
+                element.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+                element.scrollTop = element.scrollHeight;
+            }
+        }
+        
+        function updateStatus(statusId, status, text) {
+            const element = document.getElementById(statusId);
+            if (element) {
+                element.className = `status-indicator status-${status}`;
+                element.textContent = text;
+            }
+        }
+        
+        // Тест 1: Создание UI элементов
+        function testUICreation() {
+            log('ui-creation-console', 'Начинаем тест создания UI элементов...');
+            updateStatus('ui-creation-status', 'warning', 'ТЕСТИРОВАНИЕ');
+            
+            try {
+                // Проверяем доступность классов
+                if (typeof StateManager === 'undefined') {
+                    throw new Error('StateManager не загружен');
+                }
+                if (typeof Renderer === 'undefined') {
+                    throw new Error('Renderer не загружен');
+                }
+                
+                log('ui-creation-console', '✅ Основные классы загружены', 'success');
+                
+                // Создаем экземпляры
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                log('ui-creation-console', '✅ Экземпляры созданы', 'success');
+                
+                // Тестируем создание панелей
+                const templatePanel = renderer.createTemplateControlsPanel();
+                const aiPanel = renderer.createAIAdvancedOptionsPanel();
+                const textBlocksPanel = renderer.createManualTextBlocksPanel();
+                
+                if (templatePanel && aiPanel && textBlocksPanel) {
+                    log('ui-creation-console', '✅ Все панели созданы успешно', 'success');
+                    testResults.uiCreation = true;
+                    updateStatus('ui-creation-status', 'success', 'ПРОЙДЕН');
+                } else {
+                    throw new Error('Не удалось создать все панели');
+                }
+                
+            } catch (error) {
+                log('ui-creation-console', `❌ Ошибка: ${error.message}`, 'error');
+                testResults.uiCreation = false;
+                updateStatus('ui-creation-status', 'error', 'ОШИБКА');
+            }
+            
+            updateOverallStatus();
+        }
+        
+        // Тест 2: Контролы шаблонов
+        function testTemplateControls() {
+            log('template-controls-console', 'Тестируем контролы шаблонов...');
+            updateStatus('template-controls-status', 'warning', 'ТЕСТИРОВАНИЕ');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Создаем панель шаблонов
+                const templatePanel = renderer.createTemplateControlsPanel();
+                
+                // Проверяем наличие кнопок
+                const saveBtn = templatePanel.querySelector('#saveTemplateBtn');
+                const applyToSlideBtn = templatePanel.querySelector('#applyTemplateToSlideBtn');
+                const applyToAllBtn = templatePanel.querySelector('#applyTemplateToAllBtn');
+                
+                if (saveBtn && applyToSlideBtn && applyToAllBtn) {
+                    log('template-controls-console', '✅ Все кнопки шаблонов найдены', 'success');
+                    log('template-controls-console', `✅ Сохранить шаблон: ${saveBtn.textContent}`, 'success');
+                    log('template-controls-console', `✅ Применить к слайду: ${applyToSlideBtn.textContent}`, 'success');
+                    log('template-controls-console', `✅ Применить ко всем: ${applyToAllBtn.textContent}`, 'success');
+                    
+                    testResults.templateControls = true;
+                    updateStatus('template-controls-status', 'success', 'ПРОЙДЕН');
+                } else {
+                    throw new Error('Не все кнопки шаблонов найдены');
+                }
+                
+            } catch (error) {
+                log('template-controls-console', `❌ Ошибка: ${error.message}`, 'error');
+                testResults.templateControls = false;
+                updateStatus('template-controls-status', 'error', 'ОШИБКА');
+            }
+            
+            updateOverallStatus();
+        }
+        
+        // Тест 3: AI опции
+        function testAIOptions() {
+            log('ai-options-console', 'Тестируем AI расширенные опции...');
+            updateStatus('ai-options-status', 'warning', 'ТЕСТИРОВАНИЕ');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Создаем панель AI
+                const aiPanel = renderer.createAIAdvancedOptionsPanel();
+                
+                // Проверяем наличие кнопок
+                const improveBtn = aiPanel.querySelector('#improveTextBtn');
+                const variantsBtn = aiPanel.querySelector('#generateVariantsBtn');
+                const formatBtn = aiPanel.querySelector('#autoFormatBtn');
+                const aiToggle = aiPanel.querySelector('#aiModeToggle');
+                
+                if (improveBtn && variantsBtn && formatBtn && aiToggle) {
+                    log('ai-options-console', '✅ Все AI контролы найдены', 'success');
+                    log('ai-options-console', `✅ Улучшить текст: ${improveBtn.textContent}`, 'success');
+                    log('ai-options-console', `✅ Генерировать варианты: ${variantsBtn.textContent}`, 'success');
+                    log('ai-options-console', `✅ Автоформатирование: ${formatBtn.textContent}`, 'success');
+                    log('ai-options-console', `✅ AI переключатель: ${aiToggle.checked ? 'включен' : 'выключен'}`, 'success');
+                    
+                    testResults.aiOptions = true;
+                    updateStatus('ai-options-status', 'success', 'ПРОЙДЕН');
+                } else {
+                    throw new Error('Не все AI контролы найдены');
+                }
+                
+            } catch (error) {
+                log('ai-options-console', `❌ Ошибка: ${error.message}`, 'error');
+                testResults.aiOptions = false;
+                updateStatus('ai-options-status', 'error', 'ОШИБКА');
+            }
+            
+            updateOverallStatus();
+        }
+        
+        // Тест 4: Текстовые блоки
+        function testTextBlockControls() {
+            log('text-blocks-console', 'Тестируем управление текстовыми блоками...');
+            updateStatus('text-blocks-status', 'warning', 'ТЕСТИРОВАНИЕ');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Создаем панель текстовых блоков
+                const textBlocksPanel = renderer.createManualTextBlocksPanel();
+                
+                // Проверяем наличие кнопок
+                const addBtn = textBlocksPanel.querySelector('#addTextBlockBtn');
+                const duplicateBtn = textBlocksPanel.querySelector('#duplicateBlockBtn');
+                const deleteBtn = textBlocksPanel.querySelector('#deleteBlockBtn');
+                
+                if (addBtn && duplicateBtn && deleteBtn) {
+                    log('text-blocks-console', '✅ Все кнопки управления блоками найдены', 'success');
+                    log('text-blocks-console', `✅ Добавить блок: ${addBtn.textContent}`, 'success');
+                    log('text-blocks-console', `✅ Дублировать блок: ${duplicateBtn.textContent}`, 'success');
+                    log('text-blocks-console', `✅ Удалить блок: ${deleteBtn.textContent}`, 'success');
+                    
+                    testResults.textBlocks = true;
+                    updateStatus('text-blocks-status', 'success', 'ПРОЙДЕН');
+                } else {
+                    throw new Error('Не все кнопки управления блоками найдены');
+                }
+                
+            } catch (error) {
+                log('text-blocks-console', `❌ Ошибка: ${error.message}`, 'error');
+                testResults.textBlocks = false;
+                updateStatus('text-blocks-status', 'error', 'ОШИБКА');
+            }
+            
+            updateOverallStatus();
+        }
+        
+        // Тест 5: Полная синхронизация
+        function testFullSync() {
+            log('full-sync-console', 'Тестируем полную синхронизацию UI ↔ State...');
+            updateStatus('full-sync-status', 'warning', 'ТЕСТИРОВАНИЕ');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Создаем тестовые данные
+                state.generateSlides('Тестовая тема', 3);
+                
+                log('full-sync-console', '✅ Тестовые слайды созданы', 'success');
+                
+                // Переключаемся в режим редактирования
+                state.setMode('edit');
+                
+                log('full-sync-console', '✅ Режим редактирования установлен', 'success');
+                
+                // Создаем полный DOM редактора
+                const editorDOM = renderer.createEditorDOM();
+                
+                if (editorDOM) {
+                    log('full-sync-console', '✅ DOM редактора создан', 'success');
+                    
+                    // Проверяем наличие всех расширенных функций
+                    const templatePanel = editorDOM.querySelector('.template-controls-panel');
+                    const aiPanel = editorDOM.querySelector('.ai-advanced-options-panel');
+                    const textBlocksPanel = editorDOM.querySelector('.manual-text-blocks-panel');
+                    
+                    if (templatePanel && aiPanel && textBlocksPanel) {
+                        log('full-sync-console', '✅ Все расширенные панели присутствуют в DOM', 'success');
+                        
+                        testResults.fullSync = true;
+                        updateStatus('full-sync-status', 'success', 'ПРОЙДЕН');
+                    } else {
+                        throw new Error('Не все расширенные панели найдены в DOM');
+                    }
+                } else {
+                    throw new Error('Не удалось создать DOM редактора');
+                }
+                
+            } catch (error) {
+                log('full-sync-console', `❌ Ошибка: ${error.message}`, 'error');
+                testResults.fullSync = false;
+                updateStatus('full-sync-status', 'error', 'ОШИБКА');
+            }
+            
+            updateOverallStatus();
+        }
+        
+        // Визуальный тест
+        function createVisualTest() {
+            const grid = document.getElementById('uiElementsGrid');
+            grid.style.display = 'grid';
+            grid.innerHTML = '';
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Создаем карточки для каждой панели
+                const panels = [
+                    { name: 'Контролы шаблонов', element: renderer.createTemplateControlsPanel() },
+                    { name: 'AI расширенные опции', element: renderer.createAIAdvancedOptionsPanel() },
+                    { name: 'Управление блоками', element: renderer.createManualTextBlocksPanel() }
+                ];
+                
+                panels.forEach(panel => {
+                    const card = document.createElement('div');
+                    card.className = 'ui-element-card';
+                    
+                    card.innerHTML = `
+                        <div class="ui-element-title">${panel.name}</div>
+                        <div class="ui-element-status">Статус: Отображается</div>
+                        <div class="ui-element-preview"></div>
+                    `;
+                    
+                    const preview = card.querySelector('.ui-element-preview');
+                    preview.appendChild(panel.element);
+                    
+                    grid.appendChild(card);
+                });
+                
+                console.log('✅ Визуальный тест создан');
+                
+            } catch (error) {
+                console.error('❌ Ошибка создания визуального теста:', error);
+            }
+        }
+        
+        // Обновление общего статуса
+        function updateOverallStatus() {
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(result => result).length;
+            
+            if (passedTests === totalTests) {
+                updateStatus('overall-status', 'success', 'ВСЕ ТЕСТЫ ПРОЙДЕНЫ');
+            } else if (passedTests > 0) {
+                updateStatus('overall-status', 'warning', `${passedTests}/${totalTests} ПРОЙДЕНО`);
+            } else {
+                updateStatus('overall-status', 'error', 'ТЕСТЫ НЕ ПРОЙДЕНЫ');
+            }
+        }
+        
+        // Запуск всех тестов
+        function runAllTests() {
+            console.log('🚀 Запускаем все тесты UI-State синхронизации...');
+            
+            setTimeout(() => testUICreation(), 500);
+            setTimeout(() => testTemplateControls(), 1000);
+            setTimeout(() => testAIOptions(), 1500);
+            setTimeout(() => testTextBlockControls(), 2000);
+            setTimeout(() => testFullSync(), 2500);
+            setTimeout(() => createVisualTest(), 3000);
+        }
+        
+        // Открытие основного приложения
+        function openMainApp() {
+            window.open('index.html', '_blank');
+        }
+        
+        // Автозапуск при загрузке
+        window.addEventListener('load', () => {
+            console.log('🔧 UI-State Sync Test загружен');
+            
+            // Автоматически запускаем базовые тесты
+            setTimeout(() => {
+                testUICreation();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

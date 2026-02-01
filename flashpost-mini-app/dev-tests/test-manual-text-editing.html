@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Тест ручного редактирования текста</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Переопределяем проблемные CSS переменные */
+        :root {
+            --tg-bg: #ffffff;
+            --tg-text: #000000;
+            --primary: #833ab4;
+        }
+        
+        /* Исправляем основные стили редактора */
+        .editor-section {
+            background: #ffffff !important;
+            color: #333 !important;
+        }
+        
+        .editor-header {
+            background: #ffffff !important;
+            color: #333 !important;
+        }
+        
+        .editor-content {
+            background: #f8f9fa !important;
+        }
+        
+        .editor-preview {
+            background: #ffffff !important;
+        }
+        
+        .editor-tools {
+            background: #ffffff !important;
+        }
+        
+        .slide-preview {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%) !important;
+        }
+        
+        .preview-text {
+            color: white !important;
+        }
+        
+        .tool-label {
+            color: #333 !important;
+        }
+        
+        .text-editor {
+            background: #f8f9fa !important;
+            color: #333 !important;
+            border: 1px solid #e5e5e5 !important;
+        }
+        
+        .text-editor:focus {
+            border-color: #833ab4 !important;
+            background: #ffffff !important;
+        }
+        
+        /* Демонстрационная панель */
+        .demo-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .demo-panel h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .demo-panel ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .demo-panel li {
+            margin-bottom: 8px;
+        }
+        
+        .demo-panel .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <!-- Демонстрационная панель -->
+    <div class="demo-panel">
+        <h3>🖊️ Тест ручного редактирования</h3>
+        <ul>
+            <li><span class="highlight">Клик</span> - выбрать текстовый блок</li>
+            <li><span class="highlight">Двойной клик</span> - редактировать inline</li>
+            <li><span class="highlight">Enter</span> - сохранить изменения</li>
+            <li><span class="highlight">Escape</span> - отменить редактирование</li>
+            <li><span class="highlight">Shift+Enter</span> - новая строка</li>
+            <li>Редактирование в <span class="highlight">панели управления</span> в реальном времени</li>
+        </ul>
+    </div>
+
+    <div id="app">
+        <!-- Контент будет загружен через JS -->
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        const app = new FlashPostApp();
+        
+        // Тестовые данные с разными типами текста
+        const testSlides = [
+            {
+                title: "Hook",
+                text: "🔥 Секрет успешных *предпринимателей*:\n\nОни не работают больше — они работают *умнее*.\n\nВ то время как 95% людей тратят 12 часов на рутину, топ-менеджеры делегируют 80% задач."
+            },
+            {
+                title: "Problem", 
+                text: "❌ Ты работаешь 10-12 часов в день, но *результата* нет.\n\nПостоянно отвлекаешься на мелочи: письма, звонки, встречи.\n\nВажные проекты откладываются на *месяцы*."
+            },
+            {
+                title: "Solution",
+                text: "✅ Система *4D*: Delete, Delegate, Defer, Do.\n\n• Delete — удаляй ненужные задачи (30%)\n• Delegate — делегируй рутину (40%)\n• Defer — откладывай несрочное (20%)\n• Do — делай только *важное* (10%)"
+            }
+        ];
+
+        // Устанавливаем тестовые данные
+        app.slides = testSlides;
+        app.initializeSlideStyles();
+        
+        // Добавляем разные текстовые блоки для тестирования
+        app.slideStyles[0].textBlocks = [
+            {
+                id: 'test_block_1',
+                text: 'Заголовок слайда',
+                font: 'Bebas Neue',
+                size: 24,
+                weight: 700,
+                color: '#ffffff',
+                position: { x: 50, y: 20 },
+                width: 80,
+                keywordColor: '#ff6b6b',
+                highlightEnabled: true,
+                glow: true
+            },
+            {
+                id: 'test_block_2',
+                text: 'Основной *текст* с выделением',
+                font: 'Inter',
+                size: 16,
+                weight: 500,
+                color: '#ffffff',
+                position: { x: 50, y: 60 },
+                width: 70,
+                keywordColor: '#4ecdc4',
+                highlightEnabled: true,
+                glow: false
+            }
+        ];
+        
+        app.slideStyles[1].textBlocks = [
+            {
+                id: 'test_block_3',
+                text: 'Кликните *дважды* для редактирования',
+                font: 'Montserrat',
+                size: 18,
+                weight: 600,
+                color: '#ffffff',
+                position: { x: 50, y: 40 },
+                width: 75,
+                keywordColor: '#f9ca24',
+                highlightEnabled: true,
+                glow: false
+            }
+        ];
+        
+        // Третий слайд оставляем пустым для тестирования кнопки "Добавить текст"
+        app.slideStyles[2].textBlocks = [];
+        
+        // Добавляем Instagram для тестирования
+        const instagramInput = document.createElement('input');
+        instagramInput.id = 'instagramInput';
+        instagramInput.value = '@test_instagram';
+        instagramInput.style.display = 'none';
+        document.body.appendChild(instagramInput);
+        
+        // Показываем редактор
+        setTimeout(() => {
+            console.log('🚀 Показываем редактор с тестовыми данными...');
+            app.showEditor();
+            
+            // Выбираем первый блок для демонстрации
+            if (app.slideStyles[0].textBlocks.length > 0) {
+                app.selectedTextBlockId = app.slideStyles[0].textBlocks[0].id;
+                app.updateTextBlockControls();
+            }
+        }, 1000);
+        
+        // Добавляем инструкции в консоль
+        console.log(`
+🖊️ ТЕСТ РУЧНОГО РЕДАКТИРОВАНИЯ ТЕКСТА
+
+Функции для тестирования:
+
+1. ВЫБОР ТЕКСТОВОГО БЛОКА:
+   • Кликните на любой текст на слайде
+   • Блок выделится рамкой
+   • Его параметры появятся в панели управления
+
+2. INLINE-РЕДАКТИРОВАНИЕ:
+   • Дважды кликните на текст на слайде
+   • Появится текстовое поле для редактирования
+   • Enter - сохранить, Escape - отменить
+   • Shift+Enter - новая строка
+
+3. РЕДАКТИРОВАНИЕ В ПАНЕЛИ:
+   • Выберите блок кликом
+   • Редактируйте в поле "Текст" в панели управления
+   • Изменения отображаются в реальном времени
+
+4. ДОБАВЛЕНИЕ НОВОГО ТЕКСТА:
+   • Перейдите на 3-й слайд (пустой)
+   • Нажмите кнопку "Добавить текст" в центре
+   • Или используйте кнопку в панели управления
+
+5. HOVER ЭФФЕКТЫ:
+   • Наведите курсор на текстовые блоки
+   • Увидите подсветку для неактивных блоков
+
+Тестируйте все функции! 🚀
+        `);
+        
+        console.log('✅ Тест ручного редактирования инициализирован');
+    </script>
+</body>
+</html>

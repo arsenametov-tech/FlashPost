@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Исправленные независимые текстовые блоки - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .test-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .start-btn:hover {
+            background: #6d2d96;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🔧 Исправленные текстовые блоки</h1>
+        
+        <div class="test-info">
+            <strong>Исправления:</strong><br>
+            ✅ Каждый слайд имеет свои независимые текстовые блоки<br>
+            ✅ Редактирование работает только с activeTextBlockId<br>
+            ✅ Панель редактирования меняет только выбранный блок<br>
+            ✅ Добавлена кнопка addTextBlock() для создания новых блоков
+        </div>
+        
+        <button class="start-btn" onclick="startTest()">🚀 Тестировать исправления</button>
+    </div>
+
+    <script>
+        // ===== ИСПРАВЛЕННАЯ СИСТЕМА ТЕКСТОВЫХ БЛОКОВ =====
+        
+        class FixedFlashPostApp {
+            constructor() {
+                // === ПРАВИЛЬНАЯ СТРУКТУРА ПРОЕКТА ===
+                this.project = {
+                    slides: [],
+                    activeSlideId: null,
+                    activeTextBlockId: null,
+                    mode: 'edit'
+                };
+                
+                this.applyToAll = false;
+                
+                console.log('🔧 Инициализация исправленной системы...');
+                this.init();
+            }
+            
+            init() {
+                // Создаем тестовые слайды с независимыми текстовыми блоками
+                this.createTestSlides();
+                this.showApp();
+            }
+            
+            // Создание тестовых слайдов
+            createTestSlides() {
+                this.project.slides = [
+                    {
+                        id: 'slide_1',
+                        background: { color: '#ff6b6b' },
+                        textBlocks: [
+                            {
+                                id: 'block_1_1',
+                                text: 'Текст слайда 1 - блок 1',
+                                x: 20, y: 20, width: 60,
+                                font: 'Inter', size: 24, color: '#ffffff'
+                            },
+                            {
+                                id: 'block_1_2', 
+                                text: 'Текст слайда 1 - блок 2',
+                                x: 20, y: 60, width: 60,
+                                font: 'Inter', size: 18, color: '#ffffff'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'slide_2',
+                        background: { color: '#4ecdc4' },
+                        textBlocks: [
+                            {
+                                id: 'block_2_1',
+                                text: 'Текст слайда 2 - блок 1',
+                                x: 30, y: 30, width: 50,
+                                font: 'Inter', size: 28, color: '#ffffff'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'slide_3',
+                        background: { color: '#45b7d1' },
+                        textBlocks: [
+                            {
+                                id: 'block_3_1',
+                                text: 'Текст слайда 3 - блок 1',
+                                x: 10, y: 40, width: 80,
+                                font: 'Inter', size: 20, color: '#ffffff'
+                            },
+                            {
+                                id: 'block_3_2',
+                                text: 'Текст слайда 3 - блок 2', 
+                                x: 10, y: 70, width: 80,
+                                font: 'Inter', size: 16, color: '#ffffff'
+                            },
+                            {
+                                id: 'block_3_3',
+                                text: 'Текст слайда 3 - блок 3',
+                                x: 50, y: 10, width: 40,
+                                font: 'Inter', size: 14, color: '#ffffff'
+                            }
+                        ]
+                    }
+                ];
+                
+                this.project.activeSlideId = 'slide_1';
+                this.project.activeTextBlockId = 'block_1_1';
+                
+                console.log('✅ Создано 3 слайда с независимыми текстовыми блоками');
+            }
+            
+            // Получение активного слайда
+            getActiveSlide() {
+                return this.project.slides.find(slide => slide.id === this.project.activeSlideId);
+            }
+            
+            // Получение активного текстового блока
+            getActiveTextBlock() {
+                if (!this.project.activeTextBlockId) return null;
+                
+                const activeSlide = this.getActiveSlide();
+                if (!activeSlide) return null;
+                
+                return activeSlide.textBlocks.find(block => block.id === this.project.activeTextBlockId);
+            }
+            
+            // Добавление нового текстового блока
+            addTextBlock() {
+                const activeSlide = this.getActiveSlide();
+                if (!activeSlide) return;
+                
+                const newBlock = {
+                    id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                    text: 'Новый текст',
+                    x: 50, y: 50, width: 80,
+                    font: 'Inter', size: 32, color: '#ffffff'
+                };
+                
+                activeSlide.textBlocks.push(newBlock);
+                this.project.activeTextBlockId = newBlock.id;
+                
+                console.log(`✅ Добавлен новый блок: ${newBlock.id} в слайд: ${activeSlide.id}`);
+                this.render();
+            }
+            
+            // Установка активного слайда
+            setActiveSlide(slideId) {
+                this.project.activeSlideId = slideId;
+                this.project.activeTextBlockId = null; // Сбрасываем выбор блока при смене слайда
+                console.log(`🔄 Активный слайд: ${slideId}`);
+                this.render();
+            }
+            
+            // Установка активного текстового блока
+            setActiveTextBlock(blockId) {
+                this.project.activeTextBlockId = blockId;
+                console.log(`🔄 Активный блок: ${blockId}`);
+                this.render();
+            }
+            
+            // Обновление текста активного блока
+            updateActiveBlockText(newText) {
+                const activeBlock = this.getActiveTextBlock();
+                if (activeBlock) {
+                    activeBlock.text = newText;
+                    console.log(`✏️ Обновлен текст блока: ${activeBlock.id}`);
+                    this.render();
+                }
+            }
+            
+            // Обновление шрифта активного блока
+            updateActiveBlockFont(newFont) {
+                const activeBlock = this.getActiveTextBlock();
+                if (activeBlock) {
+                    activeBlock.font = newFont;
+                    console.log(`🔤 Обновлен шрифт блока: ${activeBlock.id} -> ${newFont}`);
+                    this.render();
+                }
+            }
+            
+            // Обновление размера активного блока
+            updateActiveBlockSize(newSize) {
+                const activeBlock = this.getActiveTextBlock();
+                if (activeBlock) {
+                    activeBlock.size = newSize;
+                    console.log(`📏 Обновлен размер блока: ${activeBlock.id} -> ${newSize}px`);
+                    this.render();
+                }
+            }
+            
+            // Рендеринг приложения
+            render() {
+                const activeSlide = this.getActiveSlide();
+                const activeBlock = this.getActiveTextBlock();
+                
+                document.body.innerHTML = `
+                    <div class="fixed-app">
+                        <!-- Навигация по слайдам -->
+                        <div class="slides-nav">
+                            <h3>Слайды:</h3>
+                            ${this.project.slides.map(slide => `
+                                <button class="slide-nav-btn ${slide.id === this.project.activeSlideId ? 'active' : ''}"
+                                        onclick="app.setActiveSlide('${slide.id}')">
+                                    Слайд ${slide.id.split('_')[1]} (${slide.textBlocks.length} блоков)
+                                </button>
+                            `).join('')}
+                        </div>
+                        
+                        <!-- Превью активного слайда -->
+                        <div class="slide-preview">
+                            <div class="slide-container" style="background: ${activeSlide.background.color};">
+                                ${activeSlide.textBlocks.map(block => `
+                                    <div class="text-block ${block.id === this.project.activeTextBlockId ? 'active' : ''}"
+                                         onclick="app.setActiveTextBlock('${block.id}')"
+                                         style="
+                                             position: absolute;
+                                             left: ${block.x}%;
+                                             top: ${block.y}%;
+                                             width: ${block.width}%;
+                                             font-family: ${block.font};
+                                             font-size: ${block.size}px;
+                                             color: ${block.color};
+                                             border: ${block.id === this.project.activeTextBlockId ? '2px solid #fff' : '1px solid rgba(255,255,255,0.3)'};
+                                             padding: 8px;
+                                             cursor: pointer;
+                                             border-radius: 4px;
+                                         ">
+                                        ${block.text}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Список текстовых блоков -->
+                        <div class="blocks-list">
+                            <div class="blocks-header">
+                                <h3>Текстовые блоки слайда ${this.project.activeSlideId.split('_')[1]}:</h3>
+                                <button class="add-block-btn" onclick="app.addTextBlock()">
+                                    ➕ Добавить блок
+                                </button>
+                            </div>
+                            
+                            ${activeSlide.textBlocks.map((block, index) => `
+                                <div class="block-item ${block.id === this.project.activeTextBlockId ? 'active' : ''}"
+                                     onclick="app.setActiveTextBlock('${block.id}')">
+                                    <span class="block-number">${index + 1}.</span>
+                                    <span class="block-text">${block.text.substring(0, 20)}...</span>
+                                    <span class="block-font">${block.font} ${block.size}px</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <!-- Панель редактирования активного блока -->
+                        ${activeBlock ? `
+                            <div class="edit-panel">
+                                <h3>Редактирование блока: ${activeBlock.id}</h3>
+                                
+                                <div class="edit-group">
+                                    <label>Текст:</label>
+                                    <textarea onchange="app.updateActiveBlockText(this.value)">${activeBlock.text}</textarea>
+                                </div>
+                                
+                                <div class="edit-group">
+                                    <label>Шрифт:</label>
+                                    <select onchange="app.updateActiveBlockFont(this.value)" value="${activeBlock.font}">
+                                        <option value="Inter" ${activeBlock.font === 'Inter' ? 'selected' : ''}>Inter</option>
+                                        <option value="Arial" ${activeBlock.font === 'Arial' ? 'selected' : ''}>Arial</option>
+                                        <option value="Georgia" ${activeBlock.font === 'Georgia' ? 'selected' : ''}>Georgia</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="edit-group">
+                                    <label>Размер: ${activeBlock.size}px</label>
+                                    <input type="range" min="12" max="48" value="${activeBlock.size}" 
+                                           onchange="app.updateActiveBlockSize(parseInt(this.value))">
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="edit-panel">
+                                <p>Выберите текстовый блок для редактирования</p>
+                            </div>
+                        `}
+                        
+                        <!-- Информация о состоянии -->
+                        <div class="state-info">
+                            <h4>Состояние системы:</h4>
+                            <p><strong>Активный слайд:</strong> ${this.project.activeSlideId}</p>
+                            <p><strong>Активный блок:</strong> ${this.project.activeTextBlockId || 'не выбран'}</p>
+                            <p><strong>Всего слайдов:</strong> ${this.project.slides.length}</p>
+                            <p><strong>Блоков в активном слайде:</strong> ${activeSlide.textBlocks.length}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            showApp() {
+                // Скрываем тестовый контейнер
+                document.querySelector('.test-container').style.display = 'none';
+                
+                // Добавляем стили для приложения
+                const style = document.createElement('style');
+                style.textContent = `
+                    .fixed-app {
+                        display: grid;
+                        grid-template-columns: 1fr 2fr 1fr;
+                        grid-template-rows: auto 1fr auto;
+                        gap: 20px;
+                        padding: 20px;
+                        background: white;
+                        min-height: 100vh;
+                        font-family: Inter, sans-serif;
+                    }
+                    
+                    .slides-nav {
+                        grid-column: 1;
+                        grid-row: 1 / 3;
+                    }
+                    
+                    .slide-nav-btn {
+                        display: block;
+                        width: 100%;
+                        margin-bottom: 8px;
+                        padding: 12px;
+                        border: 1px solid #ddd;
+                        background: white;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+                    
+                    .slide-nav-btn.active {
+                        background: #833ab4;
+                        color: white;
+                        border-color: #833ab4;
+                    }
+                    
+                    .slide-preview {
+                        grid-column: 2;
+                        grid-row: 1 / 3;
+                    }
+                    
+                    .slide-container {
+                        position: relative;
+                        width: 100%;
+                        height: 400px;
+                        border-radius: 12px;
+                        overflow: hidden;
+                    }
+                    
+                    .text-block {
+                        transition: all 0.2s;
+                    }
+                    
+                    .text-block:hover {
+                        transform: scale(1.02);
+                    }
+                    
+                    .blocks-list {
+                        grid-column: 3;
+                        grid-row: 1;
+                    }
+                    
+                    .blocks-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 16px;
+                    }
+                    
+                    .add-block-btn {
+                        padding: 8px 12px;
+                        background: #28a745;
+                        color: white;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 12px;
+                    }
+                    
+                    .block-item {
+                        padding: 12px;
+                        border: 1px solid #ddd;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+                    
+                    .block-item.active {
+                        background: #f0f8ff;
+                        border-color: #833ab4;
+                    }
+                    
+                    .block-number {
+                        font-weight: bold;
+                        color: #833ab4;
+                    }
+                    
+                    .block-text {
+                        display: block;
+                        margin: 4px 0;
+                        font-size: 14px;
+                    }
+                    
+                    .block-font {
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    
+                    .edit-panel {
+                        grid-column: 3;
+                        grid-row: 2;
+                        padding: 16px;
+                        border: 1px solid #ddd;
+                        border-radius: 12px;
+                        background: #f8f9fa;
+                    }
+                    
+                    .edit-group {
+                        margin-bottom: 16px;
+                    }
+                    
+                    .edit-group label {
+                        display: block;
+                        margin-bottom: 4px;
+                        font-weight: 600;
+                        font-size: 14px;
+                    }
+                    
+                    .edit-group textarea,
+                    .edit-group select,
+                    .edit-group input {
+                        width: 100%;
+                        padding: 8px;
+                        border: 1px solid #ddd;
+                        border-radius: 6px;
+                        font-family: inherit;
+                    }
+                    
+                    .edit-group textarea {
+                        height: 60px;
+                        resize: vertical;
+                    }
+                    
+                    .state-info {
+                        grid-column: 1 / 4;
+                        grid-row: 3;
+                        padding: 16px;
+                        background: #e9ecef;
+                        border-radius: 12px;
+                        font-size: 14px;
+                    }
+                    
+                    .state-info h4 {
+                        margin: 0 0 12px 0;
+                        color: #495057;
+                    }
+                    
+                    .state-info p {
+                        margin: 4px 0;
+                        color: #6c757d;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                this.render();
+            }
+        }
+        
+        function startTest() {
+            console.log('🔧 Запуск теста исправленной системы');
+            window.app = new FixedFlashPostApp();
+        }
+        
+        console.log('🔧 Исправленная система текстовых блоков загружена');
+    </script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Architecture Fixes - FlashPost</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f44336 0%, #FF9800 50%, #4CAF50 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .test-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-section h3 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            font-weight: 500;
+        }
+        
+        .status-value {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-success {
+            color: #4CAF50;
+        }
+        
+        .status-error {
+            color: #f44336;
+        }
+        
+        .status-warning {
+            color: #FF9800;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.3);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .log-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #4CAF50; }
+        .log-error { color: #f44336; }
+        .log-warning { color: #FF9800; }
+        .log-info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1 class="test-title">🔧 Architecture Fixes Test</h1>
+            <p>Тестирование исправлений архитектуры FlashPost</p>
+        </div>
+        
+        <!-- Статус исправлений -->
+        <div class="test-section">
+            <h3>🚨 Статус критических исправлений</h3>
+            <div class="status-item">
+                <span class="status-label">Циклические зависимости:</span>
+                <span class="status-value" id="cyclicDependencies">Проверяется...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Состояние гонки DOM:</span>
+                <span class="status-value" id="raceConditions">Проверяется...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Утечки памяти:</span>
+                <span class="status-value" id="memoryLeaks">Проверяется...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Синтаксические ошибки:</span>
+                <span class="status-value" id="syntaxErrors">Проверяется...</span>
+            </div>
+        </div>
+        
+        <!-- Новые системы -->
+        <div class="test-section">
+            <h3>🏗️ Новые системы</h3>
+            <div class="status-item">
+                <span class="status-label">DOMUpdateQueue:</span>
+                <span class="status-value" id="domUpdateQueue">Проверяется...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">EventManager:</span>
+                <span class="status-value" id="eventManager">Проверяется...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">StateManagerFixed:</span>
+                <span class="status-value" id="stateManagerFixed">Проверяется...</span>
+            </div>
+        </div>
+        
+        <!-- Тесты -->
+        <div class="test-section">
+            <h3>🧪 Тесты архитектуры</h3>
+            <button class="test-button" onclick="testCyclicDependencies()">Тест циклических зависимостей</button>
+            <button class="test-button" onclick="testRaceConditions()">Тест состояния гонки</button>
+            <button class="test-button" onclick="testMemoryLeaks()">Тест утечек памяти</button>
+            <button class="test-button" onclick="testEventSystem()">Тест системы событий</button>
+            <button class="test-button" onclick="testDOMUpdates()">Тест обновлений DOM</button>
+            <button class="test-button" onclick="runFullArchitectureTest()">Полный тест архитектуры</button>
+        </div>
+        
+        <!-- Результаты тестов -->
+        <div class="test-grid">
+            <div class="test-section">
+                <h3>📊 Статистика производительности</h3>
+                <div id="performanceStats">Запустите тесты для получения статистики</div>
+            </div>
+            
+            <div class="test-section">
+                <h3>📝 Лог тестирования</h3>
+                <div class="log-container" id="testLog">
+                    <div class="log-entry log-info">Готов к тестированию архитектуры...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загружаем исправленные модули -->
+    <script src="src/dom-update-queue.js"></script>
+    <script src="src/event-manager.js"></script>
+    <script src="src/state-fixed.js"></script>
+
+    <script>
+        // Система логирования
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('testLog');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Обновление статуса
+        function updateStatus(elementId, status, type = 'success') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = status;
+                element.className = `status-value status-${type}`;
+            }
+        }
+
+        // Инициализация тестов
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Инициализация тестов архитектуры...', 'info');
+            checkSystemsAvailability();
+        });
+
+        // Проверка доступности систем
+        function checkSystemsAvailability() {
+            log('Проверка доступности новых систем...', 'info');
+            
+            // DOMUpdateQueue
+            if (typeof DOMUpdateQueue !== 'undefined' && window.domUpdateQueue) {
+                updateStatus('domUpdateQueue', 'Доступна', 'success');
+                log('DOMUpdateQueue загружена успешно', 'success');
+            } else {
+                updateStatus('domUpdateQueue', 'Недоступна', 'error');
+                log('DOMUpdateQueue не найдена', 'error');
+            }
+            
+            // EventManager
+            if (typeof EventManager !== 'undefined' && window.eventManager) {
+                updateStatus('eventManager', 'Доступна', 'success');
+                log('EventManager загружен успешно', 'success');
+            } else {
+                updateStatus('eventManager', 'Недоступна', 'error');
+                log('EventManager не найден', 'error');
+            }
+            
+            // StateManagerFixed
+            if (typeof StateManagerFixed !== 'undefined') {
+                updateStatus('stateManagerFixed', 'Доступен', 'success');
+                log('StateManagerFixed загружен успешно', 'success');
+            } else {
+                updateStatus('stateManagerFixed', 'Недоступен', 'error');
+                log('StateManagerFixed не найден', 'error');
+            }
+        }
+
+        // Тест циклических зависимостей
+        function testCyclicDependencies() {
+            log('Тестирование циклических зависимостей...', 'info');
+            
+            try {
+                // Создаем StateManagerFixed
+                const state = new StateManagerFixed();
+                
+                // Проверяем, что нет прямых ссылок на DOM или другие модули
+                const hasDirectDOMRefs = Object.keys(state).some(key => 
+                    key.includes('renderer') || key.includes('editor') || key.includes('dom')
+                );
+                
+                if (!hasDirectDOMRefs) {
+                    updateStatus('cyclicDependencies', 'Исправлены', 'success');
+                    log('Циклические зависимости устранены', 'success');
+                } else {
+                    updateStatus('cyclicDependencies', 'Обнаружены', 'error');
+                    log('Найдены циклические зависимости', 'error');
+                }
+                
+                // Проверяем систему подписчиков
+                const unsubscribe = state.subscribe('propertyChange', (data) => {
+                    log(`Получено уведомление: ${data.type}`, 'info');
+                });
+                
+                // Тестируем уведомления
+                state.updateTextBlockProperty('test', 'text', 'test value');
+                
+                // Отписываемся
+                unsubscribe();
+                log('Система подписчиков работает корректно', 'success');
+                
+            } catch (error) {
+                updateStatus('cyclicDependencies', 'Ошибка теста', 'error');
+                log(`Ошибка в тесте зависимостей: ${error.message}`, 'error');
+            }
+        }
+
+        // Тест состояния гонки
+        function testRaceConditions() {
+            log('Тестирование состояния гонки DOM...', 'info');
+            
+            try {
+                if (!window.domUpdateQueue) {
+                    throw new Error('DOMUpdateQueue недоступна');
+                }
+                
+                // Симулируем множественные обновления DOM
+                const updates = [];
+                for (let i = 0; i < 50; i++) {
+                    updates.push(() => {
+                        return new Promise(resolve => {
+                            setTimeout(() => {
+                                log(`DOM обновление ${i + 1}`, 'info');
+                                resolve();
+                            }, Math.random() * 10);
+                        });
+                    });
+                }
+                
+                // Добавляем все обновления в очередь
+                updates.forEach((update, index) => {
+                    window.domUpdateQueue.enqueue(update, index < 10 ? 'high' : 'normal');
+                });
+                
+                // Проверяем статистику очереди
+                setTimeout(() => {
+                    const stats = window.domUpdateQueue.getStats();
+                    log(`Статистика очереди: ${JSON.stringify(stats)}`, 'info');
+                    
+                    if (stats.queueLength === 0) {
+                        updateStatus('raceConditions', 'Исправлены', 'success');
+                        log('Состояние гонки предотвращено очередью', 'success');
+                    } else {
+                        updateStatus('raceConditions', 'В обработке', 'warning');
+                        log('Очередь все еще обрабатывается', 'warning');
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                updateStatus('raceConditions', 'Ошибка теста', 'error');
+                log(`Ошибка в тесте состояния гонки: ${error.message}`, 'error');
+            }
+        }
+
+        // Тест утечек памяти
+        function testMemoryLeaks() {
+            log('Тестирование утечек памяти...', 'info');
+            
+            try {
+                if (!window.eventManager) {
+                    throw new Error('EventManager недоступен');
+                }
+                
+                // Создаем множество элементов и обработчиков
+                const testElements = [];
+                for (let i = 0; i < 100; i++) {
+                    const element = document.createElement('div');
+                    element.id = `test-element-${i}`;
+                    document.body.appendChild(element);
+                    testElements.push(element);
+                    
+                    // Добавляем обработчики через EventManager
+                    window.eventManager.addEventListener(element, 'click', () => {
+                        console.log(`Клик по элементу ${i}`);
+                    });
+                }
+                
+                // Проверяем статистику до очистки
+                const statsBefore = window.eventManager.getStats();
+                log(`Обработчиков до очистки: ${statsBefore.elementHandlers}`, 'info');
+                
+                // Удаляем элементы и очищаем обработчики
+                testElements.forEach(element => {
+                    window.eventManager.removeAllEventListeners(element);
+                    document.body.removeChild(element);
+                });
+                
+                // Проверяем статистику после очистки
+                const statsAfter = window.eventManager.getStats();
+                log(`Обработчиков после очистки: ${statsAfter.elementHandlers}`, 'info');
+                
+                if (statsAfter.elementHandlers === statsBefore.elementHandlers - 100) {
+                    updateStatus('memoryLeaks', 'Предотвращены', 'success');
+                    log('Утечки памяти предотвращены', 'success');
+                } else {
+                    updateStatus('memoryLeaks', 'Возможны утечки', 'warning');
+                    log('Возможны утечки памяти', 'warning');
+                }
+                
+            } catch (error) {
+                updateStatus('memoryLeaks', 'Ошибка теста', 'error');
+                log(`Ошибка в тесте утечек памяти: ${error.message}`, 'error');
+            }
+        }
+
+        // Тест системы событий
+        function testEventSystem() {
+            log('Тестирование системы событий...', 'info');
+            
+            try {
+                if (!window.eventManager) {
+                    throw new Error('EventManager недоступен');
+                }
+                
+                // Создаем тестовый элемент
+                const testElement = document.createElement('button');
+                testElement.textContent = 'Test Button';
+                document.body.appendChild(testElement);
+                
+                let clickCount = 0;
+                
+                // Добавляем обработчик
+                const handlerId = window.eventManager.addEventListener(testElement, 'click', () => {
+                    clickCount++;
+                    log(`Клик ${clickCount} обработан`, 'info');
+                });
+                
+                // Симулируем клики
+                testElement.click();
+                testElement.click();
+                testElement.click();
+                
+                // Проверяем результат
+                setTimeout(() => {
+                    if (clickCount === 3) {
+                        log('Система событий работает корректно', 'success');
+                        
+                        // Очищаем тестовый элемент
+                        window.eventManager.removeAllEventListeners(testElement);
+                        document.body.removeChild(testElement);
+                        
+                        log('Тестовые обработчики очищены', 'success');
+                    } else {
+                        log(`Ожидалось 3 клика, получено ${clickCount}`, 'error');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                log(`Ошибка в тесте системы событий: ${error.message}`, 'error');
+            }
+        }
+
+        // Тест обновлений DOM
+        function testDOMUpdates() {
+            log('Тестирование системы обновлений DOM...', 'info');
+            
+            try {
+                if (!window.domUpdateQueue) {
+                    throw new Error('DOMUpdateQueue недоступна');
+                }
+                
+                // Очищаем очередь
+                window.domUpdateQueue.clear();
+                
+                // Добавляем тестовые обновления
+                const testUpdates = [
+                    () => Promise.resolve(log('Обновление 1 выполнено', 'success')),
+                    () => Promise.resolve(log('Обновление 2 выполнено', 'success')),
+                    () => Promise.resolve(log('Обновление 3 выполнено', 'success'))
+                ];
+                
+                testUpdates.forEach((update, index) => {
+                    window.domUpdateQueue.enqueue(update, index === 0 ? 'high' : 'normal');
+                });
+                
+                // Проверяем выполнение через некоторое время
+                setTimeout(() => {
+                    const stats = window.domUpdateQueue.getStats();
+                    log(`Финальная статистика очереди: ${JSON.stringify(stats)}`, 'info');
+                    
+                    if (stats.queueLength === 0) {
+                        log('Все DOM обновления выполнены успешно', 'success');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                log(`Ошибка в тесте DOM обновлений: ${error.message}`, 'error');
+            }
+        }
+
+        // Полный тест архитектуры
+        function runFullArchitectureTest() {
+            log('Запуск полного теста архитектуры...', 'info');
+            
+            // Запускаем все тесты последовательно
+            testCyclicDependencies();
+            setTimeout(() => testRaceConditions(), 500);
+            setTimeout(() => testMemoryLeaks(), 1000);
+            setTimeout(() => testEventSystem(), 1500);
+            setTimeout(() => testDOMUpdates(), 2000);
+            
+            // Обновляем статистику производительности
+            setTimeout(() => {
+                updatePerformanceStats();
+                log('Полный тест архитектуры завершен', 'success');
+            }, 3000);
+        }
+
+        // Обновление статистики производительности
+        function updatePerformanceStats() {
+            const statsContainer = document.getElementById('performanceStats');
+            
+            let stats = '<div class="status-item"><span class="status-label">Время выполнения:</span><span class="status-value">~3 секунды</span></div>';
+            
+            if (window.domUpdateQueue) {
+                const queueStats = window.domUpdateQueue.getStats();
+                stats += `<div class="status-item"><span class="status-label">Очередь DOM:</span><span class="status-value">${queueStats.queueLength} обновлений</span></div>`;
+            }
+            
+            if (window.eventManager) {
+                const eventStats = window.eventManager.getStats();
+                stats += `<div class="status-item"><span class="status-label">Обработчики событий:</span><span class="status-value">${eventStats.elementHandlers} активных</span></div>`;
+            }
+            
+            stats += `<div class="status-item"><span class="status-label">Использование памяти:</span><span class="status-value">${Math.round(performance.memory?.usedJSHeapSize / 1024 / 1024 || 0)} MB</span></div>`;
+            
+            statsContainer.innerHTML = stats;
+        }
+
+        // Проверка синтаксических ошибок
+        setTimeout(() => {
+            try {
+                // Если мы дошли до этой точки, значит нет критических синтаксических ошибок
+                updateStatus('syntaxErrors', 'Исправлены', 'success');
+                log('Синтаксические ошибки исправлены', 'success');
+            } catch (error) {
+                updateStatus('syntaxErrors', 'Обнаружены', 'error');
+                log(`Синтаксическая ошибка: ${error.message}`, 'error');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

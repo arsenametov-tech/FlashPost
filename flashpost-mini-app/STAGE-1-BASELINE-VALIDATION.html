@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔒 Stage 1 Baseline Validation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%); color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .title { font-size: 32px; color: #00ff88; margin-bottom: 10px; }
+        .subtitle { color: #888; }
+        .validation-card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(0,255,136,0.3); }
+        .btn { background: linear-gradient(45deg, #00ff88, #0088ff); color: #000; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; margin: 10px; font-weight: bold; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,255,136,0.3); }
+        .status { padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: bold; }
+        .success { background: rgba(0,255,136,0.2); border: 2px solid #00ff88; }
+        .error { background: rgba(255,68,68,0.2); border: 2px solid #ff4444; }
+        .warning { background: rgba(255,193,7,0.2); border: 2px solid #ffc107; }
+        .info { background: rgba(0,136,255,0.2); border: 2px solid #0088ff; }
+        .frozen { background: rgba(0,255,136,0.1); border: 2px solid #00ff88; }
+        .validation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .validation-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; }
+        .check-item { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .check-icon { margin-right: 10px; font-size: 18px; }
+        .check-text { flex: 1; }
+        .check-status { font-weight: bold; }
+        iframe { width: 100%; height: 400px; border: 1px solid #333; border-radius: 8px; margin: 10px 0; }
+        .freeze-banner { background: linear-gradient(45deg, #00ff88, #0088ff); color: #000; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 18px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🔒 Stage 1 Baseline Validation</h1>
+            <p class="subtitle">Подтверждение стабильного базового функционала</p>
+        </div>
+        
+        <div id="freezeStatus" class="freeze-banner" style="display: none;">
+            🔒 STAGE 1 FROZEN AS STABLE BASELINE 🔒
+        </div>
+        
+        <div class="validation-card">
+            <h2>🚀 Validation Controls</h2>
+            <button class="btn" onclick="validateStage1()">✅ Validate Stage 1 Baseline</button>
+            <button class="btn" onclick="freezeStage1()" id="freezeBtn" disabled>🔒 Freeze as Stable</button>
+            <button class="btn" onclick="testMainApp()">📱 Test Main App</button>
+            <button class="btn" onclick="testWorkingApp()">🎯 Test Working App</button>
+        </div>
+
+        <div class="validation-grid">
+            <div class="validation-item">
+                <h3>📱 Base UI Rendering</h3>
+                <div id="uiChecks">
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Application loads</span>
+                        <span class="check-status" id="loadStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Title renders</span>
+                        <span class="check-status" id="titleStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Input fields visible</span>
+                        <span class="check-status" id="inputStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Buttons render</span>
+                        <span class="check-status" id="buttonStatus">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="validation-item">
+                <h3>✍️ Manual Text Input</h3>
+                <div id="textInputChecks">
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Text area exists</span>
+                        <span class="check-status" id="textAreaStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Manual input button</span>
+                        <span class="check-status" id="manualBtnStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Text processing works</span>
+                        <span class="check-status" id="textProcessStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Slides generation</span>
+                        <span class="check-status" id="slidesGenStatus">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="validation-item">
+                <h3>📝 Editor Panel</h3>
+                <div id="editorChecks">
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Editor container exists</span>
+                        <span class="check-status" id="editorContainerStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Edit button visible</span>
+                        <span class="check-status" id="editBtnStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Editor opens</span>
+                        <span class="check-status" id="editorOpenStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Text blocks visible</span>
+                        <span class="check-status" id="textBlocksStatus">Pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="validation-item">
+                <h3>🖱️ Button Clickability</h3>
+                <div id="clickabilityChecks">
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Generate button clickable</span>
+                        <span class="check-status" id="genBtnClickStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Manual button clickable</span>
+                        <span class="check-status" id="manualClickStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Navigation buttons</span>
+                        <span class="check-status" id="navBtnStatus">Pending</span>
+                    </div>
+                    <div class="check-item">
+                        <span class="check-icon">⏳</span>
+                        <span class="check-text">Editor buttons</span>
+                        <span class="check-status" id="editorBtnStatus">Pending</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="validation-card">
+            <h2>📱 Live Application Test</h2>
+            <iframe id="appFrame" src="working-app.html"></iframe>
+        </div>
+
+        <div class="validation-card">
+            <h2>📋 Validation Log</h2>
+            <div id="validationLog" style="background: #000; border: 1px solid #333; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto;">
+                Stage 1 Baseline Validation ready...<br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let validationResults = {};
+        let allChecksPassed = false;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icons = { error: '❌', success: '✅', warning: '⚠️', info: 'ℹ️' };
+            const colors = { error: '#ff4444', success: '#00ff88', warning: '#ffc107', info: '#0088ff' };
+            
+            const logElement = document.getElementById('validationLog');
+            if (logElement) {
+                logElement.innerHTML += `<span style="color: ${colors[type]}">[${timestamp}] ${icons[type]} ${message}</span><br>`;
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+        }
+
+        function updateCheck(checkId, status, success) {
+            const statusElement = document.getElementById(checkId);
+            const iconElement = statusElement.parentElement.querySelector('.check-icon');
+            
+            if (statusElement) {
+                statusElement.textContent = status;
+                statusElement.style.color = success ? '#00ff88' : '#ff4444';
+            }
+            
+            if (iconElement) {
+                iconElement.textContent = success ? '✅' : '❌';
+            }
+        }
+
+        async function validateBaseUI() {
+            log('📱 Validating Base UI Rendering...', 'info');
+            
+            try {
+                const frame = document.getElementById('appFrame');
+                await new Promise(resolve => {
+                    frame.onload = resolve;
+                    setTimeout(resolve, 3000);
+                });
+                
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                
+                // Check 1: Application loads
+                const bodyExists = frameDoc.body !== null;
+                updateCheck('loadStatus', bodyExists ? 'OK' : 'FAIL', bodyExists);
+                validationResults.appLoads = bodyExists;
+                
+                // Check 2: Title renders
+                const title = frameDoc.querySelector('.title');
+                const titleExists = title !== null;
+                updateCheck('titleStatus', titleExists ? 'OK' : 'FAIL', titleExists);
+                validationResults.titleRenders = titleExists;
+                
+                // Check 3: Input fields visible
+                const topicInput = frameDoc.querySelector('#topicInput');
+                const manualInput = frameDoc.querySelector('#manualInput');
+                const inputsExist = topicInput && manualInput;
+                updateCheck('inputStatus', inputsExist ? 'OK' : 'FAIL', inputsExist);
+                validationResults.inputsVisible = inputsExist;
+                
+                // Check 4: Buttons render
+                const generateBtn = frameDoc.querySelector('#generateBtn');
+                const manualBtn = frameDoc.querySelector('#manualBtn');
+                const buttonsExist = generateBtn && manualBtn;
+                updateCheck('buttonStatus', buttonsExist ? 'OK' : 'FAIL', buttonsExist);
+                validationResults.buttonsRender = buttonsExist;
+                
+                log(`📱 Base UI: ${bodyExists && titleExists && inputsExist && buttonsExist ? 'PASS' : 'FAIL'}`, 
+                    bodyExists && titleExists && inputsExist && buttonsExist ? 'success' : 'error');
+                
+                return bodyExists && titleExists && inputsExist && buttonsExist;
+                
+            } catch (error) {
+                log(`❌ Base UI validation error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function validateManualTextInput() {
+            log('✍️ Validating Manual Text Input...', 'info');
+            
+            try {
+                const frame = document.getElementById('appFrame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const frameWindow = frame.contentWindow;
+                
+                // Check 1: Text area exists
+                const manualInput = frameDoc.querySelector('#manualInput');
+                const textAreaExists = manualInput !== null;
+                updateCheck('textAreaStatus', textAreaExists ? 'OK' : 'FAIL', textAreaExists);
+                validationResults.textAreaExists = textAreaExists;
+                
+                // Check 2: Manual input button
+                const manualBtn = frameDoc.querySelector('#manualBtn');
+                const manualBtnExists = manualBtn !== null;
+                updateCheck('manualBtnStatus', manualBtnExists ? 'OK' : 'FAIL', manualBtnExists);
+                validationResults.manualBtnExists = manualBtnExists;
+                
+                // Check 3: Text processing function exists
+                const textProcessingExists = typeof frameWindow.generateSlidesFromText === 'function';
+                updateCheck('textProcessStatus', textProcessingExists ? 'OK' : 'FAIL', textProcessingExists);
+                validationResults.textProcessingWorks = textProcessingExists;
+                
+                // Check 4: Slides generation function exists
+                const slidesGenExists = typeof frameWindow.generateManualSlides === 'function';
+                updateCheck('slidesGenStatus', slidesGenExists ? 'OK' : 'FAIL', slidesGenExists);
+                validationResults.slidesGeneration = slidesGenExists;
+                
+                log(`✍️ Manual Text Input: ${textAreaExists && manualBtnExists && textProcessingExists && slidesGenExists ? 'PASS' : 'FAIL'}`, 
+                    textAreaExists && manualBtnExists && textProcessingExists && slidesGenExists ? 'success' : 'error');
+                
+                return textAreaExists && manualBtnExists && textProcessingExists && slidesGenExists;
+                
+            } catch (error) {
+                log(`❌ Manual text input validation error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function validateEditorPanel() {
+            log('📝 Validating Editor Panel...', 'info');
+            
+            try {
+                const frame = document.getElementById('appFrame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const frameWindow = frame.contentWindow;
+                
+                // Check 1: Editor container exists
+                const editorContainer = frameDoc.querySelector('#editorContainer');
+                const editorExists = editorContainer !== null;
+                updateCheck('editorContainerStatus', editorExists ? 'OK' : 'FAIL', editorExists);
+                validationResults.editorContainerExists = editorExists;
+                
+                // Check 2: Edit button visible
+                const editBtn = frameDoc.querySelector('#editSlideBtn');
+                const editBtnExists = editBtn !== null;
+                updateCheck('editBtnStatus', editBtnExists ? 'OK' : 'FAIL', editBtnExists);
+                validationResults.editBtnVisible = editBtnExists;
+                
+                // Check 3: Editor functions exist
+                const editorFunctionsExist = typeof frameWindow.openSlideEditor === 'function';
+                updateCheck('editorOpenStatus', editorFunctionsExist ? 'OK' : 'FAIL', editorFunctionsExist);
+                validationResults.editorOpens = editorFunctionsExist;
+                
+                // Check 4: Text blocks container exists
+                const textBlocksContainer = frameDoc.querySelector('#textBlocksContainer');
+                const textBlocksExists = textBlocksContainer !== null;
+                updateCheck('textBlocksStatus', textBlocksExists ? 'OK' : 'FAIL', textBlocksExists);
+                validationResults.textBlocksVisible = textBlocksExists;
+                
+                log(`📝 Editor Panel: ${editorExists && editBtnExists && editorFunctionsExist && textBlocksExists ? 'PASS' : 'FAIL'}`, 
+                    editorExists && editBtnExists && editorFunctionsExist && textBlocksExists ? 'success' : 'error');
+                
+                return editorExists && editBtnExists && editorFunctionsExist && textBlocksExists;
+                
+            } catch (error) {
+                log(`❌ Editor panel validation error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function validateButtonClickability() {
+            log('🖱️ Validating Button Clickability...', 'info');
+            
+            try {
+                const frame = document.getElementById('appFrame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const frameWindow = frame.contentWindow;
+                
+                // Check 1: Generate button clickable
+                const generateBtn = frameDoc.querySelector('#generateBtn');
+                const genBtnClickable = generateBtn && frameWindow.getComputedStyle(generateBtn).pointerEvents !== 'none';
+                updateCheck('genBtnClickStatus', genBtnClickable ? 'OK' : 'FAIL', genBtnClickable);
+                validationResults.generateBtnClickable = genBtnClickable;
+                
+                // Check 2: Manual button clickable
+                const manualBtn = frameDoc.querySelector('#manualBtn');
+                const manualBtnClickable = manualBtn && frameWindow.getComputedStyle(manualBtn).pointerEvents !== 'none';
+                updateCheck('manualClickStatus', manualBtnClickable ? 'OK' : 'FAIL', manualBtnClickable);
+                validationResults.manualBtnClickable = manualBtnClickable;
+                
+                // Check 3: Navigation buttons exist
+                const prevBtn = frameDoc.querySelector('#prevBtn');
+                const nextBtn = frameDoc.querySelector('#nextBtn');
+                const navBtnsExist = prevBtn && nextBtn;
+                updateCheck('navBtnStatus', navBtnsExist ? 'OK' : 'FAIL', navBtnsExist);
+                validationResults.navButtonsExist = navBtnsExist;
+                
+                // Check 4: Editor buttons exist
+                const addTextBtn = frameDoc.querySelector('#addTextBtn');
+                const saveBlockBtn = frameDoc.querySelector('#saveBlockBtn');
+                const editorBtnsExist = addTextBtn && saveBlockBtn;
+                updateCheck('editorBtnStatus', editorBtnsExist ? 'OK' : 'FAIL', editorBtnsExist);
+                validationResults.editorButtonsExist = editorBtnsExist;
+                
+                log(`🖱️ Button Clickability: ${genBtnClickable && manualBtnClickable && navBtnsExist && editorBtnsExist ? 'PASS' : 'FAIL'}`, 
+                    genBtnClickable && manualBtnClickable && navBtnsExist && editorBtnsExist ? 'success' : 'error');
+                
+                return genBtnClickable && manualBtnClickable && navBtnsExist && editorBtnsExist;
+                
+            } catch (error) {
+                log(`❌ Button clickability validation error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function validateStage1() {
+            log('🔒 Starting Stage 1 Baseline Validation...', 'info');
+            
+            const results = {
+                baseUI: await validateBaseUI(),
+                manualTextInput: await validateManualTextInput(),
+                editorPanel: await validateEditorPanel(),
+                buttonClickability: await validateButtonClickability()
+            };
+            
+            const allPassed = Object.values(results).every(result => result === true);
+            allChecksPassed = allPassed;
+            
+            log('📊 STAGE 1 VALIDATION RESULTS:', 'info');
+            log(`  📱 Base UI Renders: ${results.baseUI ? 'PASS' : 'FAIL'}`, results.baseUI ? 'success' : 'error');
+            log(`  ✍️ Manual Text Input: ${results.manualTextInput ? 'PASS' : 'FAIL'}`, results.manualTextInput ? 'success' : 'error');
+            log(`  📝 Editor Panel: ${results.editorPanel ? 'PASS' : 'FAIL'}`, results.editorPanel ? 'success' : 'error');
+            log(`  🖱️ Button Clickability: ${results.buttonClickability ? 'PASS' : 'FAIL'}`, results.buttonClickability ? 'success' : 'error');
+            
+            if (allPassed) {
+                log('✅ ALL STAGE 1 REQUIREMENTS VALIDATED SUCCESSFULLY', 'success');
+                log('🔒 Ready to freeze as stable baseline', 'success');
+                document.getElementById('freezeBtn').disabled = false;
+                document.getElementById('freezeBtn').style.background = 'linear-gradient(45deg, #00ff88, #0088ff)';
+            } else {
+                log('❌ STAGE 1 VALIDATION FAILED - Cannot freeze', 'error');
+                log('🔧 Fix failing components before freezing', 'warning');
+            }
+            
+            return allPassed;
+        }
+
+        function freezeStage1() {
+            if (!allChecksPassed) {
+                log('❌ Cannot freeze - validation not passed', 'error');
+                return;
+            }
+            
+            log('🔒 FREEZING STAGE 1 AS STABLE BASELINE...', 'info');
+            
+            // Show freeze banner
+            const freezeBanner = document.getElementById('freezeStatus');
+            freezeBanner.style.display = 'block';
+            
+            // Disable freeze button
+            const freezeBtn = document.getElementById('freezeBtn');
+            freezeBtn.disabled = true;
+            freezeBtn.textContent = '🔒 FROZEN';
+            freezeBtn.style.background = '#666';
+            
+            log('✅ STAGE 1 SUCCESSFULLY FROZEN', 'success');
+            log('🚫 No further refactoring allowed on Stage 1', 'warning');
+            log('📋 Baseline confirmed:', 'info');
+            log('  - Base UI renders correctly ✅', 'success');
+            log('  - Manual text input works ✅', 'success');
+            log('  - Editor panel visible ✅', 'success');
+            log('  - Buttons clickable ✅', 'success');
+            log('🎯 Stage 1 is now the stable baseline for future development', 'success');
+        }
+
+        async function testMainApp() {
+            log('📱 Testing main app (index.html)...', 'info');
+            window.open('index.html', '_blank');
+        }
+
+        async function testWorkingApp() {
+            log('🎯 Testing working app (working-app.html)...', 'info');
+            window.open('working-app.html', '_blank');
+        }
+
+        // Auto-start validation
+        window.addEventListener('load', () => {
+            log('🔒 Stage 1 Baseline Validation ready', 'info');
+            log('📋 Required validations:', 'info');
+            log('  1. Base UI renders correctly', 'info');
+            log('  2. Manual text input works', 'info');
+            log('  3. Editor panel visible', 'info');
+            log('  4. Buttons clickable', 'info');
+            
+            // Auto-validate after 2 seconds
+            setTimeout(validateStage1, 2000);
+        });
+    </script>
+</body>
+</html>

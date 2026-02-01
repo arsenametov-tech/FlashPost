@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #6d2d96; }
+        #testOutput {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 FlashPost Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Основные функции</h2>
+        <button onclick="testBasicFunctions()">Тест базовых функций</button>
+        <button onclick="testContentGeneration()">Тест генерации контента</button>
+        <button onclick="testNavigation()">Тест навигации</button>
+        <button onclick="testErrorHandling()">Тест обработки ошибок</button>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Результаты тестов</h2>
+        <div id="testOutput">Нажмите кнопки выше для запуска тестов...</div>
+    </div>
+
+    <script>
+        let testOutput = document.getElementById('testOutput');
+        let app = null;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            testOutput.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            testOutput.scrollTop = testOutput.scrollHeight;
+        }
+
+        function clearLog() {
+            testOutput.textContent = '';
+        }
+
+        // Инициализация приложения для тестов
+        function initApp() {
+            if (!app) {
+                try {
+                    // Создаем минимальную DOM структуру
+                    if (!document.getElementById('app')) {
+                        const appDiv = document.createElement('div');
+                        appDiv.id = 'app';
+                        appDiv.style.display = 'none';
+                        document.body.appendChild(appDiv);
+                    }
+                    
+                    if (!document.getElementById('loading')) {
+                        const loadingDiv = document.createElement('div');
+                        loadingDiv.id = 'loading';
+                        loadingDiv.style.display = 'none';
+                        document.body.appendChild(loadingDiv);
+                    }
+
+                    // Мокаем Telegram WebApp
+                    window.Telegram = {
+                        WebApp: {
+                            ready: () => {},
+                            expand: () => {},
+                            setHeaderColor: () => {},
+                            setBackgroundColor: () => {},
+                            MainButton: {
+                                setText: () => {},
+                                show: () => {},
+                                hide: () => {},
+                                onClick: () => {},
+                                color: '#833ab4',
+                                textColor: '#ffffff'
+                            },
+                            BackButton: {
+                                onClick: () => {}
+                            }
+                        }
+                    };
+
+                    app = new FlashPostApp();
+                    log('Приложение инициализировано', 'success');
+                    return true;
+                } catch (error) {
+                    log(`Ошибка инициализации: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function testBasicFunctions() {
+            clearLog();
+            log('=== ТЕСТ БАЗОВЫХ ФУНКЦИЙ ===');
+            
+            if (!initApp()) return;
+
+            // Тест 1: Проверка существования основных методов
+            const methods = [
+                'init', 'showApp', 'renderStartScreen', 'bindStartEvents',
+                'loadQuickIdeas', 'generateSlides', 'showCarousel',
+                'nextSlide', 'previousSlide', 'updateCarouselView'
+            ];
+
+            methods.forEach(method => {
+                if (typeof app[method] === 'function') {
+                    log(`Метод ${method} существует`, 'success');
+                } else {
+                    log(`Метод ${method} отсутствует`, 'error');
+                }
+            });
+
+            // Тест 2: Проверка свойств
+            const properties = ['currentSlide', 'slides', 'isGenerating'];
+            properties.forEach(prop => {
+                if (app.hasOwnProperty(prop)) {
+                    log(`Свойство ${prop} = ${app[prop]}`, 'success');
+                } else {
+                    log(`Свойство ${prop} отсутствует`, 'error');
+                }
+            });
+
+            log('=== БАЗОВЫЕ ФУНКЦИИ ПРОТЕСТИРОВАНЫ ===');
+        }
+
+        function testContentGeneration() {
+            clearLog();
+            log('=== ТЕСТ ГЕНЕРАЦИИ КОНТЕНТА ===');
+            
+            if (!initApp()) return;
+
+            // Тест локальной генерации
+            try {
+                const localSlides = app.generateLocalSlides('Тестовая тема');
+                if (localSlides && localSlides.length > 0) {
+                    log(`Локальная генерация: ${localSlides.length} слайдов`, 'success');
+                    localSlides.forEach((slide, i) => {
+                        log(`Слайд ${i + 1}: ${slide.title} - ${slide.text.substring(0, 50)}...`);
+                    });
+                } else {
+                    log('Локальная генерация не работает', 'error');
+                }
+            } catch (error) {
+                log(`Ошибка локальной генерации: ${error.message}`, 'error');
+            }
+
+            // Тест построения промптов
+            try {
+                const prompt = app.buildAIPrompt('Тестовая тема');
+                if (prompt && prompt.length > 0) {
+                    log(`Промпт создан: ${prompt.length} символов`, 'success');
+                } else {
+                    log('Ошибка создания промпта', 'error');
+                }
+            } catch (error) {
+                log(`Ошибка создания промпта: ${error.message}`, 'error');
+            }
+
+            log('=== ГЕНЕРАЦИЯ КОНТЕНТА ПРОТЕСТИРОВАНА ===');
+        }
+
+        function testNavigation() {
+            clearLog();
+            log('=== ТЕСТ НАВИГАЦИИ ===');
+            
+            if (!initApp()) return;
+
+            // Создаем тестовые слайды
+            app.slides = [
+                { title: 'Slide 1', text: 'Тест 1' },
+                { title: 'Slide 2', text: 'Тест 2' },
+                { title: 'Slide 3', text: 'Тест 3' }
+            ];
+            app.currentSlide = 0;
+
+            log(`Создано ${app.slides.length} тестовых слайдов`);
+
+            // Тест навигации вперед
+            const initialSlide = app.currentSlide;
+            app.nextSlide();
+            if (app.currentSlide === initialSlide + 1) {
+                log('Навигация вперед работает', 'success');
+            } else {
+                log('Ошибка навигации вперед', 'error');
+            }
+
+            // Тест навигации назад
+            const currentSlide = app.currentSlide;
+            app.previousSlide();
+            if (app.currentSlide === currentSlide - 1) {
+                log('Навигация назад работает', 'success');
+            } else {
+                log('Ошибка навигации назад', 'error');
+            }
+
+            // Тест прямого перехода
+            app.goToSlide(2);
+            if (app.currentSlide === 2) {
+                log('Прямой переход к слайду работает', 'success');
+            } else {
+                log('Ошибка прямого перехода', 'error');
+            }
+
+            log('=== НАВИГАЦИЯ ПРОТЕСТИРОВАНА ===');
+        }
+
+        function testErrorHandling() {
+            clearLog();
+            log('=== ТЕСТ ОБРАБОТКИ ОШИБОК ===');
+            
+            if (!initApp()) return;
+
+            // Тест обработки некорректного JSON
+            try {
+                const badJson = '{"slides": [{"title": "test", "text": "test"}'; // Некорректный JSON
+                app.parseAndValidateAIResponse(badJson, 'test');
+                log('Ошибка: некорректный JSON не был обнаружен', 'error');
+            } catch (error) {
+                if (error.isJSONError) {
+                    log('Обработка некорректного JSON работает', 'success');
+                } else {
+                    log(`Неожиданная ошибка JSON: ${error.message}`, 'warning');
+                }
+            }
+
+            // Тест очистки AI ответа
+            try {
+                const dirtyResponse = '```json\n{"slides": [{"title": "test", "text": "test"}]}\n```';
+                const cleaned = app.cleanAIResponse(dirtyResponse);
+                if (cleaned === '{"slides": [{"title": "test", "text": "test"}]}') {
+                    log('Очистка AI ответа работает', 'success');
+                } else {
+                    log('Ошибка очистки AI ответа', 'error');
+                }
+            } catch (error) {
+                log(`Ошибка очистки: ${error.message}`, 'error');
+            }
+
+            // Тест кэширования
+            try {
+                const testSlides = [{ title: 'Test', text: 'Test slide' }];
+                app.cacheSlides('test-topic', testSlides);
+                const cached = app.getCachedSlides('test-topic');
+                if (cached && cached.length === 1) {
+                    log('Кэширование работает', 'success');
+                } else {
+                    log('Ошибка кэширования', 'error');
+                }
+            } catch (error) {
+                log(`Ошибка кэширования: ${error.message}`, 'error');
+            }
+
+            log('=== ОБРАБОТКА ОШИБОК ПРОТЕСТИРОВАНА ===');
+        }
+
+        // Автоматический тест при загрузке
+        window.addEventListener('load', () => {
+            log('Страница тестирования загружена');
+            log('Готов к тестированию FlashPost Mini App');
+        });
+    </script>
+
+    <!-- Подключаем основной скрипт приложения -->
+    <script src="app.js"></script>
+</body>
+</html>

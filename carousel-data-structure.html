@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Carousel Data Structure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .carousel-preview {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .slide-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .slide-text {
+            font-size: 18px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .keyword {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .keyword.emotional {
+            background: rgba(231, 76, 60, 0.8);
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+        }
+
+        .keyword.conceptual {
+            background: rgba(52, 152, 219, 0.8);
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.4);
+        }
+
+        .keyword.action {
+            background: rgba(46, 204, 113, 0.8);
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+        }
+
+        .keyword.technical {
+            background: rgba(155, 89, 182, 0.8);
+            box-shadow: 0 0 8px rgba(155, 89, 182, 0.4);
+        }
+
+        .data-structure {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .btn.secondary {
+            background: #718096;
+        }
+
+        .btn.secondary:hover {
+            background: #4a5568;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .keyword-type-selector {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .type-btn {
+            padding: 4px 8px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .type-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .slide-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FlashPost - Carousel Data Structure</h1>
+        <p style="color: #718096; margin-bottom: 24px;">
+            Система управления каруселями с поддержкой ключевых слов и типизации
+        </p>
+
+        <div class="controls">
+            <button class="btn" onclick="generateSampleCarousel()">🤖 Генерировать пример</button>
+            <button class="btn secondary" onclick="addSlide()">+ Добавить слайд</button>
+            <button class="btn secondary" onclick="exportCarousel()">💾 Экспорт JSON</button>
+            <button class="btn secondary" onclick="importCarousel()">📥 Импорт JSON</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="slideCount">0</div>
+                <div class="stat-label">Слайдов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="keywordCount">0</div>
+                <div class="stat-label">Ключевых слов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="emotionalCount">0</div>
+                <div class="stat-label">Эмоциональных</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="conceptualCount">0</div>
+                <div class="stat-label">Концептуальных</div>
+            </div>
+        </div>
+
+        <div class="carousel-preview" id="carouselPreview">
+            <h3>Превью карусели</h3>
+            <p style="color: #718096;">Создайте или загрузите карусель для предварительного просмотра</p>
+        </div>
+
+        <div class="input-group">
+            <label>Название карусели</label>
+            <input type="text" id="carouselTitle" placeholder="Введите название карусели">
+        </div>
+
+        <div class="input-group">
+            <label>Текст слайда</label>
+            <textarea id="slideText" rows="3" placeholder="Введите текст для нового слайда"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label>Ключевые слова (через запятую)</label>
+            <input type="text" id="keywordsInput" placeholder="слово1, слово2, слово3">
+            <div class="keyword-type-selector">
+                <button class="type-btn active" data-type="emotional">Эмоциональные</button>
+                <button class="type-btn" data-type="conceptual">Концептуальные</button>
+                <button class="type-btn" data-type="action">Действия</button>
+                <button class="type-btn" data-type="technical">Технические</button>
+            </div>
+        </div>
+
+        <div class="data-structure" id="dataStructure">
+            <pre id="jsonOutput">{
+  "title": "",
+  "slides": []
+}</pre>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATA STRUCTURE =====
+        let carouselData = {
+            title: "",
+            slides: []
+        };
+
+        let selectedKeywordType = "emotional";
+
+        // ===== SAMPLE DATA =====
+        const sampleCarousels = [
+            {
+                title: "Секреты продуктивности",
+                slides: [
+                    {
+                        text: "🚀 Хотите быть продуктивнее? Узнайте секреты, которые изменят вашу жизнь!",
+                        keywords: [
+                            { word: "продуктивность", type: "conceptual" },
+                            { word: "секреты", type: "emotional" },
+                            { word: "изменят", type: "action" }
+                        ]
+                    },
+                    {
+                        text: "⏰ Правило 80/20: 20% усилий дают 80% результата. Фокусируйтесь на главном!",
+                        keywords: [
+                            { word: "правило", type: "conceptual" },
+                            { word: "результат", type: "technical" },
+                            { word: "фокусируйтесь", type: "action" }
+                        ]
+                    },
+                    {
+                        text: "🎯 Техника Помодоро: 25 минут работы + 5 минут отдыха = максимальная концентрация",
+                        keywords: [
+                            { word: "техника", type: "conceptual" },
+                            { word: "концентрация", type: "emotional" },
+                            { word: "работы", type: "action" }
+                        ]
+                    },
+                    {
+                        text: "📱 Отключите уведомления! Они крадут 23 минуты концентрации после каждого прерывания",
+                        keywords: [
+                            { word: "уведомления", type: "technical" },
+                            { word: "крадут", type: "emotional" },
+                            { word: "отключите", type: "action" }
+                        ]
+                    },
+                    {
+                        text: "✅ Планируйте день с вечера. Утром мозг тратит энергию на принятие решений",
+                        keywords: [
+                            { word: "планируйте", type: "action" },
+                            { word: "энергию", type: "conceptual" },
+                            { word: "решений", type: "technical" }
+                        ]
+                    }
+                ]
+            },
+            {
+                title: "Основы инвестирования",
+                slides: [
+                    {
+                        text: "💰 Инвестиции - это не азартная игра, а стратегия создания богатства",
+                        keywords: [
+                            { word: "инвестиции", type: "conceptual" },
+                            { word: "богатства", type: "emotional" },
+                            { word: "стратегия", type: "technical" }
+                        ]
+                    },
+                    {
+                        text: "📈 Диверсификация - не кладите все яйца в одну корзину",
+                        keywords: [
+                            { word: "диверсификация", type: "technical" },
+                            { word: "корзину", type: "conceptual" },
+                            { word: "кладите", type: "action" }
+                        ]
+                    },
+                    {
+                        text: "⏳ Время - ваш главный союзник. Сложный процент творит чудеса!",
+                        keywords: [
+                            { word: "время", type: "conceptual" },
+                            { word: "чудеса", type: "emotional" },
+                            { word: "процент", type: "technical" }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // ===== KEYWORD TYPE MANAGEMENT =====
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedKeywordType = btn.dataset.type;
+            });
+        });
+
+        // ===== CAROUSEL MANAGEMENT =====
+        function generateSampleCarousel() {
+            const randomCarousel = sampleCarousels[Math.floor(Math.random() * sampleCarousels.length)];
+            carouselData = JSON.parse(JSON.stringify(randomCarousel));
+            
+            document.getElementById('carouselTitle').value = carouselData.title;
+            updateDisplay();
+        }
+
+        function addSlide() {
+            const title = document.getElementById('carouselTitle').value.trim();
+            const text = document.getElementById('slideText').value.trim();
+            const keywordsInput = document.getElementById('keywordsInput').value.trim();
+
+            if (!title) {
+                alert('Введите название карусели');
+                return;
+            }
+
+            if (!text) {
+                alert('Введите текст слайда');
+                return;
+            }
+
+            carouselData.title = title;
+
+            // Parse keywords
+            const keywords = keywordsInput
+                .split(',')
+                .map(word => word.trim())
+                .filter(word => word.length > 0)
+                .map(word => ({
+                    word: word,
+                    type: selectedKeywordType
+                }));
+
+            const newSlide = {
+                text: text,
+                keywords: keywords
+            };
+
+            carouselData.slides.push(newSlide);
+
+            // Clear inputs
+            document.getElementById('slideText').value = '';
+            document.getElementById('keywordsInput').value = '';
+
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            updatePreview();
+            updateJSON();
+            updateStats();
+        }
+
+        function updatePreview() {
+            const preview = document.getElementById('carouselPreview');
+            
+            if (carouselData.slides.length === 0) {
+                preview.innerHTML = `
+                    <h3>Превью карусели</h3>
+                    <p style="color: #718096;">Создайте или загрузите карусель для предварительного просмотра</p>
+                `;
+                return;
+            }
+
+            let html = `<h3>${carouselData.title || 'Без названия'}</h3>`;
+            
+            carouselData.slides.forEach((slide, index) => {
+                html += `
+                    <div class="slide-preview">
+                        <div class="slide-indicator">${index + 1} / ${carouselData.slides.length}</div>
+                        <div class="slide-text">${slide.text}</div>
+                        <div class="keywords-container">
+                            ${slide.keywords.map(keyword => 
+                                `<span class="keyword ${keyword.type}">${keyword.word}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            preview.innerHTML = html;
+        }
+
+        function updateJSON() {
+            const jsonOutput = document.getElementById('jsonOutput');
+            jsonOutput.textContent = JSON.stringify(carouselData, null, 2);
+        }
+
+        function updateStats() {
+            const slideCount = carouselData.slides.length;
+            const allKeywords = carouselData.slides.flatMap(slide => slide.keywords);
+            const keywordCount = allKeywords.length;
+            const emotionalCount = allKeywords.filter(k => k.type === 'emotional').length;
+            const conceptualCount = allKeywords.filter(k => k.type === 'conceptual').length;
+
+            document.getElementById('slideCount').textContent = slideCount;
+            document.getElementById('keywordCount').textContent = keywordCount;
+            document.getElementById('emotionalCount').textContent = emotionalCount;
+            document.getElementById('conceptualCount').textContent = conceptualCount;
+        }
+
+        function exportCarousel() {
+            if (carouselData.slides.length === 0) {
+                alert('Нет данных для экспорта');
+                return;
+            }
+
+            const dataStr = JSON.stringify(carouselData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${carouselData.title || 'carousel'}.json`;
+            link.click();
+        }
+
+        function importCarousel() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        
+                        // Validate structure
+                        if (!imported.title || !Array.isArray(imported.slides)) {
+                            throw new Error('Неверная структура файла');
+                        }
+
+                        // Validate slides
+                        for (const slide of imported.slides) {
+                            if (!slide.text || !Array.isArray(slide.keywords)) {
+                                throw new Error('Неверная структура слайда');
+                            }
+                            
+                            for (const keyword of slide.keywords) {
+                                if (!keyword.word || !keyword.type) {
+                                    throw new Error('Неверная структура ключевого слова');
+                                }
+                            }
+                        }
+
+                        carouselData = imported;
+                        document.getElementById('carouselTitle').value = carouselData.title;
+                        updateDisplay();
+                        
+                        alert('Карусель успешно импортирована!');
+                        
+                    } catch (error) {
+                        alert('Ошибка импорта: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // ===== KEYWORD HIGHLIGHTING SIMULATION =====
+        function highlightKeywords(text, keywords) {
+            let highlightedText = text;
+            
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`\\b${keyword.word}\\b`, 'gi');
+                highlightedText = highlightedText.replace(regex, 
+                    `<span class="keyword ${keyword.type}">${keyword.word}</span>`
+                );
+            });
+            
+            return highlightedText;
+        }
+
+        // ===== API SIMULATION =====
+        function simulateAIGeneration(topic) {
+            // This would be replaced with actual AI API call
+            const mockResponse = {
+                title: `Все о ${topic}`,
+                slides: [
+                    {
+                        text: `🚀 Узнайте все секреты ${topic} за 5 минут!`,
+                        keywords: [
+                            { word: "секреты", type: "emotional" },
+                            { word: topic, type: "conceptual" }
+                        ]
+                    },
+                    {
+                        text: `💡 Главные принципы ${topic}, которые должен знать каждый`,
+                        keywords: [
+                            { word: "принципы", type: "conceptual" },
+                            { word: "знать", type: "action" }
+                        ]
+                    },
+                    {
+                        text: `🎯 Применяйте эти знания и достигайте результатов!`,
+                        keywords: [
+                            { word: "применяйте", type: "action" },
+                            { word: "результатов", type: "technical" }
+                        ]
+                    }
+                ]
+            };
+            
+            return mockResponse;
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDisplay();
+            console.log('Carousel Data Structure System initialized');
+        });
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        exportCarousel();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        importCarousel();
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        addSlide();
+                        break;
+                }
+            }
+        });
+
+        // ===== GLOBAL ACCESS FOR TESTING =====
+        window.carouselData = carouselData;
+        window.generateSampleCarousel = generateSampleCarousel;
+        window.addSlide = addSlide;
+        window.exportCarousel = exportCarousel;
+        window.importCarousel = importCarousel;
+    </script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Editor Fix - updateAllControls</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Test Editor Fix - updateAllControls</h1>
+        <p>Тестирование исправления ошибки "this.editor.updateAllControls is not a function"</p>
+        
+        <!-- Тест 1: Проверка наличия метода -->
+        <div class="test-section">
+            <h2>🔍 Проверка наличия метода updateAllControls</h2>
+            <button class="test-button" onclick="testMethodExists()">
+                Проверить наличие метода
+            </button>
+            <div id="methodResults"></div>
+        </div>
+        
+        <!-- Тест 2: Создание экземпляра Editor -->
+        <div class="test-section">
+            <h2>🏗️ Тест создания экземпляра Editor</h2>
+            <button class="test-button" onclick="testEditorCreation()">
+                Создать экземпляр Editor
+            </button>
+            <div id="creationResults"></div>
+        </div>
+        
+        <!-- Тест 3: Вызов updateAllControls -->
+        <div class="test-section">
+            <h2>🚀 Тест вызова updateAllControls</h2>
+            <button class="test-button" onclick="testUpdateAllControls()">
+                Вызвать updateAllControls
+            </button>
+            <div id="callResults"></div>
+        </div>
+        
+        <!-- Информация об исправлении -->
+        <div class="test-section">
+            <h2>📋 Информация об исправлении</h2>
+            <div class="status status-info">
+                <strong>Проблема:</strong> Ошибка "this.editor.updateAllControls is not a function"<br>
+                <strong>Причина:</strong> Метод updateAllControls отсутствовал в классе Editor<br>
+                <strong>Решение:</strong> Добавлен метод updateAllControls в flashpost-mini-app/src/editor.js
+            </div>
+            
+            <h3>Добавленный код:</h3>
+            <div class="code-block">
+// Обновление всех контролов при смене слайда
+updateAllControls() {
+    console.log('🔄 Обновление всех контролов редактора...');
+    
+    try {
+        // Обновляем контролы фона
+        this.updateBackgroundControls();
+        
+        // Обновляем отображение фона
+        this.updateSlideBackgroundDisplay();
+        
+        // Если есть выбранный блок, обновляем его контролы
+        if (this.selectedBlockId) {
+            const activeSlide = this.state.getActiveSlide();
+            if (activeSlide) {
+                const block = activeSlide.textBlocks && 
+                    activeSlide.textBlocks.find(b => b.id === this.selectedBlockId);
+                if (block) {
+                    this.updateFontControlsWithoutFocus(this.selectedBlockId);
+                }
+            }
+        }
+        
+        console.log('✅ Все контролы обновлены');
+    } catch (error) {
+        console.warn('⚠️ Ошибка обновления контролов:', error);
+    }
+}
+            </div>
+        </div>
+        
+        <!-- Результаты -->
+        <div class="test-section">
+            <h2>📊 Общие результаты</h2>
+            <div id="overallResults">
+                <p>Нажмите кнопки выше для тестирования...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули для тестирования -->
+    <script src="flashpost-mini-app/src/state.js"></script>
+    <script src="flashpost-mini-app/src/renderer.js"></script>
+    <script src="flashpost-mini-app/src/editor.js"></script>
+    
+    <script>
+        let testResults = {
+            methodExists: false,
+            editorCreation: false,
+            methodCall: false
+        };
+
+        function showResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            const statusClass = `status-${type}`;
+            
+            container.innerHTML = `
+                <div class="status ${statusClass}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function updateOverallResults() {
+            const container = document.getElementById('overallResults');
+            const passed = Object.values(testResults).filter(r => r).length;
+            const total = Object.keys(testResults).length;
+            
+            let html = `<h3>Результаты тестирования: ${passed}/${total}</h3>`;
+            
+            for (const [test, result] of Object.entries(testResults)) {
+                const status = result ? '✅' : '❌';
+                const testName = {
+                    methodExists: 'Наличие метода',
+                    editorCreation: 'Создание Editor',
+                    methodCall: 'Вызов метода'
+                }[test];
+                
+                html += `<div class="status ${result ? 'status-success' : 'status-error'}">
+                    ${status} ${testName}
+                </div>`;
+            }
+            
+            if (passed === total) {
+                html += `<div class="status status-success">
+                    🎉 Все тесты пройдены! Ошибка исправлена.
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function testMethodExists() {
+            showResult('methodResults', '🔄 Проверяем наличие метода updateAllControls...', 'info');
+            
+            try {
+                // Проверяем, что класс Editor существует
+                if (typeof Editor === 'undefined') {
+                    throw new Error('Класс Editor не найден');
+                }
+                
+                // Проверяем, что метод updateAllControls существует в прототипе
+                if (typeof Editor.prototype.updateAllControls !== 'function') {
+                    throw new Error('Метод updateAllControls не найден в классе Editor');
+                }
+                
+                testResults.methodExists = true;
+                showResult('methodResults', '✅ Метод updateAllControls найден в классе Editor!', 'success');
+                
+            } catch (error) {
+                testResults.methodExists = false;
+                showResult('methodResults', `❌ Ошибка: ${error.message}`, 'error');
+            }
+            
+            updateOverallResults();
+        }
+
+        function testEditorCreation() {
+            showResult('creationResults', '🔄 Создаем экземпляр Editor...', 'info');
+            
+            try {
+                // Создаем mock объекты для StateManager и Renderer
+                const mockState = {
+                    getActiveSlide: () => null,
+                    setPropertyChangeCallback: () => {}
+                };
+                
+                const mockRenderer = {
+                    render: () => {}
+                };
+                
+                // Создаем экземпляр Editor
+                const editor = new Editor(mockState, mockRenderer);
+                
+                // Проверяем, что метод существует
+                if (typeof editor.updateAllControls !== 'function') {
+                    throw new Error('Метод updateAllControls не найден в экземпляре');
+                }
+                
+                testResults.editorCreation = true;
+                showResult('creationResults', '✅ Экземпляр Editor создан успешно с методом updateAllControls!', 'success');
+                
+                // Сохраняем для следующего теста
+                window.testEditor = editor;
+                
+            } catch (error) {
+                testResults.editorCreation = false;
+                showResult('creationResults', `❌ Ошибка: ${error.message}`, 'error');
+            }
+            
+            updateOverallResults();
+        }
+
+        function testUpdateAllControls() {
+            showResult('callResults', '🔄 Вызываем updateAllControls...', 'info');
+            
+            try {
+                if (!window.testEditor) {
+                    throw new Error('Сначала создайте экземпляр Editor');
+                }
+                
+                // Вызываем метод
+                window.testEditor.updateAllControls();
+                
+                testResults.methodCall = true;
+                showResult('callResults', '✅ Метод updateAllControls вызван успешно без ошибок!', 'success');
+                
+            } catch (error) {
+                testResults.methodCall = false;
+                showResult('callResults', `❌ Ошибка при вызове: ${error.message}`, 'error');
+            }
+            
+            updateOverallResults();
+        }
+
+        // Автоматический запуск первого теста при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testMethodExists();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+</content>

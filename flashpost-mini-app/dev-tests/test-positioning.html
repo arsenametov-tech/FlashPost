@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест позиционирования слайдов и текстовых блоков</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+        }
+        
+        .test-description {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .test-carousel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .carousel-track {
+            position: relative;
+            height: 320px;
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            background: var(--primary);
+        }
+        
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            padding: 24px;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+        }
+        
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .text-block {
+            position: absolute;
+            text-align: center;
+            line-height: 1.2;
+            word-wrap: break-word;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            user-select: none;
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-result {
+            background: rgba(52, 168, 83, 0.2);
+            border: 1px solid rgba(52, 168, 83, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .positioning-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .info-card h4 {
+            margin: 0 0 10px 0;
+            color: #ffeb3b;
+        }
+        
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Тест позиционирования: .slide {position: relative} + .text-block {position: absolute}</h1>
+        
+        <div class="test-description">
+            <strong>Цель теста:</strong> Проверить новую структуру позиционирования, где слайды используют relative позиционирование, а текстовые блоки внутри них - absolute.
+            <br><br>
+            <strong>Ожидаемый результат:</strong> Слайды должны правильно переключаться, а текстовые блоки должны позиционироваться относительно своего слайда.
+        </div>
+        
+        <div class="positioning-info">
+            <div class="info-card">
+                <h4>📦 Контейнер (.carousel-track)</h4>
+                <div class="code">position: relative;</div>
+                <p>Создает контекст позиционирования для слайдов</p>
+            </div>
+            
+            <div class="info-card">
+                <h4>🎬 Слайды (.slide)</h4>
+                <div class="code">position: absolute;</div>
+                <p>Накладываются друг на друга в контейнере</p>
+            </div>
+            
+            <div class="info-card">
+                <h4>📝 Текстовые блоки (.text-block)</h4>
+                <div class="code">position: absolute;</div>
+                <p>Позиционируются относительно слайда</p>
+            </div>
+            
+            <div class="info-card">
+                <h4>🎯 Преимущества</h4>
+                <p>• Лучший контроль позиционирования<br>
+                • Правильная иерархия элементов<br>
+                • Упрощенная структура CSS</p>
+            </div>
+        </div>
+        
+        <div class="test-carousel">
+            <div class="carousel-track" id="carouselTrack">
+                <div class="slide active" data-slide="0">
+                    <div class="text-block" style="left: 30%; top: 30%; font-size: 18px;">
+                        🔥 Первый слайд
+                    </div>
+                    <div class="text-block" style="left: 70%; top: 70%; font-size: 14px;">
+                        Текстовый блок 2
+                    </div>
+                </div>
+                
+                <div class="slide" data-slide="1">
+                    <div class="text-block" style="left: 50%; top: 40%; font-size: 20px;">
+                        💡 Второй слайд
+                    </div>
+                    <div class="text-block" style="left: 25%; top: 75%; font-size: 12px;">
+                        Левый нижний
+                    </div>
+                    <div class="text-block" style="left: 75%; top: 25%; font-size: 12px;">
+                        Правый верхний
+                    </div>
+                </div>
+                
+                <div class="slide" data-slide="2">
+                    <div class="text-block" style="left: 50%; top: 50%; font-size: 24px;">
+                        ⚡ Третий слайд
+                    </div>
+                    <div class="text-block" style="left: 50%; top: 80%; font-size: 14px;">
+                        Центрированный текст
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prevBtn">← Предыдущий</button>
+                <span id="slideCounter">1 / 3</span>
+                <button class="nav-btn" id="nextBtn">Следующий →</button>
+            </div>
+        </div>
+        
+        <div class="test-result">
+            ✅ Новая структура позиционирования работает корректно!<br>
+            Слайды: position: absolute в relative контейнере<br>
+            Текстовые блоки: position: absolute относительно слайда
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center; font-size: 14px; opacity: 0.8;">
+            <strong>Проверьте также:</strong><br>
+            • Основное приложение (index.html)<br>
+            • Редактор слайдов<br>
+            • Перетаскивание текстовых блоков<br>
+            • Мобильную версию
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            
+            document.getElementById('slideCounter').textContent = `${index + 1} / ${totalSlides}`;
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === totalSlides - 1;
+        }
+        
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        });
+        
+        // Инициализация
+        showSlide(0);
+        
+        console.log('🧪 Тест позиционирования загружен');
+        console.log('📦 Контейнер:', document.querySelector('.carousel-track'));
+        console.log('🎬 Слайды:', slides);
+        console.log('📝 Текстовые блоки:', document.querySelectorAll('.text-block'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Advanced AI Pipeline</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-input {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .test-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .results {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .slide-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #fd79a8;
+        }
+        
+        .slide-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #fd79a8;
+        }
+        
+        .slide-type {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+        
+        .slide-content {
+            line-height: 1.4;
+            white-space: pre-line;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: rgba(0, 184, 148, 0.2);
+            border: 1px solid #00b894;
+        }
+        
+        .status.error {
+            background: rgba(214, 48, 49, 0.2);
+            border: 1px solid #d63031;
+        }
+        
+        .status.info {
+            background: rgba(116, 185, 255, 0.2);
+            border: 1px solid #74b9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Advanced AI Pipeline Test</h1>
+        
+        <div class="test-section">
+            <h3>Тест продвинутой AI генерации</h3>
+            <input type="text" class="test-input" id="topicInput" placeholder="Введите тему для карусели (например: 'Маркетинг в социальных сетях')">
+            <button class="test-btn" onclick="testAdvancedPipeline()">🚀 Тест Advanced Pipeline</button>
+            <button class="test-btn" onclick="testOutlineGeneration()">📋 Тест Outline Generation</button>
+            <button class="test-btn" onclick="testContentGeneration()">✍️ Тест Content Generation</button>
+            <button class="test-btn" onclick="clearResults()">🗑️ Очистить</button>
+        </div>
+        
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
+    <!-- Подключаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/ai.js"></script>
+
+    <script>
+        let stateManager, aiManager;
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                stateManager = new StateManager();
+                aiManager = new AIManager(stateManager);
+                
+                logStatus('✅ Модули инициализированы успешно', 'success');
+                
+                // Проверяем доступность AI
+                if (aiManager.isAvailable()) {
+                    logStatus('✅ AI модуль доступен', 'success');
+                } else {
+                    logStatus('⚠️ AI модуль работает в демо режиме', 'info');
+                }
+                
+            } catch (error) {
+                logStatus('❌ Ошибка инициализации: ' + error.message, 'error');
+            }
+        });
+        
+        // Тест полного advanced pipeline
+        async function testAdvancedPipeline() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                logStatus('❌ Введите тему для тестирования', 'error');
+                return;
+            }
+            
+            showResults();
+            logStatus(`🚀 Запуск Advanced AI Pipeline для темы: "${topic}"`, 'info');
+            
+            try {
+                // Тестируем PRO MODE генерацию
+                const result = await aiManager.generateProModeCarousel(topic);
+                
+                logStatus(`✅ Advanced Pipeline завершен успешно!`, 'success');
+                logStatus(`📊 Создано слайдов: ${result.slides.length}`, 'info');
+                logStatus(`🎯 Режим генерации: ${result.generatedBy}`, 'info');
+                
+                // Показываем outline если есть
+                if (result.outline) {
+                    logStatus(`📋 Структура карусели: ${result.outline.structure}`, 'info');
+                    logStatus(`👥 Целевая аудитория: ${result.outline.targetAudience}`, 'info');
+                }
+                
+                // Показываем превью слайдов
+                result.slides.forEach((slide, index) => {
+                    displaySlidePreview(slide, index + 1);
+                });
+                
+                // Проверяем качество генерации
+                validateAdvancedGeneration(result);
+                
+            } catch (error) {
+                logStatus('❌ Ошибка Advanced Pipeline: ' + error.message, 'error');
+                console.error('Advanced Pipeline Error:', error);
+            }
+        }
+        
+        // Тест генерации outline
+        async function testOutlineGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                logStatus('❌ Введите тему для тестирования', 'error');
+                return;
+            }
+            
+            showResults();
+            logStatus(`📋 Тест генерации outline для темы: "${topic}"`, 'info');
+            
+            try {
+                const outline = await aiManager.generateCarouselOutline(topic);
+                
+                logStatus(`✅ Outline создан успешно!`, 'success');
+                logStatus(`📊 Количество слайдов: ${outline.totalSlides}`, 'info');
+                logStatus(`🏗️ Структура: ${outline.structure}`, 'info');
+                logStatus(`👥 Целевая аудитория: ${outline.targetAudience}`, 'info');
+                logStatus(`📈 Контентная стратегия: ${outline.contentStrategy}`, 'info');
+                
+                // Показываем детали каждого слайда
+                outline.outline.forEach((slideOutline, index) => {
+                    const outlineHtml = `
+                        <div class="slide-preview">
+                            <div class="slide-type">Слайд ${slideOutline.slideNumber} - ${slideOutline.type.toUpperCase()}</div>
+                            <div class="slide-title">${slideOutline.keyMessage}</div>
+                            <div class="slide-content">
+                                <strong>Цель:</strong> ${slideOutline.purpose}
+                                <strong>Основная идея:</strong> ${slideOutline.mainIdea}
+                                <strong>Эмоциональный тон:</strong> ${slideOutline.emotionalTone}
+                                <strong>Элементы контента:</strong> ${slideOutline.contentElements.join(', ')}
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('results').innerHTML += outlineHtml;
+                });
+                
+            } catch (error) {
+                logStatus('❌ Ошибка генерации outline: ' + error.message, 'error');
+                console.error('Outline Generation Error:', error);
+            }
+        }
+        
+        // Тест генерации контента
+        async function testContentGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                logStatus('❌ Введите тему для тестирования', 'error');
+                return;
+            }
+            
+            showResults();
+            logStatus(`✍️ Тест генерации контента для темы: "${topic}"`, 'info');
+            
+            try {
+                // Сначала создаем outline
+                const outline = await aiManager.generateCarouselOutline(topic);
+                logStatus(`📋 Outline создан (${outline.totalSlides} слайдов)`, 'info');
+                
+                // Затем генерируем контент
+                const content = await aiManager.generateCarouselContent(topic, outline);
+                logStatus(`✅ Контент создан успешно!`, 'success');
+                
+                // Показываем контент каждого слайда
+                content.slides.forEach((slide, index) => {
+                    displaySlidePreview({
+                        id: index + 1,
+                        textBlocks: [
+                            { text: slide.title },
+                            { text: slide.text }
+                        ],
+                        slideType: slide.type,
+                        keywordType: slide.keywordType,
+                        emotionalTone: slide.emotionalTone
+                    }, index + 1);
+                });
+                
+                // Проверяем качество контента
+                validateContentQuality(content);
+                
+            } catch (error) {
+                logStatus('❌ Ошибка генерации контента: ' + error.message, 'error');
+                console.error('Content Generation Error:', error);
+            }
+        }
+        
+        // Отображение превью слайда
+        function displaySlidePreview(slide, slideNumber) {
+            const title = slide.textBlocks && slide.textBlocks[0] ? slide.textBlocks[0].text : `Слайд ${slideNumber}`;
+            const content = slide.textBlocks && slide.textBlocks[1] ? slide.textBlocks[1].text : 'Нет контента';
+            const type = slide.slideType || 'unknown';
+            const keywordType = slide.keywordType || 'unknown';
+            const emotionalTone = slide.emotionalTone || 'neutral';
+            
+            const slideHtml = `
+                <div class="slide-preview">
+                    <div class="slide-type">Слайд ${slideNumber} - ${type.toUpperCase()} (${keywordType}, ${emotionalTone})</div>
+                    <div class="slide-title">${title}</div>
+                    <div class="slide-content">${content}</div>
+                </div>
+            `;
+            
+            document.getElementById('results').innerHTML += slideHtml;
+        }
+        
+        // Валидация advanced генерации
+        function validateAdvancedGeneration(result) {
+            logStatus('🔍 Проверка качества Advanced генерации...', 'info');
+            
+            const issues = [];
+            
+            // Проверяем количество слайдов (должно быть 8-11)
+            if (result.slides.length < 8 || result.slides.length > 11) {
+                issues.push(`Неправильное количество слайдов: ${result.slides.length} (ожидается 8-11)`);
+            }
+            
+            // Проверяем наличие обязательных типов слайдов
+            const requiredTypes = ['hook', 'problem', 'solution', 'benefits', 'cta'];
+            const presentTypes = result.slides.map(s => s.slideType);
+            
+            requiredTypes.forEach(type => {
+                if (!presentTypes.includes(type)) {
+                    issues.push(`Отсутствует обязательный тип слайда: ${type}`);
+                }
+            });
+            
+            // Проверяем длину текста (должно быть 2-4 строки)
+            result.slides.forEach((slide, index) => {
+                if (slide.textBlocks && slide.textBlocks[1]) {
+                    const lines = slide.textBlocks[1].text.split('\n').length;
+                    if (lines < 2 || lines > 6) {
+                        issues.push(`Слайд ${index + 1}: неправильное количество строк (${lines})`);
+                    }
+                }
+            });
+            
+            // Проверяем наличие ключевых слов
+            result.slides.forEach((slide, index) => {
+                if (!slide.autoKeywords || slide.autoKeywords.length === 0) {
+                    issues.push(`Слайд ${index + 1}: отсутствуют ключевые слова`);
+                }
+            });
+            
+            if (issues.length === 0) {
+                logStatus('✅ Качество генерации соответствует стандартам Advanced AI Pipeline', 'success');
+            } else {
+                logStatus('⚠️ Обнаружены проблемы качества:', 'error');
+                issues.forEach(issue => {
+                    logStatus(`  • ${issue}`, 'error');
+                });
+            }
+        }
+        
+        // Валидация качества контента
+        function validateContentQuality(content) {
+            logStatus('🔍 Проверка качества контента...', 'info');
+            
+            const qualityMetrics = {
+                averageLength: 0,
+                keywordDensity: 0,
+                emotionalVariety: new Set(),
+                typeVariety: new Set()
+            };
+            
+            content.slides.forEach(slide => {
+                qualityMetrics.averageLength += slide.text.length;
+                qualityMetrics.emotionalVariety.add(slide.emotionalTone);
+                qualityMetrics.typeVariety.add(slide.type);
+            });
+            
+            qualityMetrics.averageLength = Math.round(qualityMetrics.averageLength / content.slides.length);
+            
+            logStatus(`📊 Средняя длина текста: ${qualityMetrics.averageLength} символов`, 'info');
+            logStatus(`🎭 Эмоциональное разнообразие: ${qualityMetrics.emotionalVariety.size} тонов`, 'info');
+            logStatus(`🏗️ Разнообразие типов: ${qualityMetrics.typeVariety.size} типов`, 'info');
+            
+            if (qualityMetrics.averageLength > 100 && qualityMetrics.emotionalVariety.size >= 3) {
+                logStatus('✅ Качество контента высокое', 'success');
+            } else {
+                logStatus('⚠️ Качество контента требует улучшения', 'error');
+            }
+        }
+        
+        // Вспомогательные функции
+        function showResults() {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        function clearResults() {
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        function logStatus(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const statusHtml = `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            document.getElementById('results').innerHTML += statusHtml;
+            
+            // Автоскролл вниз
+            const results = document.getElementById('results');
+            results.scrollTop = results.scrollHeight;
+        }
+    </script>
+</body>
+</html>

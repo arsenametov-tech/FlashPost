@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Background Integration Test - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .test-log {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🖼️ Background Integration Test</h1>
+            <p>Тестирование интеграции системы фоновых изображений в основное приложение</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Module Loading Test</h2>
+            <div id="moduleStatus">
+                <p>Проверяем загрузку модулей...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Integration Tests</h2>
+            <div>
+                <button class="test-button" onclick="testModuleInitialization()">
+                    🔧 Test Module Initialization
+                </button>
+                <button class="test-button" onclick="testBackgroundControls()">
+                    🖼️ Test Background Controls
+                </button>
+                <button class="test-button" onclick="testEditorIntegration()">
+                    ✏️ Test Editor Integration
+                </button>
+                <button class="test-button" onclick="testStateManagement()">
+                    💾 Test State Management
+                </button>
+                <button class="test-button" onclick="runAllTests()">
+                    🚀 Run All Tests
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div id="testResults">
+                <p>Нажмите кнопки выше для запуска тестов...</p>
+            </div>
+            
+            <div class="test-log" id="testLog">
+                <div class="log-entry log-info">🔄 Background integration test initialized...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загружаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        // Test state
+        let testResults = {
+            moduleInitialization: false,
+            backgroundControls: false,
+            editorIntegration: false,
+            stateManagement: false
+        };
+
+        // Logging function
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('testLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Update test results display
+        function updateTestResults() {
+            const resultsEl = document.getElementById('testResults');
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(result => result).length;
+            
+            resultsEl.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div class="test-result-item">
+                        <strong>🔧 Module Initialization:</strong><br>
+                        <span class="${testResults.moduleInitialization ? 'status-success' : 'status-error'}">
+                            ${testResults.moduleInitialization ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div class="test-result-item">
+                        <strong>🖼️ Background Controls:</strong><br>
+                        <span class="${testResults.backgroundControls ? 'status-success' : 'status-error'}">
+                            ${testResults.backgroundControls ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div class="test-result-item">
+                        <strong>✏️ Editor Integration:</strong><br>
+                        <span class="${testResults.editorIntegration ? 'status-success' : 'status-error'}">
+                            ${testResults.editorIntegration ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div class="test-result-item">
+                        <strong>💾 State Management:</strong><br>
+                        <span class="${testResults.stateManagement ? 'status-success' : 'status-error'}">
+                            ${testResults.stateManagement ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <h3>Overall Result: ${passedTests}/${totalTests} tests passed</h3>
+                    <div class="${passedTests === totalTests ? 'status-success' : 'status-error'}" style="display: inline-block; padding: 10px 20px; border-radius: 10px; font-size: 16px;">
+                        ${passedTests === totalTests ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Test module initialization
+        function testModuleInitialization() {
+            log('🔧 Testing module initialization...', 'info');
+            
+            try {
+                // Check if all required classes are available
+                const requiredClasses = ['StateManager', 'Renderer', 'Editor', 'FlashPostApp'];
+                let allClassesAvailable = true;
+                
+                requiredClasses.forEach(className => {
+                    if (typeof window[className] === 'undefined') {
+                        log(`❌ Class ${className} not found`, 'error');
+                        allClassesAvailable = false;
+                    } else {
+                        log(`✅ Class ${className} loaded`, 'success');
+                    }
+                });
+                
+                if (allClassesAvailable) {
+                    // Try to create instances
+                    const state = new StateManager();
+                    const renderer = new Renderer(state);
+                    const editor = new Editor(state, renderer);
+                    
+                    log('✅ All modules initialized successfully', 'success');
+                    testResults.moduleInitialization = true;
+                } else {
+                    log('❌ Module initialization failed', 'error');
+                    testResults.moduleInitialization = false;
+                }
+                
+            } catch (error) {
+                log(`❌ Module initialization error: ${error.message}`, 'error');
+                testResults.moduleInitialization = false;
+            }
+            
+            updateTestResults();
+        }
+
+        // Test background controls
+        function testBackgroundControls() {
+            log('🖼️ Testing background controls...', 'info');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Create a temporary container for testing
+                const testContainer = document.createElement('div');
+                testContainer.id = 'testPropertiesPanel';
+                document.body.appendChild(testContainer);
+                
+                // Create background properties group
+                const backgroundGroup = renderer.createBackgroundPropertiesGroup();
+                testContainer.appendChild(backgroundGroup);
+                
+                // Check if all required elements are created
+                const requiredElements = [
+                    'backgroundImageUpload',
+                    'removeBackgroundBtn',
+                    'backgroundXRange',
+                    'backgroundYRange',
+                    'backgroundBrightnessRange',
+                    'applyBackgroundToAll',
+                    'backgroundPreview'
+                ];
+                
+                let allElementsFound = true;
+                requiredElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (!element) {
+                        log(`❌ Element ${elementId} not found`, 'error');
+                        allElementsFound = false;
+                    } else {
+                        log(`✅ Element ${elementId} created`, 'success');
+                    }
+                });
+                
+                // Clean up
+                document.body.removeChild(testContainer);
+                
+                if (allElementsFound) {
+                    log('✅ Background controls test passed', 'success');
+                    testResults.backgroundControls = true;
+                } else {
+                    log('❌ Background controls test failed', 'error');
+                    testResults.backgroundControls = false;
+                }
+                
+            } catch (error) {
+                log(`❌ Background controls error: ${error.message}`, 'error');
+                testResults.backgroundControls = false;
+            }
+            
+            updateTestResults();
+        }
+
+        // Test editor integration
+        function testEditorIntegration() {
+            log('✏️ Testing editor integration...', 'info');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                const editor = new Editor(state, renderer);
+                
+                // Check if editor has background methods
+                const requiredMethods = [
+                    'handleBackgroundImageUpload',
+                    'removeBackgroundImage',
+                    'updateSlideBackground',
+                    'updateBackgroundControls',
+                    'updateAllControls'
+                ];
+                
+                let allMethodsFound = true;
+                requiredMethods.forEach(methodName => {
+                    if (typeof editor[methodName] !== 'function') {
+                        log(`❌ Method ${methodName} not found`, 'error');
+                        allMethodsFound = false;
+                    } else {
+                        log(`✅ Method ${methodName} available`, 'success');
+                    }
+                });
+                
+                // Test applyToAllSlides property
+                if (typeof editor.applyToAllSlides !== 'boolean') {
+                    log('❌ applyToAllSlides property not found', 'error');
+                    allMethodsFound = false;
+                } else {
+                    log('✅ applyToAllSlides property available', 'success');
+                }
+                
+                if (allMethodsFound) {
+                    log('✅ Editor integration test passed', 'success');
+                    testResults.editorIntegration = true;
+                } else {
+                    log('❌ Editor integration test failed', 'error');
+                    testResults.editorIntegration = false;
+                }
+                
+            } catch (error) {
+                log(`❌ Editor integration error: ${error.message}`, 'error');
+                testResults.editorIntegration = false;
+            }
+            
+            updateTestResults();
+        }
+
+        // Test state management
+        function testStateManagement() {
+            log('💾 Testing state management...', 'info');
+            
+            try {
+                const state = new StateManager();
+                
+                // Initialize default state
+                state.clearProject();
+                
+                // Get active slide
+                const activeSlide = state.getActiveSlide();
+                if (!activeSlide) {
+                    log('❌ No active slide found', 'error');
+                    testResults.stateManagement = false;
+                    updateTestResults();
+                    return;
+                }
+                
+                // Test background property initialization
+                if (!activeSlide.background) {
+                    activeSlide.background = {
+                        type: 'color',
+                        color: '#833ab4',
+                        image: null,
+                        x: 50,
+                        y: 50,
+                        brightness: 100
+                    };
+                }
+                
+                // Test background property updates
+                const originalX = activeSlide.background.x;
+                activeSlide.background.x = 75;
+                
+                if (activeSlide.background.x === 75) {
+                    log('✅ Background property update works', 'success');
+                    
+                    // Restore original value
+                    activeSlide.background.x = originalX;
+                    
+                    log('✅ State management test passed', 'success');
+                    testResults.stateManagement = true;
+                } else {
+                    log('❌ Background property update failed', 'error');
+                    testResults.stateManagement = false;
+                }
+                
+            } catch (error) {
+                log(`❌ State management error: ${error.message}`, 'error');
+                testResults.stateManagement = false;
+            }
+            
+            updateTestResults();
+        }
+
+        // Run all tests
+        function runAllTests() {
+            log('🚀 Running all tests...', 'info');
+            
+            // Reset results
+            Object.keys(testResults).forEach(key => {
+                testResults[key] = false;
+            });
+            
+            // Run tests sequentially
+            setTimeout(() => testModuleInitialization(), 100);
+            setTimeout(() => testBackgroundControls(), 500);
+            setTimeout(() => testEditorIntegration(), 1000);
+            setTimeout(() => testStateManagement(), 1500);
+            
+            setTimeout(() => {
+                const passedTests = Object.values(testResults).filter(result => result).length;
+                const totalTests = Object.keys(testResults).length;
+                
+                if (passedTests === totalTests) {
+                    log('🎉 All tests passed! Background image integration is working correctly.', 'success');
+                } else {
+                    log(`⚠️ ${totalTests - passedTests} test(s) failed. Please check the implementation.`, 'warning');
+                }
+            }, 2000);
+        }
+
+        // Check module loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Background integration test initialized', 'success');
+            
+            // Check initial module status
+            const moduleStatusEl = document.getElementById('moduleStatus');
+            const requiredClasses = ['StateManager', 'Renderer', 'Editor', 'FlashPostApp'];
+            let loadedModules = 0;
+            
+            let statusHTML = '<ul>';
+            requiredClasses.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    statusHTML += `<li>✅ ${className} - Loaded</li>`;
+                    loadedModules++;
+                } else {
+                    statusHTML += `<li>❌ ${className} - Not Found</li>`;
+                }
+            });
+            statusHTML += '</ul>';
+            statusHTML += `<p><strong>Status:</strong> ${loadedModules}/${requiredClasses.length} modules loaded</p>`;
+            
+            moduleStatusEl.innerHTML = statusHTML;
+            
+            updateTestResults();
+        });
+    </script>
+</body>
+</html>

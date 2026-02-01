@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Screen Fix Test</title>
+    <style>
+        /* Применяем исправленные стили */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #0f0f14;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+        }
+        
+        #app {
+            min-height: 100vh;
+            background: #0f0f14;
+            color: #fff;
+            display: block;
+        }
+        
+        .test-container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .status-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .success { border-left: 4px solid #28a745; }
+        .warning { border-left: 4px solid #ffc107; }
+        .error { border-left: 4px solid #dc3545; }
+        
+        button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #6c2e8f;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+        }
+        
+        .loading-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 28px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-icon">⚡</div>
+        <div>Loading FlashPost...</div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app" style="display: none;">
+        <div class="test-container">
+            <h1>✅ White Screen Fix Test</h1>
+            
+            <div class="status-card success">
+                <h3>🎯 Success!</h3>
+                <p>If you can see this content, the white screen fix is working correctly.</p>
+            </div>
+            
+            <div class="status-card">
+                <h3>🔧 Applied Fixes:</h3>
+                <ul>
+                    <li>✅ html, body: margin: 0, padding: 0, height: 100%, background: #0f0f14</li>
+                    <li>✅ #app: min-height: 100vh, background: #0f0f14, color: #fff, display: block</li>
+                    <li>✅ Removed CSS variables that might cause issues</li>
+                    <li>✅ Guaranteed dark background on all containers</li>
+                </ul>
+            </div>
+            
+            <div class="status-card warning">
+                <h3>⚠️ Common White Screen Causes:</h3>
+                <ul>
+                    <li>CSS not loading (check Network tab)</li>
+                    <li>JavaScript errors (check Console tab)</li>
+                    <li>#app element empty (renderApp() not executing)</li>
+                    <li>Elements hidden by CSS (display: none, opacity: 0)</li>
+                    <li>White background overriding dark theme</li>
+                </ul>
+            </div>
+            
+            <div>
+                <button onclick="testMainApp()">🚀 Test Main App</button>
+                <button onclick="showDiagnostics()">🔍 Show Diagnostics</button>
+                <button onclick="simulateWhiteScreen()">⚪ Simulate White Screen</button>
+                <button onclick="fixWhiteScreen()">🔧 Fix White Screen</button>
+            </div>
+            
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // Симуляция загрузки приложения
+        function initApp() {
+            console.log('🚀 Initializing app...');
+            
+            // Скрываем loading через 1 секунду
+            setTimeout(() => {
+                const loading = document.getElementById('loading');
+                const app = document.getElementById('app');
+                
+                if (loading) {
+                    loading.style.opacity = '0';
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                    }, 300);
+                }
+                
+                if (app) {
+                    app.style.display = 'block';
+                    app.style.opacity = '1';
+                }
+                
+                console.log('✅ App initialized successfully');
+            }, 1000);
+        }
+        
+        function testMainApp() {
+            console.log('🧪 Testing main app...');
+            window.open('index.html', '_blank');
+        }
+        
+        function showDiagnostics() {
+            console.log('🔍 Opening diagnostics...');
+            window.open('white-screen-diagnosis.html', '_blank');
+        }
+        
+        function simulateWhiteScreen() {
+            console.log('⚪ Simulating white screen...');
+            
+            const app = document.getElementById('app');
+            if (app) {
+                // Применяем стили которые вызывают белый экран
+                app.style.background = 'white';
+                app.style.color = 'black';
+                document.body.style.background = 'white';
+                
+                document.getElementById('testResults').innerHTML = `
+                    <div class="status-card error">
+                        <h3>⚪ White Screen Simulated</h3>
+                        <p>Applied problematic styles. Click "Fix White Screen" to restore.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function fixWhiteScreen() {
+            console.log('🔧 Fixing white screen...');
+            
+            // Применяем исправленные стили
+            document.documentElement.style.cssText = `
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                background: #0f0f14;
+            `;
+            
+            document.body.style.cssText = `
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                background: #0f0f14;
+                color: #ffffff;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            
+            const app = document.getElementById('app');
+            if (app) {
+                app.style.cssText = `
+                    min-height: 100vh;
+                    background: #0f0f14;
+                    color: #fff;
+                    display: block;
+                `;
+            }
+            
+            document.getElementById('testResults').innerHTML = `
+                <div class="status-card success">
+                    <h3>✅ White Screen Fixed</h3>
+                    <p>Applied corrected styles. Dark theme restored.</p>
+                </div>
+            `;
+        }
+        
+        // Мониторинг состояния DOM
+        function monitorDOM() {
+            const app = document.getElementById('app');
+            const loading = document.getElementById('loading');
+            
+            console.log('📊 DOM Status:', {
+                app: {
+                    exists: !!app,
+                    display: app ? window.getComputedStyle(app).display : 'N/A',
+                    background: app ? window.getComputedStyle(app).backgroundColor : 'N/A',
+                    opacity: app ? window.getComputedStyle(app).opacity : 'N/A'
+                },
+                loading: {
+                    exists: !!loading,
+                    display: loading ? window.getComputedStyle(loading).display : 'N/A'
+                },
+                body: {
+                    background: window.getComputedStyle(document.body).backgroundColor,
+                    color: window.getComputedStyle(document.body).color
+                }
+            });
+        }
+        
+        // Инициализация
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, starting app initialization...');
+            monitorDOM();
+            initApp();
+            
+            // Мониторим каждые 2 секунды
+            setInterval(monitorDOM, 2000);
+        });
+        
+        // Также запускаем сразу
+        setTimeout(() => {
+            console.log('🔄 Early initialization attempt...');
+            monitorDOM();
+            initApp();
+        }, 100);
+    </script>
+</body>
+</html>

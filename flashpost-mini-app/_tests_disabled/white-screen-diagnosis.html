@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Screen Diagnosis</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f14;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .diagnosis-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .check-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #666;
+            background: rgba(255,255,255,0.05);
+        }
+        .check-item.pass {
+            border-left-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+        .check-item.fail {
+            border-left-color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+        }
+        .check-item.warning {
+            border-left-color: #ffc107;
+            background: rgba(255, 193, 7, 0.1);
+        }
+        .code-block {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #6c2e8f;
+        }
+        .dom-inspector {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .element-info {
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagnosis-container">
+        <h1>🔍 White Screen Diagnosis Tool</h1>
+        
+        <div class="check-item">
+            <strong>🎯 Цель:</strong> Определить причину белого экрана
+        </div>
+        
+        <h3>📋 Diagnostic Checklist</h3>
+        <div id="diagnosticResults">
+            <div class="check-item">⏳ Running diagnostics...</div>
+        </div>
+        
+        <h3>🔧 DOM Inspector</h3>
+        <div>
+            <button onclick="inspectDOM()">🔍 Inspect DOM</button>
+            <button onclick="inspectCSS()">🎨 Check CSS</button>
+            <button onclick="testRenderApp()">🚀 Test renderApp()</button>
+            <button onclick="forceShowApp()">💪 Force Show App</button>
+        </div>
+        
+        <div class="dom-inspector" id="domInspector">
+            Click buttons above to inspect...
+        </div>
+        
+        <h3>🛠️ Quick Fixes</h3>
+        <div>
+            <button onclick="fixAppVisibility()">👁️ Fix App Visibility</button>
+            <button onclick="fixLoadingScreen()">⚡ Fix Loading Screen</button>
+            <button onclick="createMissingElements()">➕ Create Missing Elements</button>
+            <button onclick="window.location.href='index.html'">🔄 Test Main App</button>
+        </div>
+        
+        <div id="fixResults"></div>
+    </div>
+
+    <script>
+        let diagnosticData = {};
+        
+        function runDiagnostics() {
+            console.log('🔍 Running white screen diagnostics...');
+            
+            const results = [];
+            
+            // 1. Проверяем наличие #app и #loading
+            const appElement = document.getElementById('app');
+            const loadingElement = document.getElementById('loading');
+            
+            results.push({
+                test: 'DOM Elements Exist',
+                app: !!appElement,
+                loading: !!loadingElement,
+                status: appElement && loadingElement ? 'pass' : 'fail'
+            });
+            
+            // 2. Проверяем видимость элементов
+            if (appElement) {
+                const appStyles = window.getComputedStyle(appElement);
+                const appVisible = appStyles.display !== 'none' && appStyles.opacity !== '0';
+                
+                results.push({
+                    test: 'App Element Visibility',
+                    display: appStyles.display,
+                    opacity: appStyles.opacity,
+                    visibility: appStyles.visibility,
+                    visible: appVisible,
+                    status: appVisible ? 'pass' : 'fail'
+                });
+            }
+            
+            // 3. Проверяем содержимое #app
+            if (appElement) {
+                const hasContent = appElement.innerHTML.trim().length > 0;
+                const childCount = appElement.children.length;
+                
+                results.push({
+                    test: 'App Content',
+                    hasContent: hasContent,
+                    childCount: childCount,
+                    innerHTML: appElement.innerHTML.substring(0, 100) + '...',
+                    status: hasContent ? 'pass' : 'fail'
+                });
+            }
+            
+            // 4. Проверяем загрузку CSS
+            const cssLoaded = document.querySelector('link[href*="app.css"]') || 
+                             document.querySelector('style');
+            
+            results.push({
+                test: 'CSS Loading',
+                cssLoaded: !!cssLoaded,
+                status: cssLoaded ? 'pass' : 'warning'
+            });
+            
+            // 5. Проверяем JavaScript ошибки
+            const hasJSErrors = window.jsErrors && window.jsErrors.length > 0;
+            
+            results.push({
+                test: 'JavaScript Errors',
+                hasErrors: hasJSErrors,
+                errorCount: window.jsErrors ? window.jsErrors.length : 0,
+                status: hasJSErrors ? 'fail' : 'pass'
+            });
+            
+            // 6. Проверяем FlashPostApp
+            const flashPostApp = window.flashPostApp;
+            
+            results.push({
+                test: 'FlashPostApp Instance',
+                exists: !!flashPostApp,
+                hasRenderApp: !!(flashPostApp && flashPostApp.renderApp),
+                status: flashPostApp ? 'pass' : 'fail'
+            });
+            
+            diagnosticData = results;
+            displayDiagnosticResults(results);
+        }
+        
+        function displayDiagnosticResults(results) {
+            const container = document.getElementById('diagnosticResults');
+            
+            container.innerHTML = results.map(result => {
+                const icon = result.status === 'pass' ? '✅' : result.status === 'fail' ? '❌' : '⚠️';
+                
+                let details = '';
+                Object.keys(result).forEach(key => {
+                    if (key !== 'test' && key !== 'status') {
+                        details += `<br><small>${key}: ${JSON.stringify(result[key])}</small>`;
+                    }
+                });
+                
+                return `<div class="check-item ${result.status}">
+                    <strong>${icon} ${result.test}</strong>
+                    ${details}
+                </div>`;
+            }).join('');
+        }
+        
+        function inspectDOM() {
+            const inspector = document.getElementById('domInspector');
+            
+            const appElement = document.getElementById('app');
+            const loadingElement = document.getElementById('loading');
+            
+            let html = '<h4>🔍 DOM Structure Analysis</h4>';
+            
+            // Проверяем #app
+            if (appElement) {
+                const styles = window.getComputedStyle(appElement);
+                html += `<div class="element-info">
+                    <strong>#app element:</strong><br>
+                    • Display: ${styles.display}<br>
+                    • Opacity: ${styles.opacity}<br>
+                    • Visibility: ${styles.visibility}<br>
+                    • Background: ${styles.backgroundColor}<br>
+                    • Height: ${styles.height}<br>
+                    • Children: ${appElement.children.length}<br>
+                    • Content length: ${appElement.innerHTML.length} chars
+                </div>`;
+                
+                if (appElement.innerHTML.length > 0) {
+                    html += `<div class="code-block">${appElement.innerHTML.substring(0, 500)}...</div>`;
+                }
+            } else {
+                html += '<div class="element-info">❌ #app element NOT FOUND</div>';
+            }
+            
+            // Проверяем #loading
+            if (loadingElement) {
+                const styles = window.getComputedStyle(loadingElement);
+                html += `<div class="element-info">
+                    <strong>#loading element:</strong><br>
+                    • Display: ${styles.display}<br>
+                    • Opacity: ${styles.opacity}<br>
+                    • Z-index: ${styles.zIndex}
+                </div>`;
+            } else {
+                html += '<div class="element-info">❌ #loading element NOT FOUND</div>';
+            }
+            
+            inspector.innerHTML = html;
+        }
+        
+        function inspectCSS() {
+            const inspector = document.getElementById('domInspector');
+            
+            let html = '<h4>🎨 CSS Analysis</h4>';
+            
+            // Проверяем загруженные стили
+            const stylesheets = Array.from(document.styleSheets);
+            html += `<div class="element-info">
+                <strong>Loaded Stylesheets:</strong> ${stylesheets.length}<br>
+            `;
+            
+            stylesheets.forEach((sheet, index) => {
+                try {
+                    html += `• ${sheet.href || 'inline'} (${sheet.cssRules ? sheet.cssRules.length : 'N/A'} rules)<br>`;
+                } catch (e) {
+                    html += `• ${sheet.href || 'inline'} (CORS blocked)<br>`;
+                }
+            });
+            
+            html += '</div>';
+            
+            // Проверяем body стили
+            const bodyStyles = window.getComputedStyle(document.body);
+            html += `<div class="element-info">
+                <strong>Body styles:</strong><br>
+                • Background: ${bodyStyles.backgroundColor}<br>
+                • Color: ${bodyStyles.color}<br>
+                • Font-family: ${bodyStyles.fontFamily}
+            </div>`;
+            
+            inspector.innerHTML = html;
+        }
+        
+        function testRenderApp() {
+            const inspector = document.getElementById('domInspector');
+            
+            let html = '<h4>🚀 Testing renderApp()</h4>';
+            
+            if (window.flashPostApp && window.flashPostApp.renderApp) {
+                try {
+                    html += '<div class="element-info">✅ flashPostApp.renderApp exists, calling...</div>';
+                    
+                    // Вызываем renderApp
+                    window.flashPostApp.renderApp();
+                    
+                    // Проверяем результат через 1 секунду
+                    setTimeout(() => {
+                        const appElement = document.getElementById('app');
+                        if (appElement && appElement.innerHTML.trim().length > 0) {
+                            html += '<div class="element-info">✅ renderApp() executed, content added to #app</div>';
+                        } else {
+                            html += '<div class="element-info">❌ renderApp() executed, but #app is still empty</div>';
+                        }
+                        inspector.innerHTML = html;
+                    }, 1000);
+                    
+                } catch (error) {
+                    html += `<div class="element-info">❌ Error calling renderApp(): ${error.message}</div>`;
+                }
+            } else {
+                html += '<div class="element-info">❌ flashPostApp.renderApp not available</div>';
+                
+                // Пытаемся загрузить модули
+                html += '<div class="element-info">🔄 Trying to initialize FlashPostApp...</div>';
+                
+                if (typeof initFlashPostApp === 'function') {
+                    try {
+                        initFlashPostApp();
+                        html += '<div class="element-info">✅ initFlashPostApp() called</div>';
+                    } catch (error) {
+                        html += `<div class="element-info">❌ Error in initFlashPostApp(): ${error.message}</div>`;
+                    }
+                } else {
+                    html += '<div class="element-info">❌ initFlashPostApp function not found</div>';
+                }
+            }
+            
+            inspector.innerHTML = html;
+        }
+        
+        function forceShowApp() {
+            const appElement = document.getElementById('app');
+            const loadingElement = document.getElementById('loading');
+            
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+            
+            if (appElement) {
+                appElement.style.display = 'block';
+                appElement.style.opacity = '1';
+                appElement.style.visibility = 'visible';
+                
+                if (appElement.innerHTML.trim().length === 0) {
+                    appElement.innerHTML = `
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 100vh;
+                            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+                            color: white;
+                            text-align: center;
+                            padding: 20px;
+                        ">
+                            <div>
+                                <h1>🚀 FlashPost Mini App</h1>
+                                <p>Force-shown app container</p>
+                                <button onclick="window.location.reload()" style="
+                                    background: white;
+                                    color: #333;
+                                    border: none;
+                                    padding: 12px 24px;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    margin-top: 20px;
+                                ">
+                                    🔄 Reload App
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            document.getElementById('fixResults').innerHTML = `
+                <div class="check-item pass">
+                    ✅ Force-showed app container. Check if content is now visible.
+                </div>
+            `;
+        }
+        
+        function fixAppVisibility() {
+            const appElement = document.getElementById('app');
+            
+            if (appElement) {
+                // Принудительно делаем видимым
+                appElement.style.cssText = `
+                    display: block !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    min-height: 100vh !important;
+                    background: #0f0f14 !important;
+                    position: relative !important;
+                    z-index: 2 !important;
+                `;
+                
+                document.getElementById('fixResults').innerHTML = `
+                    <div class="check-item pass">
+                        ✅ Applied visibility fixes to #app element
+                    </div>
+                `;
+            } else {
+                document.getElementById('fixResults').innerHTML = `
+                    <div class="check-item fail">
+                        ❌ #app element not found - cannot fix visibility
+                    </div>
+                `;
+            }
+        }
+        
+        function fixLoadingScreen() {
+            const loadingElement = document.getElementById('loading');
+            
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+                
+                document.getElementById('fixResults').innerHTML = `
+                    <div class="check-item pass">
+                        ✅ Hidden loading screen
+                    </div>
+                `;
+            } else {
+                document.getElementById('fixResults').innerHTML = `
+                    <div class="check-item warning">
+                        ⚠️ #loading element not found
+                    </div>
+                `;
+            }
+        }
+        
+        function createMissingElements() {
+            let created = [];
+            
+            // Создаем #app если нет
+            if (!document.getElementById('app')) {
+                const app = document.createElement('div');
+                app.id = 'app';
+                app.className = 'app';
+                app.style.cssText = `
+                    display: block;
+                    min-height: 100vh;
+                    background: #0f0f14;
+                `;
+                document.body.appendChild(app);
+                created.push('#app');
+            }
+            
+            // Создаем #loading если нет
+            if (!document.getElementById('loading')) {
+                const loading = document.createElement('div');
+                loading.id = 'loading';
+                loading.className = 'loading';
+                loading.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+                    display: none;
+                    z-index: 9999;
+                `;
+                loading.innerHTML = `
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        color: white;
+                        font-size: 18px;
+                    ">
+                        ⚡ Loading...
+                    </div>
+                `;
+                document.body.appendChild(loading);
+                created.push('#loading');
+            }
+            
+            document.getElementById('fixResults').innerHTML = `
+                <div class="check-item ${created.length > 0 ? 'pass' : 'warning'}">
+                    ${created.length > 0 ? '✅' : '⚠️'} 
+                    ${created.length > 0 ? `Created elements: ${created.join(', ')}` : 'All required elements already exist'}
+                </div>
+            `;
+        }
+        
+        // Перехватываем JavaScript ошибки
+        window.jsErrors = [];
+        window.addEventListener('error', (event) => {
+            window.jsErrors.push({
+                message: event.message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno
+            });
+        });
+        
+        // Запускаем диагностику при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostics, 500);
+        });
+        
+        // Также запускаем сразу
+        setTimeout(runDiagnostics, 100);
+    </script>
+</body>
+</html>

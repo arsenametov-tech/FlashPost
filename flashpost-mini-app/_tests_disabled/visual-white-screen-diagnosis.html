@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual White Screen Diagnosis</title>
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Main App CSS -->
+    <link rel="stylesheet" href="app.css">
+    
+    <style>
+        /* Диагностические стили */
+        .diagnosis-overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 10px;
+            z-index: 10000;
+            overflow-y: auto;
+            border-left: 2px solid #833ab4;
+        }
+        
+        .diagnosis-section {
+            margin-bottom: 15px;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        
+        .diagnosis-title {
+            color: #833ab4;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .pass { color: #28a745; }
+        .fail { color: #dc3545; }
+        .warning { color: #ffc107; }
+        
+        .debug-button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            margin: 2px;
+        }
+        
+        .debug-button:hover {
+            background: #6c2e8f;
+        }
+        
+        .debug-red {
+            background: #dc3545 !important;
+            color: white !important;
+            font-size: 24px !important;
+            font-weight: bold !important;
+            padding: 20px !important;
+            text-align: center !important;
+            min-height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        <div class="loading-icon">⚡</div>
+        <div class="loading-text">Диагностика белого экрана...</div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app"></div>
+    
+    <!-- Диагностическая панель -->
+    <div class="diagnosis-overlay" id="diagnosisPanel">
+        <div class="diagnosis-title">🔍 VISUAL WHITE SCREEN DIAGNOSIS</div>
+        
+        <!-- 1. CSS Layout Check -->
+        <div class="diagnosis-section">
+            <div class="diagnosis-title">1. CSS Layout Check</div>
+            <div id="cssLayoutResults">Проверяем...</div>
+            <button class="debug-button" onclick="checkCSSLayout()">🔄 Recheck</button>
+        </div>
+        
+        <!-- 2. Position Check -->
+        <div class="diagnosis-section">
+            <div class="diagnosis-title">2. Position Check</div>
+            <div id="positionResults">Проверяем...</div>
+            <button class="debug-button" onclick="checkPositioning()">🔄 Recheck</button>
+        </div>
+        
+        <!-- 3. RenderApp Check -->
+        <div class="diagnosis-section">
+            <div class="diagnosis-title">3. RenderApp Check</div>
+            <div id="renderAppResults">Проверяем...</div>
+            <button class="debug-button" onclick="checkRenderApp()">🔄 Recheck</button>
+            <button class="debug-button" onclick="forceRenderApp()">🔴 Force Render</button>
+        </div>
+        
+        <!-- 4. Debug UI -->
+        <div class="diagnosis-section">
+            <div class="diagnosis-title">4. Debug UI</div>
+            <div id="debugUIResults">Готов к тесту</div>
+            <button class="debug-button" onclick="addDebugUI()">🔴 Add Red Debug</button>
+            <button class="debug-button" onclick="removeDebugUI()">❌ Remove Debug</button>
+        </div>
+        
+        <!-- 5. Telegram Expand Check -->
+        <div class="diagnosis-section">
+            <div class="diagnosis-title">5. Telegram Expand</div>
+            <div id="telegramResults">Проверяем...</div>
+            <button class="debug-button" onclick="checkTelegramExpand()">🔄 Recheck</button>
+            <button class="debug-button" onclick="forceTelegramExpand()">📱 Force Expand</button>
+        </div>
+        
+        <!-- Общие действия -->
+        <div class="diagnosis-section">
+            <div class="diagnosis-title">🛠️ Actions</div>
+            <button class="debug-button" onclick="runFullDiagnosis()">🔍 Full Diagnosis</button>
+            <button class="debug-button" onclick="fixAllIssues()">🔧 Fix All</button>
+            <button class="debug-button" onclick="togglePanel()">👁️ Hide Panel</button>
+        </div>
+        
+        <!-- Результаты -->
+        <div class="diagnosis-section">
+            <div class="diagnosis-title">📊 Summary</div>
+            <div id="summaryResults">Запустите диагностику</div>
+        </div>
+    </div>
+
+    <!-- Main App Scripts -->
+    <script src="src/state.js" defer></script>
+    <script src="src/renderer.js" defer></script>
+    <script src="src/editor.js" defer></script>
+    <script src="src/drag.js" defer></script>
+    <script src="src/export.js" defer></script>
+    <script src="src/ai.js" defer></script>
+    <script src="src/template-manager.js" defer></script>
+    <script src="src/app.js" defer></script>
+
+    <script>
+        let diagnosisResults = {};
+        let tg = window.Telegram?.WebApp;
+        
+        // 1. Проверка CSS Layout
+        function checkCSSLayout() {
+            console.log('🔍 Checking CSS Layout...');
+            
+            const html = document.documentElement;
+            const body = document.body;
+            const app = document.getElementById('app');
+            
+            const htmlStyles = window.getComputedStyle(html);
+            const bodyStyles = window.getComputedStyle(body);
+            const appStyles = app ? window.getComputedStyle(app) : null;
+            
+            const results = {
+                html: {
+                    height: htmlStyles.height,
+                    margin: htmlStyles.margin,
+                    padding: htmlStyles.padding,
+                    background: htmlStyles.backgroundColor
+                },
+                body: {
+                    height: bodyStyles.height,
+                    margin: bodyStyles.margin,
+                    padding: bodyStyles.padding,
+                    background: bodyStyles.backgroundColor,
+                    minHeight: bodyStyles.minHeight
+                },
+                app: app ? {
+                    exists: true,
+                    height: appStyles.height,
+                    minHeight: appStyles.minHeight,
+                    background: appStyles.backgroundColor,
+                    display: appStyles.display,
+                    position: appStyles.position
+                } : { exists: false }
+            };
+            
+            diagnosisResults.cssLayout = results;
+            
+            let output = '';
+            
+            // HTML проверки
+            output += `<strong>HTML:</strong><br>`;
+            output += `height: ${results.html.height} ${results.html.height === '100%' ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            output += `background: ${results.html.background}<br>`;
+            
+            // BODY проверки
+            output += `<strong>BODY:</strong><br>`;
+            output += `height: ${results.body.height} ${results.body.height === '100%' ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            output += `margin: ${results.body.margin} ${results.body.margin === '0px' ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            output += `padding: ${results.body.padding} ${results.body.padding === '0px' ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            output += `background: ${results.body.background}<br>`;
+            
+            // APP проверки
+            if (results.app.exists) {
+                output += `<strong>#APP:</strong><br>`;
+                output += `exists: <span class="pass">✓</span><br>`;
+                output += `min-height: ${results.app.minHeight} ${results.app.minHeight.includes('100vh') ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+                output += `display: ${results.app.display} ${results.app.display === 'block' ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+                output += `background: ${results.app.background}<br>`;
+            } else {
+                output += `<strong>#APP:</strong> <span class="fail">NOT FOUND ✗</span><br>`;
+            }
+            
+            document.getElementById('cssLayoutResults').innerHTML = output;
+            return results;
+        }
+        
+        // 2. Проверка позиционирования
+        function checkPositioning() {
+            console.log('🔍 Checking Positioning...');
+            
+            const app = document.getElementById('app');
+            const loading = document.getElementById('loading');
+            
+            const results = {
+                app: app ? {
+                    position: window.getComputedStyle(app).position,
+                    top: window.getComputedStyle(app).top,
+                    left: window.getComputedStyle(app).left,
+                    width: window.getComputedStyle(app).width,
+                    height: window.getComputedStyle(app).height,
+                    zIndex: window.getComputedStyle(app).zIndex
+                } : null,
+                loading: loading ? {
+                    position: window.getComputedStyle(loading).position,
+                    display: window.getComputedStyle(loading).display,
+                    zIndex: window.getComputedStyle(loading).zIndex
+                } : null
+            };
+            
+            diagnosisResults.positioning = results;
+            
+            let output = '';
+            
+            if (results.app) {
+                output += `<strong>#APP Position:</strong><br>`;
+                output += `position: ${results.app.position}<br>`;
+                
+                if (results.app.position === 'fixed' || results.app.position === 'absolute') {
+                    output += `<span class="warning">⚠️ Fixed/Absolute position detected</span><br>`;
+                    output += `top: ${results.app.top}<br>`;
+                    output += `left: ${results.app.left}<br>`;
+                    output += `width: ${results.app.width}<br>`;
+                    output += `height: ${results.app.height}<br>`;
+                } else {
+                    output += `<span class="pass">✓ Safe position</span><br>`;
+                }
+                
+                output += `z-index: ${results.app.zIndex}<br>`;
+            } else {
+                output += `<span class="fail">#APP not found ✗</span><br>`;
+            }
+            
+            if (results.loading) {
+                output += `<strong>#LOADING:</strong><br>`;
+                output += `display: ${results.loading.display}<br>`;
+                output += `z-index: ${results.loading.zIndex}<br>`;
+                
+                if (results.loading.display !== 'none') {
+                    output += `<span class="warning">⚠️ Loading still visible</span><br>`;
+                } else {
+                    output += `<span class="pass">✓ Loading hidden</span><br>`;
+                }
+            }
+            
+            document.getElementById('positionResults').innerHTML = output;
+            return results;
+        }
+        
+        // 3. Проверка renderApp()
+        function checkRenderApp() {
+            console.log('🔍 Checking RenderApp...');
+            
+            const app = document.getElementById('app');
+            const hasFlashPostApp = !!window.flashPostApp;
+            const hasRenderApp = hasFlashPostApp && typeof window.flashPostApp.renderApp === 'function';
+            
+            const results = {
+                appExists: !!app,
+                appContent: app ? app.innerHTML.length : 0,
+                appEmpty: app ? app.innerHTML.trim() === '' : true,
+                flashPostAppExists: hasFlashPostApp,
+                renderAppExists: hasRenderApp,
+                lastRenderTime: window.lastRenderTime || 'never'
+            };
+            
+            diagnosisResults.renderApp = results;
+            
+            let output = '';
+            output += `#app exists: ${results.appExists ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            output += `#app content: ${results.appContent} chars<br>`;
+            output += `#app empty: ${results.appEmpty ? '<span class="fail">✗ EMPTY</span>' : '<span class="pass">✓ HAS CONTENT</span>'}<br>`;
+            output += `flashPostApp: ${results.flashPostAppExists ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            output += `renderApp(): ${results.renderAppExists ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            output += `Last render: ${results.lastRenderTime}<br>`;
+            
+            document.getElementById('renderAppResults').innerHTML = output;
+            return results;
+        }
+        
+        // 4. Добавление debug UI
+        function addDebugUI() {
+            console.log('🔴 Adding Debug UI...');
+            
+            const app = document.getElementById('app');
+            if (!app) {
+                console.error('❌ #app not found for debug UI');
+                return;
+            }
+            
+            // Временный debug UI с красным текстом
+            app.innerHTML = `
+                <div class="debug-red">
+                    🔴 DEBUG UI ACTIVE<br>
+                    <div style="font-size: 16px; margin-top: 20px;">
+                        ✅ #app element exists<br>
+                        ✅ innerHTML can be set<br>
+                        ✅ CSS styles apply<br>
+                        ✅ Red text visible<br>
+                        ✅ Full height works<br>
+                        <div style="margin-top: 20px; font-size: 12px;">
+                            Time: ${new Date().toLocaleTimeString()}<br>
+                            Viewport: ${window.innerWidth}x${window.innerHeight}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Скрываем loading
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+            
+            document.getElementById('debugUIResults').innerHTML = `
+                <span class="pass">✅ Debug UI added</span><br>
+                Red text should be visible<br>
+                Time: ${new Date().toLocaleTimeString()}
+            `;
+            
+            window.lastRenderTime = new Date().toLocaleTimeString();
+        }
+        
+        function removeDebugUI() {
+            console.log('❌ Removing Debug UI...');
+            
+            const app = document.getElementById('app');
+            if (app) {
+                app.innerHTML = '';
+            }
+            
+            document.getElementById('debugUIResults').innerHTML = `
+                <span class="warning">⚪ Debug UI removed</span><br>
+                #app is now empty
+            `;
+        }
+        
+        // 5. Проверка Telegram expand
+        function checkTelegramExpand() {
+            console.log('📱 Checking Telegram Expand...');
+            
+            const results = {
+                telegramAvailable: !!tg,
+                version: tg ? tg.version : 'N/A',
+                isExpanded: tg ? tg.isExpanded : false,
+                viewportHeight: tg ? tg.viewportHeight : 'N/A',
+                stableHeight: tg ? tg.viewportStableHeight : 'N/A',
+                windowHeight: window.innerHeight
+            };
+            
+            diagnosisResults.telegram = results;
+            
+            let output = '';
+            output += `Telegram SDK: ${results.telegramAvailable ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'}<br>`;
+            
+            if (results.telegramAvailable) {
+                output += `Version: ${results.version}<br>`;
+                output += `Expanded: ${results.isExpanded ? '<span class="pass">✓</span>' : '<span class="fail">✗ NOT EXPANDED</span>'}<br>`;
+                output += `TG Height: ${results.viewportHeight}px<br>`;
+                output += `Stable: ${results.stableHeight}px<br>`;
+                output += `Window: ${results.windowHeight}px<br>`;
+                
+                if (results.viewportHeight < 400) {
+                    output += `<span class="fail">⚠️ Height too small</span><br>`;
+                }
+            } else {
+                output += `<span class="warning">Running outside Telegram</span><br>`;
+                output += `Window: ${results.windowHeight}px<br>`;
+            }
+            
+            document.getElementById('telegramResults').innerHTML = output;
+            return results;
+        }
+        
+        function forceTelegramExpand() {
+            console.log('📱 Force Telegram Expand...');
+            
+            if (tg) {
+                try {
+                    tg.ready();
+                    tg.expand();
+                    console.log('✅ Telegram expand called');
+                    
+                    setTimeout(() => {
+                        checkTelegramExpand();
+                    }, 500);
+                } catch (error) {
+                    console.error('❌ Error expanding Telegram:', error);
+                }
+            } else {
+                console.log('⚠️ Telegram not available');
+            }
+        }
+        
+        // Принудительный вызов renderApp
+        function forceRenderApp() {
+            console.log('🔴 Force RenderApp...');
+            
+            if (window.flashPostApp && window.flashPostApp.renderApp) {
+                try {
+                    window.flashPostApp.renderApp();
+                    console.log('✅ Main app renderApp() called');
+                    
+                    setTimeout(() => {
+                        checkRenderApp();
+                    }, 500);
+                } catch (error) {
+                    console.error('❌ Error calling renderApp():', error);
+                    addDebugUI(); // Fallback to debug UI
+                }
+            } else {
+                console.log('⚠️ Main app not available, using debug UI');
+                addDebugUI();
+            }
+        }
+        
+        // Полная диагностика
+        function runFullDiagnosis() {
+            console.log('🔍 Running Full Diagnosis...');
+            
+            const results = {
+                cssLayout: checkCSSLayout(),
+                positioning: checkPositioning(),
+                renderApp: checkRenderApp(),
+                telegram: checkTelegramExpand()
+            };
+            
+            // Анализ результатов
+            const issues = [];
+            const passes = [];
+            
+            // CSS Layout issues
+            if (!results.cssLayout.app.exists) {
+                issues.push('#app element missing');
+            }
+            if (!results.cssLayout.app.minHeight?.includes('100vh')) {
+                issues.push('#app min-height not 100vh');
+            }
+            if (results.cssLayout.body.margin !== '0px') {
+                issues.push('body margin not 0');
+            }
+            
+            // Position issues
+            if (results.positioning.app?.position === 'fixed' || results.positioning.app?.position === 'absolute') {
+                if (results.positioning.app.width === 'auto' || results.positioning.app.height === 'auto') {
+                    issues.push('fixed/absolute without explicit size');
+                }
+            }
+            
+            // RenderApp issues
+            if (results.renderApp.appEmpty) {
+                issues.push('#app is empty');
+            }
+            if (!results.renderApp.renderAppExists) {
+                issues.push('renderApp() not available');
+            }
+            
+            // Telegram issues
+            if (results.telegram.telegramAvailable && !results.telegram.isExpanded) {
+                issues.push('Telegram not expanded');
+            }
+            
+            // Passes
+            if (results.cssLayout.app.exists) passes.push('✅ #app exists');
+            if (results.cssLayout.body.margin === '0px') passes.push('✅ body margin 0');
+            if (results.renderApp.renderAppExists) passes.push('✅ renderApp() available');
+            if (!results.telegram.telegramAvailable || results.telegram.isExpanded) passes.push('✅ Telegram OK');
+            
+            let summary = '';
+            if (passes.length > 0) {
+                summary += `<div class="pass">${passes.join('<br>')}</div>`;
+            }
+            if (issues.length > 0) {
+                summary += `<div class="fail">ISSUES:<br>${issues.join('<br>')}</div>`;
+            } else {
+                summary += `<div class="pass">✅ No issues detected!</div>`;
+            }
+            
+            document.getElementById('summaryResults').innerHTML = summary;
+            
+            return { results, issues, passes };
+        }
+        
+        // Исправление всех проблем
+        function fixAllIssues() {
+            console.log('🔧 Fixing All Issues...');
+            
+            // 1. Создаем #app если нет
+            let app = document.getElementById('app');
+            if (!app) {
+                app = document.createElement('div');
+                app.id = 'app';
+                document.body.appendChild(app);
+                console.log('✅ Created #app element');
+            }
+            
+            // 2. Применяем критические CSS стили
+            document.documentElement.style.cssText = `
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                background: #0f0f14;
+            `;
+            
+            document.body.style.cssText = `
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                background: #0f0f14;
+                color: #ffffff;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            
+            app.style.cssText = `
+                min-height: 100vh;
+                background: #0f0f14;
+                color: #fff;
+                display: block;
+                position: relative;
+            `;
+            
+            // 3. Скрываем loading
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+            
+            // 4. Вызываем Telegram expand
+            if (tg) {
+                try {
+                    tg.ready();
+                    tg.expand();
+                } catch (error) {
+                    console.error('Error with Telegram:', error);
+                }
+            }
+            
+            // 5. Добавляем debug UI
+            addDebugUI();
+            
+            // 6. Повторная диагностика
+            setTimeout(() => {
+                runFullDiagnosis();
+            }, 1000);
+            
+            console.log('✅ All fixes applied');
+        }
+        
+        // Переключение панели
+        function togglePanel() {
+            const panel = document.getElementById('diagnosisPanel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        
+        // Инициализация
+        window.addEventListener('load', () => {
+            console.log('🔍 Visual White Screen Diagnosis loaded');
+            
+            // Автоматическая диагностика через 2 секунды
+            setTimeout(() => {
+                console.log('🔄 Running automatic diagnosis...');
+                runFullDiagnosis();
+            }, 2000);
+            
+            // Скрываем loading через 3 секунды если все еще видим
+            setTimeout(() => {
+                const loading = document.getElementById('loading');
+                if (loading && window.getComputedStyle(loading).display !== 'none') {
+                    console.log('⏰ Auto-hiding loading screen');
+                    loading.style.display = 'none';
+                }
+            }, 3000);
+        });
+        
+        // Экспорт функций для консоли
+        window.checkCSSLayout = checkCSSLayout;
+        window.checkPositioning = checkPositioning;
+        window.checkRenderApp = checkRenderApp;
+        window.addDebugUI = addDebugUI;
+        window.checkTelegramExpand = checkTelegramExpand;
+        window.runFullDiagnosis = runFullDiagnosis;
+        window.fixAllIssues = fixAllIssues;
+        
+        console.log('💡 Available commands: checkCSSLayout(), addDebugUI(), runFullDiagnosis(), fixAllIssues()');
+    </script>
+</body>
+</html>

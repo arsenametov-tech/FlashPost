@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Manual Fix - FlashPost</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Test Manual Fix</h1>
+        <p>Тестирование исправлений для ручного ввода и создания из текста</p>
+        
+        <!-- Тест доступности функций -->
+        <div class="test-section">
+            <h2>🔍 Проверка доступности функций</h2>
+            <button class="test-button" onclick="testFunctionAvailability()">
+                🔍 Проверить функции
+            </button>
+            <div id="functionResults"></div>
+        </div>
+        
+        <!-- Тест открытия модального окна -->
+        <div class="test-section">
+            <h2>📝 Тест открытия модального окна</h2>
+            <button class="test-button" onclick="testModalOpen()">
+                📝 Открыть модальное окно
+            </button>
+            <div id="modalResults"></div>
+        </div>
+        
+        <!-- Тест создания из текста -->
+        <div class="test-section">
+            <h2>📄 Тест создания карусели из текста</h2>
+            <button class="test-button" onclick="testTextToSlides()">
+                📄 Тест создания из текста
+            </button>
+            <div id="textResults"></div>
+        </div>
+        
+        <!-- Результаты -->
+        <div class="test-section">
+            <h2>📊 Общие результаты</h2>
+            <div id="overallResults">
+                <p>Нажмите кнопки выше для тестирования...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            functions: false,
+            modal: false,
+            textCreation: false
+        };
+
+        function showResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            const statusClass = `status-${type}`;
+            
+            container.innerHTML = `
+                <div class="status ${statusClass}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function updateOverallResults() {
+            const container = document.getElementById('overallResults');
+            const passed = Object.values(testResults).filter(r => r).length;
+            const total = Object.keys(testResults).length;
+            
+            let html = `<h3>Результаты тестирования: ${passed}/${total}</h3>`;
+            
+            for (const [test, result] of Object.entries(testResults)) {
+                const status = result ? '✅' : '❌';
+                const testName = {
+                    functions: 'Доступность функций',
+                    modal: 'Модальное окно',
+                    textCreation: 'Создание из текста'
+                }[test];
+                
+                html += `<div class="status ${result ? 'status-success' : 'status-error'}">
+                    ${status} ${testName}
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function testFunctionAvailability() {
+            showResult('functionResults', '🔄 Проверяем доступность функций...', 'info');
+            
+            try {
+                // Проверяем наличие основных элементов
+                const manualModal = document.getElementById('manualModal');
+                const manualBtn = document.getElementById('manualBtn');
+                const manualTextInput = document.getElementById('manualTextInput');
+                const createManualBtn = document.getElementById('createManualBtn');
+                
+                let issues = [];
+                
+                if (!manualModal) issues.push('Модальное окно (#manualModal) не найдено');
+                if (!manualBtn) issues.push('Кнопка ручного ввода (#manualBtn) не найдена');
+                if (!manualTextInput) issues.push('Поле ввода текста (#manualTextInput) не найдено');
+                if (!createManualBtn) issues.push('Кнопка создания (#createManualBtn) не найдена');
+                
+                // Проверяем наличие app объекта
+                if (!window.app) {
+                    issues.push('Объект window.app не найден');
+                } else {
+                    if (typeof window.app.openManualInput !== 'function') {
+                        issues.push('Функция openManualInput не найдена');
+                    }
+                    if (typeof window.app.generateSlidesFromText !== 'function') {
+                        issues.push('Функция generateSlidesFromText не найдена');
+                    }
+                    if (typeof window.app.createManualCarousel !== 'function') {
+                        issues.push('Функция createManualCarousel не найдена');
+                    }
+                }
+                
+                if (issues.length === 0) {
+                    testResults.functions = true;
+                    showResult('functionResults', '✅ Все функции доступны!', 'success');
+                } else {
+                    testResults.functions = false;
+                    showResult('functionResults', `❌ Найдены проблемы:\n${issues.join('\n')}`, 'error');
+                }
+                
+            } catch (error) {
+                testResults.functions = false;
+                showResult('functionResults', `❌ Ошибка проверки: ${error.message}`, 'error');
+            }
+            
+            updateOverallResults();
+        }
+
+        function testModalOpen() {
+            showResult('modalResults', '🔄 Тестируем открытие модального окна...', 'info');
+            
+            try {
+                if (!window.app) {
+                    throw new Error('window.app не найден');
+                }
+                
+                if (typeof window.app.openManualInput !== 'function') {
+                    throw new Error('Функция openManualInput не найдена');
+                }
+                
+                // Пробуем открыть модальное окно
+                window.app.openManualInput();
+                
+                // Проверяем, открылось ли модальное окно
+                setTimeout(() => {
+                    const manualModal = document.getElementById('manualModal');
+                    if (manualModal && manualModal.style.display === 'flex') {
+                        testResults.modal = true;
+                        showResult('modalResults', '✅ Модальное окно успешно открыто!', 'success');
+                        
+                        // Закрываем модальное окно
+                        setTimeout(() => {
+                            manualModal.style.display = 'none';
+                        }, 2000);
+                    } else {
+                        testResults.modal = false;
+                        showResult('modalResults', '❌ Модальное окно не открылось', 'error');
+                    }
+                    updateOverallResults();
+                }, 100);
+                
+            } catch (error) {
+                testResults.modal = false;
+                showResult('modalResults', `❌ Ошибка: ${error.message}`, 'error');
+                updateOverallResults();
+            }
+        }
+
+        function testTextToSlides() {
+            showResult('textResults', '🔄 Тестируем создание слайдов из текста...', 'info');
+            
+            try {
+                if (!window.app) {
+                    throw new Error('window.app не найден');
+                }
+                
+                if (typeof window.app.generateSlidesFromText !== 'function') {
+                    throw new Error('Функция generateSlidesFromText не найдена');
+                }
+                
+                // Тестовый текст
+                const testText = `Первый слайд с важной информацией
+
+Второй слайд с дополнительными деталями
+
+Третий слайд с заключением`;
+                
+                // Пробуем создать слайды
+                const slides = window.app.generateSlidesFromText(testText);
+                
+                if (slides && slides.length === 3) {
+                    testResults.textCreation = true;
+                    showResult('textResults', `✅ Создано ${slides.length} слайдов из текста!`, 'success');
+                } else {
+                    testResults.textCreation = false;
+                    showResult('textResults', `❌ Неожиданный результат: ${slides ? slides.length : 0} слайдов`, 'error');
+                }
+                
+            } catch (error) {
+                testResults.textCreation = false;
+                showResult('textResults', `❌ Ошибка: ${error.message}`, 'error');
+            }
+            
+            updateOverallResults();
+        }
+
+        // Автоматический запуск проверки функций при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testFunctionAvailability();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+</content>

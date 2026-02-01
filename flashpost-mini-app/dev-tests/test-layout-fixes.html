@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Тест исправлений layout</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        :root {
+            --tg-bg: #ffffff;
+            --tg-text: #000000;
+            --primary: #833ab4;
+        }
+        
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 200px;
+        }
+        
+        .debug-item {
+            margin: 4px 0;
+            padding: 2px 4px;
+            background: #f8f9fa;
+            border-radius: 3px;
+        }
+        
+        .test-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+        
+        .test-btn {
+            padding: 8px 16px;
+            background: #833ab4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .test-btn:hover {
+            background: #6d2d96;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-panel">
+        <h4>🔍 Layout Debug</h4>
+        <div class="debug-item" id="currentState">Состояние: загрузка...</div>
+        <div class="debug-item" id="sectionHeight">Высота: 0px</div>
+        <div class="debug-item" id="sectionBg">Фон: проверка...</div>
+        <div class="debug-item" id="fontSlider">Слайдер: не найден</div>
+    </div>
+    
+    <div class="test-buttons">
+        <button class="test-btn" onclick="testCarousel()">Карусель</button>
+        <button class="test-btn" onclick="testEditor()">Редактор</button>
+        <button class="test-btn" onclick="testFontSize()">Тест шрифта</button>
+    </div>
+
+    <div id="app">
+        <div style="padding: 40px; text-align: center;">
+            <h2>Загрузка тестов...</h2>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация
+        const app = new FlashPostApp();
+        
+        // Тестовые данные
+        app.slides = [
+            {
+                title: "Hook",
+                text: "🔥 Тестовый слайд 1\n\nПроверяем единообразный layout между секциями."
+            },
+            {
+                title: "Problem", 
+                text: "❌ Тестовый слайд 2\n\nПроверяем работу изменения размера шрифта."
+            },
+            {
+                title: "Solution",
+                text: "✅ Тестовый слайд 3\n\nПроверяем адаптацию для мини-апп."
+            }
+        ];
+        
+        app.initializeSlideStyles();
+        
+        // Добавляем Instagram для тестирования
+        const instagramInput = document.createElement('input');
+        instagramInput.id = 'instagramInput';
+        instagramInput.value = '@test_layout';
+        instagramInput.style.display = 'none';
+        document.body.appendChild(instagramInput);
+        
+        // Функции отладки
+        function updateDebugInfo() {
+            const currentStateEl = document.getElementById('currentState');
+            const sectionHeightEl = document.getElementById('sectionHeight');
+            const sectionBgEl = document.getElementById('sectionBg');
+            const fontSliderEl = document.getElementById('fontSlider');
+            
+            // Определяем текущее состояние
+            const appEl = document.getElementById('app');
+            let currentState = 'Неизвестно';
+            let activeSection = null;
+            
+            if (appEl.querySelector('#carouselSection')) {
+                currentState = 'Карусель';
+                activeSection = appEl.querySelector('#carouselSection');
+            } else if (appEl.querySelector('#editorSection')) {
+                currentState = 'Редактор';
+                activeSection = appEl.querySelector('#editorSection');
+            }
+            
+            currentStateEl.textContent = `Состояние: ${currentState}`;
+            
+            if (activeSection) {
+                const rect = activeSection.getBoundingClientRect();
+                sectionHeightEl.textContent = `Высота: ${Math.round(rect.height)}px`;
+                
+                const computedStyle = window.getComputedStyle(activeSection);
+                sectionBgEl.textContent = `Фон: ${computedStyle.backgroundColor}`;
+            }
+            
+            // Проверяем слайдер шрифта
+            const fontSizeSlider = document.getElementById('fontSizeSlider');
+            if (fontSizeSlider) {
+                fontSliderEl.textContent = `Слайдер: найден (${fontSizeSlider.value})`;
+                fontSliderEl.style.background = '#e8f5e8';
+                fontSliderEl.style.color = '#2e7d32';
+            } else {
+                fontSliderEl.textContent = 'Слайдер: не найден';
+                fontSliderEl.style.background = '#ffebee';
+                fontSliderEl.style.color = '#c62828';
+            }
+        }
+        
+        function testCarousel() {
+            console.log('🧪 Тестируем карусель...');
+            app.showCarousel();
+            setTimeout(updateDebugInfo, 300);
+        }
+        
+        function testEditor() {
+            console.log('🧪 Тестируем редактор...');
+            app.openEditor();
+            setTimeout(updateDebugInfo, 300);
+        }
+        
+        function testFontSize() {
+            console.log('🧪 Тестируем изменение размера шрифта...');
+            const fontSizeSlider = document.getElementById('fontSizeSlider');
+            if (fontSizeSlider) {
+                // Симулируем изменение размера шрифта
+                fontSizeSlider.value = 20;
+                fontSizeSlider.dispatchEvent(new Event('input'));
+                console.log('✅ Размер шрифта изменен на 20px');
+                
+                setTimeout(() => {
+                    const fontSizeValue = document.getElementById('fontSizeValue');
+                    if (fontSizeValue) {
+                        console.log('✅ Значение обновлено:', fontSizeValue.textContent);
+                    }
+                }, 100);
+            } else {
+                console.error('❌ Слайдер размера шрифта не найден');
+            }
+            setTimeout(updateDebugInfo, 300);
+        }
+        
+        // Автоматически показываем карусель
+        setTimeout(() => {
+            console.log('🚀 Автоматически показываем карусель...');
+            testCarousel();
+        }, 1000);
+        
+        // Обновляем отладочную информацию каждые 2 секунды
+        setInterval(updateDebugInfo, 2000);
+        
+        console.log(`
+🔧 ТЕСТ ИСПРАВЛЕНИЙ LAYOUT
+
+Проверяем:
+✅ Единообразный layout между секциями
+✅ Правильную работу изменения шрифта
+✅ Адаптацию для мини-апп
+✅ Корректное отображение фона
+
+Используйте кнопки справа для тестирования!
+        `);
+        
+        console.log('✅ Тест исправлений готов');
+    </script>
+</body>
+</html>

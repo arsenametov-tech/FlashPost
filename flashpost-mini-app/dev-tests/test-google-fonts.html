@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Test Google Fonts</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Oswald:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Bebas+Neue:wght@400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="app.css">
+    
+    <style>
+        .font-demo {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            z-index: 10000;
+            max-width: 300px;
+        }
+        
+        .font-demo h3 {
+            margin-bottom: 15px;
+            color: #f9ca24;
+        }
+        
+        .font-sample {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        
+        .font-name {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 4px;
+        }
+        
+        .font-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <!-- Демонстрация шрифтов -->
+    <div class="font-demo">
+        <h3>🎨 Google Fonts Demo</h3>
+        
+        <div class="font-sample">
+            <div class="font-name">Inter</div>
+            <div class="font-text" style="font-family: 'Inter', sans-serif;">Modern & Clean</div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Montserrat</div>
+            <div class="font-text" style="font-family: 'Montserrat', sans-serif;">Elegant Design</div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Oswald</div>
+            <div class="font-text" style="font-family: 'Oswald', sans-serif;">BOLD IMPACT</div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Playfair Display</div>
+            <div class="font-text" style="font-family: 'Playfair Display', serif; font-style: italic;">Luxury Style</div>
+        </div>
+        
+        <div class="font-sample">
+            <div class="font-name">Bebas Neue</div>
+            <div class="font-text" style="font-family: 'Bebas Neue', cursive; letter-spacing: 1px;">STRONG PRESENCE</div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="loading-content">
+            <div class="loading-logo">⚡</div>
+            <div class="loading-text">FlashPost AI</div>
+            <div class="loading-subtitle">Загрузка шрифтов...</div>
+        </div>
+    </div>
+
+    <div id="app" class="app" style="display: none;"></div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        window.app = new FlashPostApp();
+        
+        // Тестовые данные для демонстрации всех Google Fonts
+        setTimeout(() => {
+            console.log('🎨 Testing Google Fonts functionality...');
+            
+            // Создаем тестовые слайды
+            app.slides = [
+                { text: "Inter Font Demo" },
+                { text: "Montserrat Showcase" },
+                { text: "Oswald Typography" },
+                { text: "Playfair Elegance" },
+                { text: "Bebas Neue Power" }
+            ];
+            
+            // Инициализируем стили слайдов
+            app.initializeSlideStyles();
+            
+            // Настраиваем каждый слайд с разными шрифтами
+            app.slideStyles[0].textBlocks[0] = {
+                id: 'inter_demo',
+                text: 'Inter Font\nModern & Readable',
+                font: 'Inter',
+                size: 18,
+                weight: 600,
+                color: '#ffffff',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 80
+            };
+            
+            app.slideStyles[1].textBlocks[0] = {
+                id: 'montserrat_demo',
+                text: 'Montserrat\nElegant Design',
+                font: 'Montserrat',
+                size: 18,
+                weight: 700,
+                color: '#ffffff',
+                glow: true,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 80
+            };
+            
+            app.slideStyles[2].textBlocks[0] = {
+                id: 'oswald_demo',
+                text: 'OSWALD FONT\nBOLD IMPACT',
+                font: 'Oswald',
+                size: 20,
+                weight: 600,
+                color: '#ffffff',
+                glow: false,
+                isKeyword: true,
+                position: { x: 50, y: 50 },
+                width: 85
+            };
+            
+            app.slideStyles[3].textBlocks[0] = {
+                id: 'playfair_demo',
+                text: 'Playfair Display\nLuxury & Style',
+                font: 'Playfair Display',
+                size: 18,
+                weight: 600,
+                color: '#ffffff',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 85
+            };
+            
+            app.slideStyles[4].textBlocks[0] = {
+                id: 'bebas_demo',
+                text: 'BEBAS NEUE\nSTRONG PRESENCE',
+                font: 'Bebas Neue',
+                size: 22,
+                weight: 400,
+                color: '#ffffff',
+                glow: true,
+                isKeyword: false,
+                position: { x: 50, y: 50 },
+                width: 90
+            };
+            
+            // Добавляем дополнительные блоки для демонстрации
+            app.slideStyles[0].textBlocks.push({
+                id: 'inter_sub',
+                text: 'Perfect for UI/UX',
+                font: 'Inter',
+                size: 14,
+                weight: 400,
+                color: '#f9ca24',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 75 },
+                width: 60
+            });
+            
+            app.slideStyles[1].textBlocks.push({
+                id: 'montserrat_sub',
+                text: 'Geometric Sans-Serif',
+                font: 'Montserrat',
+                size: 14,
+                weight: 500,
+                color: '#4ecdc4',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 75 },
+                width: 70
+            });
+            
+            console.log('✅ Google Fonts demo initialized:', app.slideStyles);
+            
+            // Показываем редактор для тестирования
+            app.openEditor();
+            
+        }, 2000);
+    </script>
+</body>
+</html>

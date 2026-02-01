@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Modules - FlashPost</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .log {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff00;
+        }
+        .error {
+            border-left-color: #ff0000;
+            color: #ff6666;
+        }
+        .warning {
+            border-left-color: #ffaa00;
+            color: #ffcc66;
+        }
+        .success {
+            border-left-color: #00ff00;
+            color: #66ff66;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Modules Loading</h1>
+    <div id="logs"></div>
+
+    <script>
+        const logs = document.getElementById('logs');
+        
+        function addLog(message, type = 'log') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(div);
+            console.log(message);
+        }
+
+        // Перехват ошибок
+        window.addEventListener('error', (event) => {
+            addLog(`❌ ERROR: ${event.message} at ${event.filename}:${event.lineno}`, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            addLog(`❌ PROMISE REJECTION: ${event.reason}`, 'error');
+        });
+
+        addLog('🚀 Начинаем загрузку модулей...');
+
+        // Проверяем DOM
+        if (document.readyState === 'loading') {
+            addLog('📄 DOM загружается...', 'warning');
+        } else {
+            addLog('✅ DOM готов', 'success');
+        }
+
+        // Функция проверки модуля
+        function checkModule(name) {
+            if (typeof window[name] !== 'undefined') {
+                addLog(`✅ ${name} загружен`, 'success');
+                return true;
+            } else {
+                addLog(`❌ ${name} НЕ загружен`, 'error');
+                return false;
+            }
+        }
+
+        // Ждем загрузки DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            addLog('📄 DOMContentLoaded событие сработало');
+            
+            setTimeout(() => {
+                addLog('🔍 Проверяем модули через 1 секунду...');
+                
+                const modules = [
+                    'StateManager',
+                    'Renderer', 
+                    'Editor',
+                    'DragManager',
+                    'ExportManager',
+                    'AIManager',
+                    'TemplateManager',
+                    'FlashPostApp'
+                ];
+                
+                let loadedCount = 0;
+                modules.forEach(module => {
+                    if (checkModule(module)) {
+                        loadedCount++;
+                    }
+                });
+                
+                addLog(`📊 Загружено модулей: ${loadedCount}/${modules.length}`);
+                
+                // Проверяем экземпляр приложения
+                if (typeof window.flashPostApp !== 'undefined') {
+                    addLog('✅ window.flashPostApp существует', 'success');
+                    addLog(`📱 Тип: ${typeof window.flashPostApp}`);
+                    
+                    if (window.flashPostApp.state) {
+                        addLog('✅ state доступен', 'success');
+                    } else {
+                        addLog('❌ state НЕ доступен', 'error');
+                    }
+                    
+                    if (window.flashPostApp.renderer) {
+                        addLog('✅ renderer доступен', 'success');
+                    } else {
+                        addLog('❌ renderer НЕ доступен', 'error');
+                    }
+                } else {
+                    addLog('❌ window.flashPostApp НЕ существует', 'error');
+                }
+                
+                // Проверяем DOM элементы
+                const appElement = document.getElementById('app');
+                if (appElement) {
+                    addLog('✅ #app элемент найден', 'success');
+                } else {
+                    addLog('❌ #app элемент НЕ найден', 'error');
+                }
+                
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) {
+                    addLog('✅ #loading элемент найден', 'success');
+                } else {
+                    addLog('❌ #loading элемент НЕ найден', 'error');
+                }
+                
+            }, 1000);
+            
+            // Дополнительная проверка через 3 секунды
+            setTimeout(() => {
+                addLog('🔍 Финальная проверка через 3 секунды...');
+                
+                if (typeof window.flashPostApp !== 'undefined') {
+                    addLog('✅ FlashPostApp ИНИЦИАЛИЗИРОВАНО!', 'success');
+                } else {
+                    addLog('❌ FlashPostApp ТАК И НЕ ИНИЦИАЛИЗИРОВАНО', 'error');
+                    
+                    // Попробуем инициализировать вручную
+                    addLog('🔧 Попытка ручной инициализации...');
+                    
+                    if (typeof FlashPostApp !== 'undefined') {
+                        try {
+                            window.flashPostApp = new FlashPostApp();
+                            addLog('✅ Ручная инициализация УСПЕШНА!', 'success');
+                        } catch (error) {
+                            addLog(`❌ Ошибка ручной инициализации: ${error.message}`, 'error');
+                        }
+                    } else {
+                        addLog('❌ Класс FlashPostApp недоступен', 'error');
+                    }
+                }
+            }, 3000);
+        });
+    </script>
+
+    <!-- Загружаем модули в том же порядке что и в index.html -->
+    <script src="src/state.js" defer></script>
+    <script src="src/renderer.js" defer></script>
+    <script src="src/editor.js" defer></script>
+    <script src="src/drag.js" defer></script>
+    <script src="src/export.js" defer></script>
+    <script src="src/ai.js" defer></script>
+    <script src="src/template-manager.js" defer></script>
+    <script src="src/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест FlashPost Universal</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f0f14;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        .test-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .success { border-left-color: #4CAF50; }
+        .error { border-left-color: #F44336; }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Тест FlashPost Universal Complete</h1>
+        <p>Проверяем функциональность единого приложения</p>
+        
+        <div class="test-item success">
+            <h3>✅ Основное приложение</h3>
+            <p>Файл: <code>flashpost-universal-complete.html</code></p>
+            <p>Статус: Создан и готов к использованию</p>
+            <button class="btn" onclick="window.open('flashpost-universal-complete.html', '_blank')">
+                🚀 Открыть приложение
+            </button>
+        </div>
+        
+        <div class="test-item">
+            <h3>📋 Функции приложения</h3>
+            <ul>
+                <li>✅ AI генерация карусели (с лимитами FREE/PRO)</li>
+                <li>✅ Создание слайдов вручную</li>
+                <li>✅ Полный редактор с drag & drop</li>
+                <li>✅ Система шаблонов (сохранение/загрузка)</li>
+                <li>✅ Экспорт в разных форматах (PNG, JPEG, PDF)</li>
+                <li>✅ Разные качества экспорта (720p, 1080p, 4K)</li>
+                <li>✅ Навигация по слайдам</li>
+                <li>✅ Клавиатурные сокращения</li>
+                <li>✅ Telegram Mini App интеграция</li>
+                <li>✅ Адаптивный дизайн</li>
+            </ul>
+        </div>
+        
+        <div class="test-item">
+            <h3>🎯 Как тестировать</h3>
+            <ol>
+                <li><strong>AI генерация:</strong> Введите тему и нажмите "AI генерация"</li>
+                <li><strong>Редактирование:</strong> Кликните на текст слайда для редактирования</li>
+                <li><strong>Навигация:</strong> Используйте стрелки или точки для переключения слайдов</li>
+                <li><strong>Drag & Drop:</strong> Перетаскивайте текстовые блоки мышью</li>
+                <li><strong>Шаблоны:</strong> Сохраните карусель как шаблон и загрузите его</li>
+                <li><strong>Экспорт:</strong> Экспортируйте текущий слайд или всю карусель</li>
+                <li><strong>Клавиши:</strong> Ctrl+Enter (AI), стрелки (навигация), Ctrl+S (сохранить)</li>
+            </ol>
+        </div>
+        
+        <div class="test-item">
+            <h3>🔧 Технические детали</h3>
+            <ul>
+                <li><strong>Размер файла:</strong> ~50KB (все в одном файле)</li>
+                <li><strong>Зависимости:</strong> HTML2Canvas (для экспорта изображений)</li>
+                <li><strong>Совместимость:</strong> Все современные браузеры</li>
+                <li><strong>Производительность:</strong> Оптимизировано с debouncing</li>
+                <li><strong>Хранение:</strong> localStorage для настроек и шаблонов</li>
+            </ul>
+        </div>
+        
+        <div class="test-item">
+            <h3>💡 Дополнительные возможности</h3>
+            <ul>
+                <li><strong>FREE план:</strong> 3 AI генерации в день, PNG 720p экспорт</li>
+                <li><strong>PRO план:</strong> Безлимитная AI генерация, все форматы и качества</li>
+                <li><strong>Автосохранение:</strong> Настройки и прогресс сохраняются автоматически</li>
+                <li><strong>Уведомления:</strong> Toast сообщения для всех действий</li>
+                <li><strong>Индикаторы:</strong> Прогресс экспорта и загрузки</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" onclick="window.open('flashpost-universal-complete.html', '_blank')">
+                🚀 Запустить FlashPost Universal
+            </button>
+            <button class="btn" onclick="window.open('flashpost-mini-app/index.html', '_blank')" style="background: rgba(255,255,255,0.1);">
+                📱 Сравнить с модульной версией
+            </button>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+            <h3>🎉 Результат</h3>
+            <p>Создано единое универсальное приложение FlashPost со всеми функциями:</p>
+            <ul>
+                <li>✅ Все функции объединены в одном файле</li>
+                <li>✅ Полная совместимость с Telegram Mini Apps</li>
+                <li>✅ Современный дизайн и UX</li>
+                <li>✅ Оптимизированная производительность</li>
+                <li>✅ Готово к продакшену</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

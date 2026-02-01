@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM Render Integration Test - FlashPost</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary { background: #833ab4; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        
+        .btn:hover { transform: translateY(-2px); }
+        
+        .app-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            min-height: 600px;
+        }
+        
+        /* Стили для редактора */
+        .section {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .editor-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .editor-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .editor-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .editor-nav-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            background: #833ab4;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .editor-nav-btn:hover:not(:disabled) {
+            background: #6a2c91;
+        }
+        
+        .editor-nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .editor-counter {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .editor-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            flex: 1;
+        }
+        
+        .editor-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slide-preview {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+        
+        .slide-text-block {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: move;
+            font-family: Inter, sans-serif;
+            color: #333;
+            min-width: 60px;
+            min-height: 30px;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            text-align: center;
+            line-height: 1.2;
+            word-wrap: break-word;
+            user-select: none;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .slide-text-block:hover {
+            border-color: #833ab4;
+        }
+        
+        .slide-text-block.active {
+            border-color: #833ab4;
+            box-shadow: 0 0 8px rgba(131, 58, 180, 0.3);
+            z-index: 100;
+        }
+        
+        .slide-text-block.dragging {
+            z-index: 1000;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        
+        .add-text-block-btn {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            padding: 12px 16px;
+            background: #833ab4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .add-text-block-btn:hover {
+            background: #6a2c91;
+            transform: translateY(-2px);
+        }
+        
+        .editor-tools {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tool-section {
+            margin-bottom: 16px;
+        }
+        
+        .tool-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .text-editor {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .font-selector {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .slider {
+            width: 100%;
+            margin: 8px 0;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .no-selection {
+            color: #6c757d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .editor-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            margin-top: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* Стили для ключевых слов */
+        .auto-keyword {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            text-shadow: none;
+            box-shadow: 0 0 6px rgba(255, 107, 107, 0.4);
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        .manual-keyword {
+            background: linear-gradient(45deg, #48cae4, #0077b6);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+            text-shadow: none;
+            box-shadow: 0 0 6px rgba(72, 202, 228, 0.4);
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-pulse {
+            0% { box-shadow: 0 0 6px rgba(255, 107, 107, 0.4); }
+            100% { box-shadow: 0 0 12px rgba(255, 107, 107, 0.8); }
+        }
+        
+        .performance-info {
+            background: #e9ecef;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔧 DOM Render Integration Test</h1>
+        
+        <div class="test-controls">
+            <button class="btn btn-primary" onclick="testApp.enterEditMode()">Режим редактирования</button>
+            <button class="btn btn-success" onclick="testApp.addTextBlock()">Добавить блок</button>
+            <button class="btn btn-info" onclick="testApp.testPerformance()">Тест производительности</button>
+            <button class="btn btn-warning" onclick="testApp.resetData()">Сброс данных</button>
+        </div>
+        
+        <div class="app-container" id="app">
+            <!-- Здесь будет рендериться приложение -->
+        </div>
+        
+        <div class="performance-info" id="performanceInfo">
+            <!-- Информация о производительности -->
+        </div>
+    </div>
+
+    <script>
+        // Упрощенная версия FlashPostApp для тестирования DOM рендеринга
+        class TestFlashPostApp {
+            constructor() {
+                this.project = {
+                    slides: [],
+                    activeSlideId: null,
+                    activeTextBlockId: null,
+                    mode: 'edit'
+                };
+                
+                this.dragState = {
+                    isDragging: false,
+                    activeBlockId: null,
+                    startX: 0,
+                    startY: 0,
+                    startBlockX: 0,
+                    startBlockY: 0,
+                    slideRect: null
+                };
+                
+                this.performanceMetrics = {
+                    renderTime: 0,
+                    blocksRendered: 0,
+                    lastRender: null
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.createTestData();
+                this.bindGlobalEvents();
+                this.render();
+                this.updatePerformanceInfo();
+            }
+            
+            createTestData() {
+                const slide1 = {
+                    id: 'slide_1',
+                    background: { type: 'color', color: '#ff6b6b' },
+                    textBlocks: [
+                        {
+                            id: 'block_1_1',
+                            text: 'Заголовок с рынком и инвестициями',
+                            x: 50, y: 30, width: 80,
+                            font: 'Inter', size: 18, weight: 700, color: '#ffffff'
+                        },
+                        {
+                            id: 'block_1_2',
+                            text: 'Подзаголовок о прибыли',
+                            x: 50, y: 70, width: 70,
+                            font: 'Inter', size: 14, weight: 600, color: '#ffffff'
+                        }
+                    ],
+                    autoKeywords: ['рынок', 'инвестиции', 'прибыль']
+                };
+                
+                this.project.slides = [slide1];
+                this.project.activeSlideId = 'slide_1';
+                this.project.activeTextBlockId = 'block_1_1';
+            }
+            
+            // ===== DOM RENDERING METHODS =====
+            
+            renderTextBlock(block, editable = true) {
+                const startTime = performance.now();
+                
+                const el = document.createElement('div');
+                el.className = 'slide-text-block';
+                el.dataset.blockId = block.id;
+                
+                // Устанавливаем стили
+                el.style.position = 'absolute';
+                el.style.left = block.x + '%';
+                el.style.top = block.y + '%';
+                el.style.width = block.width + '%';
+                el.style.fontSize = block.size + 'px';
+                el.style.fontFamily = block.font;
+                el.style.fontWeight = block.weight;
+                el.style.color = block.color;
+                el.style.transform = 'translate(-50%, -50%)';
+                
+                // Добавляем активный класс
+                if (this.project.activeTextBlockId === block.id) {
+                    el.classList.add('active');
+                }
+                
+                // Парсим текст с ключевыми словами
+                const slide = this.getSlideByBlockId(block.id);
+                el.innerHTML = this.parseTextWithKeywords(
+                    block.text,
+                    slide ? slide.autoKeywords : []
+                );
+                
+                // Добавляем события для редактирования
+                if (editable) {
+                    el.addEventListener('mousedown', (e) => this.startDrag(e, block.id));
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.project.activeTextBlockId = block.id;
+                        this.updateEditorControls();
+                        this.updateActiveBlockStyles();
+                    });
+                }
+                
+                const renderTime = performance.now() - startTime;
+                this.performanceMetrics.blocksRendered++;
+                
+                return el;
+            }
+            
+            renderSlide(slide, editable = true) {
+                const startTime = performance.now();
+                
+                const slideEl = document.createElement('div');
+                slideEl.className = 'slide-preview';
+                slideEl.dataset.slideId = slide.id;
+                
+                // Устанавливаем фон
+                slideEl.style.background = slide.background.color;
+                
+                // Добавляем текстовые блоки
+                slide.textBlocks.forEach(block => {
+                    slideEl.appendChild(this.renderTextBlock(block, editable));
+                });
+                
+                // Добавляем кнопку добавления блока
+                if (editable) {
+                    const addBtn = this.createAddTextBlockButton();
+                    slideEl.appendChild(addBtn);
+                }
+                
+                const renderTime = performance.now() - startTime;
+                this.performanceMetrics.renderTime += renderTime;
+                
+                return slideEl;
+            }
+            
+            createAddTextBlockButton() {
+                const btn = document.createElement('button');
+                btn.className = 'add-text-block-btn';
+                btn.id = 'addTextBlockBtn';
+                
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '24');
+                svg.setAttribute('height', '24');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+                svg.setAttribute('stroke-width', '2');
+                
+                const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line1.setAttribute('x1', '12');
+                line1.setAttribute('y1', '5');
+                line1.setAttribute('x2', '12');
+                line1.setAttribute('y2', '19');
+                
+                const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line2.setAttribute('x1', '5');
+                line2.setAttribute('y1', '12');
+                line2.setAttribute('x2', '19');
+                line2.setAttribute('y2', '12');
+                
+                svg.appendChild(line1);
+                svg.appendChild(line2);
+                
+                btn.appendChild(svg);
+                btn.appendChild(document.createTextNode(' Добавить текст'));
+                
+                return btn;
+            }
+            
+            renderEditor() {
+                const activeSlide = this.getActiveSlide();
+                if (!activeSlide) return document.createElement('div');
+                
+                const startTime = performance.now();
+                
+                const section = document.createElement('div');
+                section.className = 'section active';
+                section.id = 'editorSection';
+                
+                const editorSection = document.createElement('div');
+                editorSection.className = 'editor-section';
+                
+                // Заголовок
+                const header = this.createEditorHeader();
+                editorSection.appendChild(header);
+                
+                // Контент
+                const content = document.createElement('div');
+                content.className = 'editor-content';
+                
+                const preview = document.createElement('div');
+                preview.className = 'editor-preview';
+                
+                const slideElement = this.renderSlide(activeSlide, true);
+                preview.appendChild(slideElement);
+                content.appendChild(preview);
+                
+                const tools = this.createEditorTools();
+                content.appendChild(tools);
+                
+                editorSection.appendChild(content);
+                
+                // Действия
+                const actions = this.createEditorActions();
+                editorSection.appendChild(actions);
+                
+                section.appendChild(editorSection);
+                
+                const renderTime = performance.now() - startTime;
+                this.performanceMetrics.renderTime += renderTime;
+                this.performanceMetrics.lastRender = new Date();
+                
+                return section;
+            }
+            
+            createEditorHeader() {
+                const header = document.createElement('div');
+                header.className = 'editor-header';
+                
+                const title = document.createElement('div');
+                title.className = 'editor-title';
+                title.textContent = 'DOM Render Editor';
+                
+                const nav = document.createElement('div');
+                nav.className = 'editor-nav';
+                
+                const counter = document.createElement('div');
+                counter.className = 'editor-counter';
+                counter.textContent = '1/1';
+                
+                nav.appendChild(counter);
+                header.appendChild(title);
+                header.appendChild(nav);
+                
+                return header;
+            }
+            
+            createEditorTools() {
+                const tools = document.createElement('div');
+                tools.className = 'editor-tools';
+                tools.id = 'editorTools';
+                
+                this.updateEditorToolsContent(tools);
+                
+                return tools;
+            }
+            
+            updateEditorToolsContent(toolsContainer) {
+                const activeBlock = this.getActiveTextBlock();
+                
+                toolsContainer.innerHTML = '';
+                
+                if (activeBlock) {
+                    // Информация о блоке
+                    const infoSection = document.createElement('div');
+                    infoSection.className = 'tool-section';
+                    
+                    const infoLabel = document.createElement('label');
+                    infoLabel.className = 'tool-label';
+                    infoLabel.textContent = `Активный блок: ${activeBlock.id}`;
+                    infoSection.appendChild(infoLabel);
+                    toolsContainer.appendChild(infoSection);
+                    
+                    // Редактирование текста
+                    const textSection = document.createElement('div');
+                    textSection.className = 'tool-section';
+                    
+                    const textLabel = document.createElement('label');
+                    textLabel.className = 'tool-label';
+                    textLabel.textContent = 'Текст';
+                    
+                    const textEditor = document.createElement('textarea');
+                    textEditor.className = 'text-editor';
+                    textEditor.id = 'blockTextEditor';
+                    textEditor.value = activeBlock.text;
+                    
+                    textSection.appendChild(textLabel);
+                    textSection.appendChild(textEditor);
+                    toolsContainer.appendChild(textSection);
+                    
+                    // Размер шрифта
+                    const sizeSection = document.createElement('div');
+                    sizeSection.className = 'tool-section';
+                    
+                    const sizeLabel = document.createElement('label');
+                    sizeLabel.className = 'tool-label';
+                    sizeLabel.textContent = `Размер: ${activeBlock.size}px`;
+                    
+                    const sizeSlider = document.createElement('input');
+                    sizeSlider.type = 'range';
+                    sizeSlider.className = 'slider';
+                    sizeSlider.id = 'blockSizeSlider';
+                    sizeSlider.min = '12';
+                    sizeSlider.max = '72';
+                    sizeSlider.value = activeBlock.size;
+                    
+                    sizeSection.appendChild(sizeLabel);
+                    sizeSection.appendChild(sizeSlider);
+                    toolsContainer.appendChild(sizeSection);
+                    
+                } else {
+                    const noSelectionSection = document.createElement('div');
+                    noSelectionSection.className = 'tool-section';
+                    
+                    const noSelectionText = document.createElement('p');
+                    noSelectionText.className = 'no-selection';
+                    noSelectionText.textContent = 'Выберите текстовый блок для редактирования';
+                    
+                    noSelectionSection.appendChild(noSelectionText);
+                    toolsContainer.appendChild(noSelectionSection);
+                }
+            }
+            
+            createEditorActions() {
+                const actions = document.createElement('div');
+                actions.className = 'editor-actions';
+                
+                const exitBtn = document.createElement('button');
+                exitBtn.className = 'btn btn-secondary';
+                exitBtn.textContent = '← Назад';
+                
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'btn btn-primary';
+                saveBtn.textContent = '✓ Готово';
+                
+                actions.appendChild(exitBtn);
+                actions.appendChild(saveBtn);
+                
+                return actions;
+            }
+            
+            // ===== UTILITY METHODS =====
+            
+            parseTextWithKeywords(text, autoKeywords = []) {
+                if (!text) return '';
+                
+                let parsedText = text;
+                
+                autoKeywords.forEach(keyword => {
+                    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                    parsedText = parsedText.replace(regex, '<span class="auto-keyword">$1</span>');
+                });
+                
+                return parsedText;
+            }
+            
+            getActiveSlide() {
+                return this.project.slides.find(slide => slide.id === this.project.activeSlideId);
+            }
+            
+            getActiveTextBlock() {
+                const activeSlide = this.getActiveSlide();
+                if (!activeSlide) return null;
+                return activeSlide.textBlocks.find(block => block.id === this.project.activeTextBlockId);
+            }
+            
+            getSlideByBlockId(blockId) {
+                return this.project.slides.find(slide => 
+                    slide.textBlocks.some(block => block.id === blockId)
+                );
+            }
+            
+            // ===== MAIN METHODS =====
+            
+            render() {
+                const app = document.getElementById('app');
+                app.innerHTML = '';
+                
+                const editorElement = this.renderEditor();
+                app.appendChild(editorElement);
+                
+                this.bindEvents();
+                this.updatePerformanceInfo();
+            }
+            
+            bindEvents() {
+                // Кнопка добавления блока
+                const addBtn = document.getElementById('addTextBlockBtn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => this.addTextBlock());
+                }
+                
+                // События инструментов
+                const textEditor = document.getElementById('blockTextEditor');
+                if (textEditor) {
+                    textEditor.addEventListener('input', (e) => {
+                        const activeBlock = this.getActiveTextBlock();
+                        if (activeBlock) {
+                            activeBlock.text = e.target.value;
+                            this.updateTextBlockElement(activeBlock.id, 'text', e.target.value);
+                        }
+                    });
+                }
+                
+                const sizeSlider = document.getElementById('blockSizeSlider');
+                if (sizeSlider) {
+                    sizeSlider.addEventListener('input', (e) => {
+                        const size = parseInt(e.target.value);
+                        const activeBlock = this.getActiveTextBlock();
+                        if (activeBlock) {
+                            activeBlock.size = size;
+                            this.updateTextBlockElement(activeBlock.id, 'size', size);
+                            
+                            // Обновляем лейбл
+                            const label = sizeSlider.parentElement.querySelector('.tool-label');
+                            if (label) {
+                                label.textContent = `Размер: ${size}px`;
+                            }
+                        }
+                    });
+                }
+            }
+            
+            bindGlobalEvents() {
+                document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                document.addEventListener('mouseup', () => this.handleMouseUp());
+            }
+            
+            // ===== DRAG & DROP =====
+            
+            startDrag(e, blockId) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const block = this.getActiveTextBlock();
+                if (!block || block.id !== blockId) {
+                    this.project.activeTextBlockId = blockId;
+                    this.updateActiveBlockStyles();
+                    this.updateEditorControls();
+                }
+                
+                const slideElement = e.target.closest('.slide-preview');
+                const slideRect = slideElement.getBoundingClientRect();
+                
+                this.dragState = {
+                    isDragging: true,
+                    activeBlockId: blockId,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    startBlockX: this.getBlockById(blockId).x,
+                    startBlockY: this.getBlockById(blockId).y,
+                    slideRect: slideRect
+                };
+                
+                const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+                if (blockElement) {
+                    blockElement.classList.add('dragging');
+                }
+            }
+            
+            handleMouseMove(e) {
+                if (!this.dragState.isDragging) return;
+                
+                const block = this.getBlockById(this.dragState.activeBlockId);
+                const element = document.querySelector(`[data-block-id="${this.dragState.activeBlockId}"]`);
+                
+                if (!block || !element) return;
+                
+                const slideRect = this.dragState.slideRect;
+                const deltaX = e.clientX - this.dragState.startX;
+                const deltaY = e.clientY - this.dragState.startY;
+                
+                const deltaXPercent = (deltaX / slideRect.width) * 100;
+                const deltaYPercent = (deltaY / slideRect.height) * 100;
+                
+                let newX = this.dragState.startBlockX + deltaXPercent;
+                let newY = this.dragState.startBlockY + deltaYPercent;
+                
+                newX = Math.max(0, Math.min(100, newX));
+                newY = Math.max(0, Math.min(100, newY));
+                
+                block.x = newX;
+                block.y = newY;
+                
+                element.style.left = newX + '%';
+                element.style.top = newY + '%';
+            }
+            
+            handleMouseUp() {
+                if (!this.dragState.isDragging) return;
+                
+                const blockElement = document.querySelector(`[data-block-id="${this.dragState.activeBlockId}"]`);
+                if (blockElement) {
+                    blockElement.classList.remove('dragging');
+                }
+                
+                this.dragState.isDragging = false;
+            }
+            
+            getBlockById(blockId) {
+                const activeSlide = this.getActiveSlide();
+                return activeSlide ? activeSlide.textBlocks.find(b => b.id === blockId) : null;
+            }
+            
+            updateTextBlockElement(blockId, property, value) {
+                const element = document.querySelector(`[data-block-id="${blockId}"]`);
+                if (!element) return;
+                
+                switch (property) {
+                    case 'text':
+                        const slide = this.getSlideByBlockId(blockId);
+                        element.innerHTML = this.parseTextWithKeywords(
+                            value, 
+                            slide ? slide.autoKeywords : []
+                        );
+                        break;
+                    case 'size':
+                        element.style.fontSize = value + 'px';
+                        break;
+                }
+            }
+            
+            updateActiveBlockStyles() {
+                const blocks = document.querySelectorAll('.slide-text-block');
+                blocks.forEach(block => {
+                    const blockId = block.dataset.blockId;
+                    if (blockId === this.project.activeTextBlockId) {
+                        block.classList.add('active');
+                    } else {
+                        block.classList.remove('active');
+                    }
+                });
+            }
+            
+            updateEditorControls() {
+                const toolsContainer = document.getElementById('editorTools');
+                if (toolsContainer) {
+                    this.updateEditorToolsContent(toolsContainer);
+                    this.bindEvents(); // Перепривязываем события
+                }
+            }
+            
+            // ===== TEST METHODS =====
+            
+            enterEditMode() {
+                this.project.mode = 'edit';
+                this.render();
+                console.log('✅ Режим редактирования активирован');
+            }
+            
+            addTextBlock() {
+                const activeSlide = this.getActiveSlide();
+                if (!activeSlide) return;
+                
+                const newBlock = {
+                    id: `block_${Date.now()}`,
+                    text: `Новый блок ${activeSlide.textBlocks.length + 1}`,
+                    x: 30 + Math.random() * 40,
+                    y: 30 + Math.random() * 40,
+                    width: 60,
+                    font: 'Inter',
+                    size: 16,
+                    weight: 600,
+                    color: '#ffffff'
+                };
+                
+                activeSlide.textBlocks.push(newBlock);
+                this.project.activeTextBlockId = newBlock.id;
+                
+                this.render();
+                console.log(`✅ Добавлен блок: ${newBlock.id}`);
+            }
+            
+            testPerformance() {
+                const startTime = performance.now();
+                
+                // Добавляем 10 блоков
+                for (let i = 0; i < 10; i++) {
+                    this.addTextBlock();
+                }
+                
+                const endTime = performance.now();
+                console.log(`🚀 Тест производительности: ${(endTime - startTime).toFixed(2)}ms для 10 блоков`);
+                
+                this.updatePerformanceInfo();
+            }
+            
+            resetData() {
+                this.createTestData();
+                this.render();
+                console.log('🔄 Данные сброшены');
+            }
+            
+            updatePerformanceInfo() {
+                const info = document.getElementById('performanceInfo');
+                info.innerHTML = `
+                    <strong>Метрики производительности DOM-рендера:</strong><br>
+                    Общее время рендеринга: ${this.performanceMetrics.renderTime.toFixed(2)}ms<br>
+                    Блоков отрендерено: ${this.performanceMetrics.blocksRendered}<br>
+                    Последний рендер: ${this.performanceMetrics.lastRender ? this.performanceMetrics.lastRender.toLocaleTimeString() : 'не выполнен'}<br>
+                    Активный слайд: ${this.project.activeSlideId}<br>
+                    Активный блок: ${this.project.activeTextBlockId || 'не выбран'}
+                `;
+            }
+        }
+        
+        // Инициализация тестового приложения
+        let testApp;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            testApp = new TestFlashPostApp();
+            console.log('🔧 DOM Render Integration Test загружен');
+        });
+    </script>
+</body>
+</html>

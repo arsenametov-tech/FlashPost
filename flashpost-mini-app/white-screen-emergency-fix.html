@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost Emergency Fix - White Screen Diagnostic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .diagnostic-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .diagnostic-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+        
+        .diagnostic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .diagnostic-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-ok {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .status-error {
+            color: #f44336;
+            font-weight: 600;
+        }
+        
+        .status-warning {
+            color: #ff9800;
+            font-weight: 600;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.4);
+        }
+        
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-error {
+            color: #f44336;
+        }
+        
+        .log-warning {
+            color: #ff9800;
+        }
+        
+        .log-info {
+            color: #2196F3;
+        }
+        
+        .log-success {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagnostic-container">
+        <h1 class="title">🚨 FlashPost White Screen Emergency Diagnostic</h1>
+        
+        <div class="diagnostic-section">
+            <h2 class="section-title">📋 System Status</h2>
+            <div id="systemStatus"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2 class="section-title">📦 Module Loading Status</h2>
+            <div id="moduleStatus"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2 class="section-title">🔧 DOM Elements Status</h2>
+            <div id="domStatus"></div>
+        </div>
+        
+        <div class="diagnostic-section">
+            <h2 class="section-title">📊 Console Logs</h2>
+            <div class="log-container" id="consoleLogs"></div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn" onclick="runDiagnostic()">🔍 Run Full Diagnostic</button>
+            <button class="btn" onclick="fixWhiteScreen()">🔧 Apply Emergency Fix</button>
+            <button class="btn" onclick="openMainApp()">🚀 Open Main App</button>
+        </div>
+    </div>
+
+    <script>
+        // Перехватываем console.log для отображения
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const logs = [];
+        
+        console.log = function(...args) {
+            logs.push({type: 'info', message: args.join(' '), timestamp: new Date().toLocaleTimeString()});
+            originalLog.apply(console, args);
+            updateConsoleLogs();
+        };
+        
+        console.error = function(...args) {
+            logs.push({type: 'error', message: args.join(' '), timestamp: new Date().toLocaleTimeString()});
+            originalError.apply(console, args);
+            updateConsoleLogs();
+        };
+        
+        console.warn = function(...args) {
+            logs.push({type: 'warning', message: args.join(' '), timestamp: new Date().toLocaleTimeString()});
+            originalWarn.apply(console, args);
+            updateConsoleLogs();
+        };
+        
+        function updateConsoleLogs() {
+            const container = document.getElementById('consoleLogs');
+            container.innerHTML = logs.slice(-20).map(log => 
+                `<div class="log-entry log-${log.type}">[${log.timestamp}] ${log.message}</div>`
+            ).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function createStatusItem(label, status, statusClass = 'status-ok') {
+            return `
+                <div class="diagnostic-item">
+                    <span>${label}</span>
+                    <span class="${statusClass}">${status}</span>
+                </div>
+            `;
+        }
+        
+        function runDiagnostic() {
+            console.log('🔍 Starting FlashPost White Screen Diagnostic...');
+            
+            // System Status
+            let systemHtml = '';
+            systemHtml += createStatusItem('Browser', navigator.userAgent.split(' ')[0]);
+            systemHtml += createStatusItem('Viewport', `${window.innerWidth}x${window.innerHeight}`);
+            systemHtml += createStatusItem('Preview Mode', window.PREVIEW_MODE ? 'Active' : 'Inactive');
+            systemHtml += createStatusItem('Telegram WebApp', window.Telegram?.WebApp ? 'Available' : 'Not Available', window.Telegram?.WebApp ? 'status-ok' : 'status-warning');
+            
+            document.getElementById('systemStatus').innerHTML = systemHtml;
+            
+            // Module Status
+            let moduleHtml = '';
+            const requiredClasses = ['StateManager', 'Renderer', 'Editor', 'FlashPostApp'];
+            
+            requiredClasses.forEach(className => {
+                const available = typeof window[className] !== 'undefined';
+                moduleHtml += createStatusItem(
+                    className, 
+                    available ? 'Loaded' : 'Missing', 
+                    available ? 'status-ok' : 'status-error'
+                );
+            });
+            
+            // Check if FlashPost app instance exists
+            moduleHtml += createStatusItem(
+                'FlashPost App Instance', 
+                window.flashPostApp ? 'Created' : 'Missing', 
+                window.flashPostApp ? 'status-ok' : 'status-error'
+            );
+            
+            document.getElementById('moduleStatus').innerHTML = moduleHtml;
+            
+            // DOM Status
+            let domHtml = '';
+            const requiredElements = ['app', 'loading'];
+            
+            requiredElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                const exists = element !== null;
+                let status = 'Missing';
+                let statusClass = 'status-error';
+                
+                if (exists) {
+                    const isVisible = element.style.display !== 'none' && element.style.visibility !== 'hidden';
+                    status = isVisible ? 'Visible' : 'Hidden';
+                    statusClass = isVisible ? 'status-ok' : 'status-warning';
+                }
+                
+                domHtml += createStatusItem(`#${elementId}`, status, statusClass);
+            });
+            
+            document.getElementById('domStatus').innerHTML = domHtml;
+            
+            console.log('✅ Diagnostic completed');
+        }
+        
+        function fixWhiteScreen() {
+            console.log('🔧 Applying emergency white screen fix...');
+            
+            try {
+                // 1. Ensure PREVIEW_MODE is set
+                if (typeof window.PREVIEW_MODE === 'undefined') {
+                    window.PREVIEW_MODE = !window.Telegram?.WebApp;
+                    console.log('✅ PREVIEW_MODE set to:', window.PREVIEW_MODE);
+                }
+                
+                // 2. Create mock Telegram API if needed
+                if (window.PREVIEW_MODE && !window.Telegram?.WebApp) {
+                    window.Telegram = {
+                        WebApp: {
+                            ready: () => console.log('📱 Mock: Telegram.WebApp.ready()'),
+                            expand: () => console.log('📱 Mock: Telegram.WebApp.expand()'),
+                            setHeaderColor: () => console.log('📱 Mock: setHeaderColor()'),
+                            setBackgroundColor: () => console.log('📱 Mock: setBackgroundColor()'),
+                            MainButton: {
+                                setText: (text) => console.log('📱 Mock: MainButton.setText(' + text + ')'),
+                                show: () => console.log('📱 Mock: MainButton.show()'),
+                                hide: () => console.log('📱 Mock: MainButton.hide()')
+                            },
+                            version: '6.1',
+                            colorScheme: 'dark'
+                        }
+                    };
+                    console.log('✅ Mock Telegram API created');
+                }
+                
+                // 3. Force show body and hide loading
+                document.body.style.display = 'block';
+                document.body.style.visibility = 'visible';
+                document.body.style.opacity = '1';
+                
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                    loading.style.visibility = 'hidden';
+                    loading.style.opacity = '0';
+                    console.log('✅ Loading screen hidden');
+                }
+                
+                // 4. Force show app container
+                const app = document.getElementById('app');
+                if (app) {
+                    app.style.display = 'block';
+                    app.style.visibility = 'visible';
+                    app.style.opacity = '1';
+                    app.style.minHeight = '100vh';
+                    console.log('✅ App container shown');
+                } else {
+                    console.warn('⚠️ #app element not found');
+                }
+                
+                console.log('✅ Emergency fix applied successfully');
+                
+                // Try to initialize the app
+                setTimeout(() => {
+                    if (typeof window.FlashPostApp !== 'undefined' && !window.flashPostApp) {
+                        console.log('🚀 Attempting to initialize FlashPost App...');
+                        try {
+                            window.flashPostApp = new window.FlashPostApp();
+                            console.log('✅ FlashPost App initialized successfully');
+                        } catch (error) {
+                            console.error('❌ Failed to initialize FlashPost App:', error);
+                        }
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('❌ Emergency fix failed:', error);
+            }
+        }
+        
+        function openMainApp() {
+            console.log('🚀 Opening main FlashPost app...');
+            window.location.href = 'index.html';
+        }
+        
+        // Run initial diagnostic
+        setTimeout(() => {
+            runDiagnostic();
+        }, 500);
+        
+        console.log('🚨 FlashPost Emergency Diagnostic loaded');
+    </script>
+</body>
+</html>

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Standalone Fixed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            min-width: 150px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: rgba(0, 184, 148, 0.2);
+            border: 1px solid #00b894;
+        }
+        
+        .status.error {
+            background: rgba(214, 48, 49, 0.2);
+            border: 1px solid #d63031;
+        }
+        
+        .status.info {
+            background: rgba(116, 185, 255, 0.2);
+            border: 1px solid #74b9ff;
+        }
+        
+        .carousel-preview {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .slide-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #fd79a8;
+        }
+        
+        .slide-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #fd79a8;
+        }
+        
+        .slide-content {
+            line-height: 1.4;
+            white-space: pre-line;
+            font-size: 14px;
+        }
+        
+        .slide-meta {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+        
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fd79a8;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FlashPost</h1>
+        <p class="subtitle">Создание каруселей с Advanced AI Pipeline</p>
+        
+        <div class="input-group">
+            <input type="text" id="topicInput" placeholder="Введите тему карусели (например: 'Маркетинг в Instagram')" />
+            <input type="text" id="instagramInput" placeholder="Instagram никнейм (опционально)" />
+        </div>
+        
+        <button class="btn" id="generateBtn">📝 Ручная генерация</button>
+        <button class="btn" id="aiBtn">🤖 AI генерация</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p id="loadingText">Генерируем карусель...</p>
+        </div>
+        
+        <div id="status"></div>
+        <div id="carouselPreview" class="carousel-preview"></div>
+    </div>
+
+    <script>
+        // ===== ВСТРОЕННЫЙ STATE MANAGER =====
+        class StateManager {
+            constructor() {
+                this.state = {
+                    mode: 'start',
+                    currentSlideIndex: 0,
+                    slides: [],
+                    instagramNickname: '',
+                    ctaText: 'Подпишись на @username',
+                    isGenerating: false
+                };
+                console.log('✅ StateManager инициализирован');
+            }
+            
+            getMode() { return this.state.mode; }
+            setMode(mode) { this.state.mode = mode; }
+            
+            getSlides() { return this.state.slides; }
+            clearProject() { this.state.slides = []; }
+            
+            createSlide(slideData) {
+                const slide = {
+                    id: this.state.slides.length + 1,
+                    ...slideData
+                };
+                this.state.slides.push(slide);
+                return slide;
+            }
+            
+            setCurrentSlideIndex(index) { this.state.currentSlideIndex = index; }
+            getCurrentSlideIndex() { return this.state.currentSlideIndex; }
+            
+            setInstagramNickname(nickname) { this.state.instagramNickname = nickname; }
+            getInstagramNickname() { return this.state.instagramNickname; }
+            
+            setCTAText(text) { this.state.ctaText = text; }
+            getCTAText() { return this.state.ctaText; }
+        }
+
+        // ===== ВСТРОЕННЫЙ AI MANAGER =====
+        class AIManager {
+            constructor(stateManager) {
+                this.state = stateManager;
+                console.log('✅ AIManager инициализирован');
+            }
+            
+            isAvailable() { return true; }
+            
+            // ADVANCED AI PIPELINE
+            async generateProModeCarousel(topic) {
+                console.log('🚀 ADVANCED AI: Генерация PRO MODE карусели для темы:', topic);
+                
+                try {
+                    // ЭТАП A: Генерация outline
+                    const outline = await this.generateCarouselOutline(topic);
+                    
+                    // ЭТАП B: Генерация контента
+                    const content = await this.generateCarouselContent(topic, outline);
+                    
+                    // ЭТАП C: Конвертация в слайды
+                    const slides = await this.convertToProModeSlides(content);
+                    
+                    // Сохранение в state
+                    this.state.clearProject();
+                    slides.forEach(slideData => {
+                        this.state.createSlide(slideData);
+                    });
+                    
+                    if (slides.length > 0) {
+                        this.state.setCurrentSlideIndex(0);
+                    }
+                    
+                    console.log(`✅ ADVANCED AI: Создано ${slides.length} слайдов`);
+                    
+                    return {
+                        slides: slides,
+                        topic: topic,
+                        generatedBy: 'AI-Advanced-Pipeline',
+                        timestamp: Date.now(),
+                        outline: outline
+                    };
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка Advanced AI Pipeline:', error);
+                    throw error;
+                }
+            }
+            
+            // Генерация outline (8-11 слайдов)
+            async generateCarouselOutline(topic) {
+                console.log('📋 ADVANCED AI: Генерация outline для темы:', topic);
+                
+                const slideCount = Math.floor(Math.random() * 4) + 8; // 8-11 слайдов
+                
+                const slideTypes = [
+                    { type: "hook", required: true },
+                    { type: "context", required: true },
+                    { type: "problem", required: true },
+                    { type: "solution", required: true },
+                    { type: "benefits", required: true },
+                    { type: "proof", required: true },
+                    { type: "action", required: true },
+                    { type: "cta", required: true },
+                    { type: "agitation", required: false },
+                    { type: "objections", required: false },
+                    { type: "bonus", required: false }
+                ];
+                
+                let selectedSlides = slideTypes.filter(s => s.required);
+                const remainingSlots = slideCount - selectedSlides.length;
+                
+                if (remainingSlots > 0) {
+                    const optionalSlides = slideTypes
+                        .filter(s => !s.required)
+                        .slice(0, remainingSlots);
+                    selectedSlides = [...selectedSlides, ...optionalSlides];
+                }
+                
+                const outline = {
+                    topic: topic,
+                    totalSlides: selectedSlides.length,
+                    structure: selectedSlides.map(s => s.type).join(' → '),
+                    targetAudience: this.analyzeTargetAudience(topic),
+                    outline: selectedSlides.map((slideType, index) => ({
+                        slideNumber: index + 1,
+                        type: slideType.type,
+                        mainIdea: `${slideType.type} для ${topic}`,
+                        purpose: `Цель слайда ${slideType.type}`,
+                        emotionalTone: this.getEmotionalTone(slideType.type)
+                    }))
+                };
+                
+                console.log('✅ ADVANCED OUTLINE создан:', outline.outline.length, 'слайдов');
+                return outline;
+            }
+            
+            // Генерация контента
+            async generateCarouselContent(topic, outline) {
+                console.log('✍️ ADVANCED AI: Генерация контента на основе outline...');
+                
+                const content = {
+                    topic: topic,
+                    slides: outline.outline.map(outlineSlide => {
+                        const slideContent = this.generateSlideContent(outlineSlide.type, topic);
+                        
+                        return {
+                            slideNumber: outlineSlide.slideNumber,
+                            type: outlineSlide.type,
+                            title: slideContent.title,
+                            text: slideContent.text,
+                            keywordType: slideContent.keywordType,
+                            emotionalTone: outlineSlide.emotionalTone
+                        };
+                    })
+                };
+                
+                console.log('✅ ADVANCED CONTENT создан:', content.slides.length, 'слайдов');
+                return content;
+            }
+            
+            // Генерация контента для слайда
+            generateSlideContent(slideType, topic) {
+                const templates = {
+                    hook: {
+                        title: `${topic}`,
+                        text: `Знали ли вы, что ${topic.toLowerCase()} может изменить жизнь за 30 дней?\n\nБолее 80% людей не знают этого секрета\nА те, кто знают — уже получают результаты\nУзнайте правду прямо сейчас`,
+                        keywordType: 'emotional'
+                    },
+                    context: {
+                        title: 'Ситуация',
+                        text: `В 2024 году ${topic.toLowerCase()} стал критически важным\n\nБолее 70% специалистов уже используют это\nОстальные теряют возможности каждый день\nВремя действовать — сейчас`,
+                        keywordType: 'conceptual'
+                    },
+                    problem: {
+                        title: 'Проблема',
+                        text: `95% людей совершают одну критическую ошибку\n\nОни игнорируют важность ${topic.toLowerCase()}\nЭто приводит к потере времени и ресурсов\nА решение проще, чем кажется`,
+                        keywordType: 'conceptual'
+                    },
+                    agitation: {
+                        title: 'Последствия',
+                        text: `Каждый день без ${topic.toLowerCase()} — это потерянные возможности\n\nВаши конкуренты уже используют это\nОни получают лучшие результаты\nА вы остаетесь позади`,
+                        keywordType: 'emotional'
+                    },
+                    solution: {
+                        title: 'Решение',
+                        text: `${topic} — это ваш ключ к успеху\n\nПроверенная система, которая работает\nТысячи людей уже получили результаты\nТеперь ваша очередь`,
+                        keywordType: 'conceptual'
+                    },
+                    benefits: {
+                        title: 'Преимущества',
+                        text: `Правильный ${topic.toLowerCase()} дает:\n\n• Увеличение результатов на 300%\n• Экономию времени в 5 раз\n• Стабильный рост доходов\n• Уверенность в завтрашнем дне`,
+                        keywordType: 'conceptual'
+                    },
+                    proof: {
+                        title: 'Доказательства',
+                        text: `Реальные результаты от ${topic.toLowerCase()}:\n\n• Компания А: +250% роста за год\n• Эксперт Б: доход вырос в 4 раза\n• Исследование: 89% участников довольны`,
+                        keywordType: 'conceptual'
+                    },
+                    objections: {
+                        title: 'Сомнения?',
+                        text: `"${topic} слишком сложно" — это миф\n\nНа самом деле всё проще, чем кажется\nНужно только знать правильный подход\nТысячи людей уже убедились в этом`,
+                        keywordType: 'conceptual'
+                    },
+                    action: {
+                        title: 'Действие',
+                        text: `Как начать с ${topic.toLowerCase()} уже сегодня:\n\n1️⃣ Изучите основы (30 минут)\n2️⃣ Выберите подходящий метод\n3️⃣ Сделайте первый шаг\n4️⃣ Отслеживайте результаты`,
+                        keywordType: 'conceptual'
+                    },
+                    bonus: {
+                        title: 'Бонус',
+                        text: `Скрытые преимущества ${topic.toLowerCase()}:\n\n🎁 Улучшение других сфер жизни\n🎁 Новые возможности и связи\n🎁 Повышение самооценки\n🎁 Вдохновение для окружающих`,
+                        keywordType: 'emotional'
+                    },
+                    cta: {
+                        title: 'Действуйте!',
+                        text: `Готовы изменить жизнь с ${topic.toLowerCase()}?\n\n👍 Лайк, если материал полезен\n💬 Комментарий с вашим опытом\n📤 Репост друзьям\n🔔 Подписка на обновления`,
+                        keywordType: 'emotional'
+                    }
+                };
+                
+                return templates[slideType] || templates.hook;
+            }
+            
+            // Конвертация в слайды
+            async convertToProModeSlides(content) {
+                console.log('🔄 ADVANCED AI: Конвертация в слайды...');
+                
+                const gradients = [
+                    'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)',
+                    'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
+                    'linear-gradient(135deg, #a55eea 0%, #8b5cf6 100%)',
+                    'linear-gradient(135deg, #00b894 0%, #00cec9 100%)',
+                    'linear-gradient(135deg, #fd79a8 0%, #e84393 100%)',
+                    'linear-gradient(135deg, #fdcb6e 0%, #e17055 100%)',
+                    'linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%)',
+                    'linear-gradient(135deg, #55efc4 0%, #00b894 100%)',
+                    'linear-gradient(135deg, #ff7675 0%, #d63031 100%)',
+                    'linear-gradient(135deg, #81ecec 0%, #74b9ff 100%)',
+                    'linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%)'
+                ];
+                
+                const slides = content.slides.map((slide, index) => ({
+                    id: index + 1,
+                    background: {
+                        type: 'gradient',
+                        color: gradients[index % gradients.length]
+                    },
+                    textBlocks: [
+                        {
+                            id: `slide_${index + 1}_title`,
+                            text: slide.title,
+                            x: 50, y: 20, width: 85, height: 15,
+                            font: 'Inter', size: 22, weight: 'bold',
+                            color: '#ffffff', textAlign: 'center'
+                        },
+                        {
+                            id: `slide_${index + 1}_content`,
+                            text: slide.text,
+                            x: 50, y: 55, width: 88, height: 55,
+                            font: 'Inter', size: 17, weight: 'normal',
+                            color: '#ffffff', textAlign: 'center'
+                        }
+                    ],
+                    slideType: slide.type,
+                    keywordType: slide.keywordType,
+                    emotionalTone: slide.emotionalTone,
+                    metadata: {
+                        generatedBy: 'AI-Advanced-Pipeline',
+                        slideNumber: slide.slideNumber
+                    }
+                }));
+                
+                console.log(`✅ ADVANCED AI: Создано ${slides.length} слайдов`);
+                return slides;
+            }
+            
+            // Вспомогательные методы
+            analyzeTargetAudience(topic) {
+                const audienceMap = {
+                    'маркетинг': 'маркетологи и предприниматели',
+                    'бизнес': 'предприниматели и руководители',
+                    'здоровье': 'люди, заботящиеся о здоровье',
+                    'образование': 'студенты и преподаватели',
+                    'технологии': 'IT-специалисты',
+                    'финансы': 'инвесторы и трейдеры'
+                };
+                
+                const topicLower = topic.toLowerCase();
+                for (const [key, audience] of Object.entries(audienceMap)) {
+                    if (topicLower.includes(key)) {
+                        return audience;
+                    }
+                }
+                return 'широкая аудитория';
+            }
+            
+            getEmotionalTone(slideType) {
+                const tones = {
+                    hook: 'удивление',
+                    context: 'понимание',
+                    problem: 'беспокойство',
+                    agitation: 'тревога',
+                    solution: 'надежда',
+                    benefits: 'воодушевление',
+                    proof: 'доверие',
+                    objections: 'убеждение',
+                    action: 'мотивация',
+                    bonus: 'приятное удивление',
+                    cta: 'решимость'
+                };
+                return tones[slideType] || 'нейтральный';
+            }
+            
+            // Ручная генерация
+            generateManualCarousel(topic) {
+                console.log('📝 Ручная генерация карусели для темы:', topic);
+                
+                const manualSlides = [
+                    {
+                        background: { type: 'gradient', color: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 100%)' },
+                        textBlocks: [{
+                            text: `${topic}\n\nПолное руководство\nВсе что нужно знать`,
+                            x: 50, y: 50, width: 80, height: 'auto',
+                            font: 'Inter', size: 18, weight: 600, color: '#ffffff', textAlign: 'center'
+                        }]
+                    },
+                    {
+                        background: { type: 'gradient', color: 'linear-gradient(135deg, #fd1d1d 0%, #fcb045 100%)' },
+                        textBlocks: [{
+                            text: `Основы ${topic.toLowerCase()}\n\nЧто нужно знать\nС чего начать`,
+                            x: 50, y: 50, width: 80, height: 'auto',
+                            font: 'Inter', size: 18, weight: 600, color: '#ffffff', textAlign: 'center'
+                        }]
+                    },
+                    {
+                        background: { type: 'gradient', color: 'linear-gradient(135deg, #fcb045 0%, #f77737 100%)' },
+                        textBlocks: [{
+                            text: `Применение ${topic.toLowerCase()}\n\nПрактические шаги\nРеальные примеры`,
+                            x: 50, y: 50, width: 80, height: 'auto',
+                            font: 'Inter', size: 18, weight: 600, color: '#ffffff', textAlign: 'center'
+                        }]
+                    },
+                    {
+                        background: { type: 'gradient', color: 'linear-gradient(135deg, #f77737 0%, #e1306c 100%)' },
+                        textBlocks: [{
+                            text: `Результаты от ${topic.toLowerCase()}\n\nЧего ожидать\nКак измерить успех`,
+                            x: 50, y: 50, width: 80, height: 'auto',
+                            font: 'Inter', size: 18, weight: 600, color: '#ffffff', textAlign: 'center'
+                        }]
+                    },
+                    {
+                        background: { type: 'gradient', color: 'linear-gradient(135deg, #e1306c 0%, #833ab4 100%)' },
+                        textBlocks: [{
+                            text: `Выводы о ${topic.toLowerCase()}\n\nГлавные моменты\nСледующие шаги`,
+                            x: 50, y: 50, width: 80, height: 'auto',
+                            font: 'Inter', size: 18, weight: 600, color: '#ffffff', textAlign: 'center'
+                        }]
+                    }
+                ];
+                
+                // Сохранение в state
+                this.state.clearProject();
+                manualSlides.forEach(slideData => {
+                    this.state.createSlide(slideData);
+                });
+                
+                if (manualSlides.length > 0) {
+                    this.state.setCurrentSlideIndex(0);
+                }
+                
+                return {
+                    slides: manualSlides,
+                    topic: topic,
+                    generatedBy: 'Manual',
+                    timestamp: Date.now()
+                };
+            }
+        }
+
+        // ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ =====
+        class FlashPostApp {
+            constructor() {
+                this.state = new StateManager();
+                this.ai = new AIManager(this.state);
+                this.init();
+            }
+            
+            init() {
+                console.log('🚀 FlashPost Standalone инициализирован');
+                this.bindEvents();
+                this.showStatus('✅ Приложение готово к работе', 'success');
+            }
+            
+            bindEvents() {
+                document.getElementById('generateBtn').addEventListener('click', () => {
+                    this.handleManualGenerate();
+                });
+                
+                document.getElementById('aiBtn').addEventListener('click', () => {
+                    this.handleAIGenerate();
+                });
+                
+                document.getElementById('topicInput').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleManualGenerate();
+                    }
+                });
+                
+                document.getElementById('instagramInput').addEventListener('input', (e) => {
+                    const nickname = e.target.value.trim();
+                    this.state.setInstagramNickname(nickname);
+                    if (nickname) {
+                        this.state.setCTAText(`Подпишись на @${nickname}`);
+                    }
+                });
+            }
+            
+            async handleManualGenerate() {
+                const topic = document.getElementById('topicInput').value.trim();
+                if (!topic) {
+                    this.showStatus('❌ Введите тему для карусели', 'error');
+                    return;
+                }
+                
+                this.showLoading(true, 'Создаем карусель вручную...');
+                this.showStatus('📝 Ручная генерация карусели...', 'info');
+                
+                try {
+                    const result = this.ai.generateManualCarousel(topic);
+                    
+                    setTimeout(() => {
+                        this.showLoading(false);
+                        this.showStatus(`✅ Карусель создана! Слайдов: ${result.slides.length}`, 'success');
+                        this.displayCarousel(result);
+                    }, 1500);
+                    
+                } catch (error) {
+                    this.showLoading(false);
+                    this.showStatus('❌ Ошибка создания карусели: ' + error.message, 'error');
+                }
+            }
+            
+            async handleAIGenerate() {
+                const topic = document.getElementById('topicInput').value.trim();
+                if (!topic) {
+                    this.showStatus('❌ Введите тему для карусели', 'error');
+                    return;
+                }
+                
+                this.showLoading(true, 'AI генерирует карусель...');
+                this.showStatus('🤖 ADVANCED AI Pipeline активирован...', 'info');
+                
+                try {
+                    const result = await this.ai.generateProModeCarousel(topic);
+                    
+                    setTimeout(() => {
+                        this.showLoading(false);
+                        this.showStatus(`✅ AI карусель создана! Слайдов: ${result.slides.length} (${result.generatedBy})`, 'success');
+                        this.displayCarousel(result);
+                    }, 2500);
+                    
+                } catch (error) {
+                    this.showLoading(false);
+                    this.showStatus('❌ Ошибка AI генерации: ' + error.message, 'error');
+                }
+            }
+            
+            displayCarousel(result) {
+                const preview = document.getElementById('carouselPreview');
+                preview.innerHTML = `
+                    <h3>📊 Карусель: ${result.topic}</h3>
+                    <p><strong>Генератор:</strong> ${result.generatedBy}</p>
+                    <p><strong>Слайдов:</strong> ${result.slides.length}</p>
+                    ${result.outline ? `<p><strong>Структура:</strong> ${result.outline.structure}</p>` : ''}
+                    ${result.outline ? `<p><strong>Аудитория:</strong> ${result.outline.targetAudience}</p>` : ''}
+                `;
+                
+                result.slides.forEach((slide, index) => {
+                    const slideEl = document.createElement('div');
+                    slideEl.className = 'slide-item';
+                    
+                    const title = slide.textBlocks && slide.textBlocks[0] ? slide.textBlocks[0].text.split('\n')[0] : `Слайд ${index + 1}`;
+                    const content = slide.textBlocks && slide.textBlocks[1] ? slide.textBlocks[1].text : 
+                                   (slide.textBlocks && slide.textBlocks[0] ? slide.textBlocks[0].text : 'Нет контента');
+                    
+                    slideEl.innerHTML = `
+                        <div class="slide-title">${title}</div>
+                        <div class="slide-content">${content}</div>
+                        <div class="slide-meta">
+                            Тип: ${slide.slideType || 'standard'} | 
+                            Ключевые слова: ${slide.keywordType || 'none'} | 
+                            Тон: ${slide.emotionalTone || 'neutral'}
+                        </div>
+                    `;
+                    
+                    preview.appendChild(slideEl);
+                });
+            }
+            
+            showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.innerHTML = `<div class="status ${type}">${message}</div>`;
+            }
+            
+            showLoading(show, text = 'Загрузка...') {
+                const loading = document.getElementById('loading');
+                const loadingText = document.getElementById('loadingText');
+                
+                if (show) {
+                    loading.classList.add('active');
+                    loadingText.textContent = text;
+                } else {
+                    loading.classList.remove('active');
+                }
+            }
+        }
+
+        // Запуск приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            window.flashPostApp = new FlashPostApp();
+        });
+    </script>
+</body>
+</html>

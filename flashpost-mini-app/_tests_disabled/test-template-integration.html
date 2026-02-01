@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Integration Test - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-section">
+            <h1>🎨 Template Integration Test</h1>
+            <p>Быстрая проверка интеграции системы шаблонов</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Integration Status</h2>
+            <div id="integrationStatus">Проверяем интеграцию...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Quick Tests</h2>
+            <div>
+                <button class="test-button" onclick="testModuleLoading()">
+                    🔧 Test Module Loading
+                </button>
+                <button class="test-button" onclick="testTemplateManager()">
+                    🎨 Test Template Manager
+                </button>
+                <button class="test-button" onclick="testEditorIntegration()">
+                    ✏️ Test Editor Integration
+                </button>
+                <button class="test-button" onclick="testUIComponents()">
+                    🖼️ Test UI Components
+                </button>
+                <button class="test-button" onclick="runAllTests()">
+                    🚀 Run All Tests
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div id="testResults">
+                <p>Нажмите кнопки выше для запуска тестов...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загружаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let testResults = {
+            moduleLoading: false,
+            templateManager: false,
+            editorIntegration: false,
+            uiComponents: false
+        };
+
+        // Test module loading
+        function testModuleLoading() {
+            console.log('🔧 Testing module loading...');
+            
+            try {
+                const requiredClasses = ['StateManager', 'Renderer', 'Editor', 'TemplateManager'];
+                let allLoaded = true;
+                
+                requiredClasses.forEach(className => {
+                    if (typeof window[className] === 'undefined') {
+                        console.error(`❌ ${className} not loaded`);
+                        allLoaded = false;
+                    } else {
+                        console.log(`✅ ${className} loaded`);
+                    }
+                });
+                
+                if (allLoaded) {
+                    // Try to create instances
+                    const state = new StateManager();
+                    const renderer = new Renderer(state);
+                    const editor = new Editor(state, renderer);
+                    const templateManager = new TemplateManager(state);
+                    
+                    console.log('✅ All modules instantiated successfully');
+                    testResults.moduleLoading = true;
+                } else {
+                    console.error('❌ Some modules failed to load');
+                    testResults.moduleLoading = false;
+                }
+                
+            } catch (error) {
+                console.error('❌ Module loading error:', error);
+                testResults.moduleLoading = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test template manager
+        function testTemplateManager() {
+            console.log('🎨 Testing template manager...');
+            
+            try {
+                const state = new StateManager();
+                const templateManager = new TemplateManager(state);
+                
+                // Initialize test slide
+                state.clearProject();
+                const testSlide = {
+                    id: 'test-slide',
+                    background: {
+                        type: 'color',
+                        color: '#833ab4',
+                        image: null,
+                        x: 50,
+                        y: 50,
+                        brightness: 100
+                    },
+                    textBlocks: [
+                        {
+                            id: 'test-block',
+                            text: 'Test Text',
+                            x: 10, y: 20,
+                            font: 'Inter',
+                            size: 24,
+                            color: '#ffffff'
+                        }
+                    ]
+                };
+                
+                state.addSlide(testSlide);
+                state.setActiveSlideByIndex(0);
+                
+                // Test template creation
+                const templateName = 'Test Template';
+                const saveSuccess = templateManager.saveCurrentSlideAsTemplate(templateName);
+                
+                if (saveSuccess) {
+                    // Test template retrieval
+                    const templates = templateManager.getTemplatesFromStorage();
+                    const savedTemplate = templates.find(t => t.name === templateName);
+                    
+                    if (savedTemplate) {
+                        console.log('✅ Template manager working correctly');
+                        testResults.templateManager = true;
+                    } else {
+                        console.error('❌ Template not found after saving');
+                        testResults.templateManager = false;
+                    }
+                } else {
+                    console.error('❌ Template save failed');
+                    testResults.templateManager = false;
+                }
+                
+            } catch (error) {
+                console.error('❌ Template manager error:', error);
+                testResults.templateManager = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test editor integration
+        function testEditorIntegration() {
+            console.log('✏️ Testing editor integration...');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                const editor = new Editor(state, renderer);
+                
+                // Check if template methods exist
+                const requiredMethods = [
+                    'bindTemplateEvents',
+                    'showSaveTemplateModal',
+                    'showSelectTemplateModal',
+                    'handleSaveTemplate',
+                    'handleApplyTemplate',
+                    'showToast'
+                ];
+                
+                let allMethodsExist = true;
+                requiredMethods.forEach(method => {
+                    if (typeof editor[method] !== 'function') {
+                        console.error(`❌ Method ${method} not found`);
+                        allMethodsExist = false;
+                    } else {
+                        console.log(`✅ Method ${method} exists`);
+                    }
+                });
+                
+                // Check template action type property
+                if (typeof editor.templateActionType !== 'undefined') {
+                    console.log('✅ templateActionType property exists');
+                } else {
+                    console.error('❌ templateActionType property not found');
+                    allMethodsExist = false;
+                }
+                
+                testResults.editorIntegration = allMethodsExist;
+                
+            } catch (error) {
+                console.error('❌ Editor integration error:', error);
+                testResults.editorIntegration = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test UI components
+        function testUIComponents() {
+            console.log('🖼️ Testing UI components...');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Create a test container
+                const testContainer = document.createElement('div');
+                testContainer.id = 'testEditorActions';
+                document.body.appendChild(testContainer);
+                
+                // Create editor actions
+                const editorActions = renderer.createEditorActions();
+                testContainer.appendChild(editorActions);
+                
+                // Check if template buttons exist
+                const requiredButtons = [
+                    'saveTemplateBtn',
+                    'applyTemplateToSlideBtn',
+                    'applyTemplateToAllBtn'
+                ];
+                
+                let allButtonsExist = true;
+                requiredButtons.forEach(buttonId => {
+                    const button = document.getElementById(buttonId);
+                    if (!button) {
+                        console.error(`❌ Button ${buttonId} not found`);
+                        allButtonsExist = false;
+                    } else {
+                        console.log(`✅ Button ${buttonId} exists`);
+                    }
+                });
+                
+                // Check if modal methods exist
+                const modalMethods = [
+                    'showSaveTemplateModal',
+                    'showSelectTemplateModal',
+                    'closeSaveTemplateModal',
+                    'closeSelectTemplateModal'
+                ];
+                
+                modalMethods.forEach(method => {
+                    if (typeof renderer[method] !== 'function') {
+                        console.error(`❌ Modal method ${method} not found`);
+                        allButtonsExist = false;
+                    } else {
+                        console.log(`✅ Modal method ${method} exists`);
+                    }
+                });
+                
+                // Clean up
+                document.body.removeChild(testContainer);
+                
+                testResults.uiComponents = allButtonsExist;
+                
+            } catch (error) {
+                console.error('❌ UI components error:', error);
+                testResults.uiComponents = false;
+            }
+            
+            updateResults();
+        }
+
+        // Run all tests
+        function runAllTests() {
+            console.log('🚀 Running all integration tests...');
+            
+            // Reset results
+            Object.keys(testResults).forEach(key => {
+                testResults[key] = false;
+            });
+            
+            // Run tests sequentially
+            setTimeout(() => testModuleLoading(), 100);
+            setTimeout(() => testTemplateManager(), 500);
+            setTimeout(() => testEditorIntegration(), 1000);
+            setTimeout(() => testUIComponents(), 1500);
+            
+            setTimeout(() => {
+                const passedTests = Object.values(testResults).filter(result => result).length;
+                const totalTests = Object.keys(testResults).length;
+                
+                if (passedTests === totalTests) {
+                    console.log('🎉 All integration tests passed!');
+                } else {
+                    console.log(`⚠️ ${totalTests - passedTests} test(s) failed.`);
+                }
+            }, 2000);
+        }
+
+        // Update results display
+        function updateResults() {
+            const resultsEl = document.getElementById('testResults');
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(result => result).length;
+            
+            resultsEl.innerHTML = `
+                <h3>Integration Test Results</h3>
+                <div class="status ${passedTests === totalTests ? 'status-success' : 'status-error'}">
+                    ${passedTests}/${totalTests} tests passed
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                    <div>
+                        <strong>Module Loading:</strong><br>
+                        <span class="status ${testResults.moduleLoading ? 'status-success' : 'status-error'}">
+                            ${testResults.moduleLoading ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div>
+                        <strong>Template Manager:</strong><br>
+                        <span class="status ${testResults.templateManager ? 'status-success' : 'status-error'}">
+                            ${testResults.templateManager ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div>
+                        <strong>Editor Integration:</strong><br>
+                        <span class="status ${testResults.editorIntegration ? 'status-success' : 'status-error'}">
+                            ${testResults.editorIntegration ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                    <div>
+                        <strong>UI Components:</strong><br>
+                        <span class="status ${testResults.uiComponents ? 'status-success' : 'status-error'}">
+                            ${testResults.uiComponents ? 'PASSED' : 'FAILED'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Check integration status on load
+        function checkIntegrationStatus() {
+            const statusEl = document.getElementById('integrationStatus');
+            
+            try {
+                // Check if all required classes are available
+                const requiredClasses = ['StateManager', 'Renderer', 'Editor', 'TemplateManager'];
+                const loadedClasses = requiredClasses.filter(className => 
+                    typeof window[className] !== 'undefined'
+                );
+                
+                const loadPercentage = Math.round((loadedClasses.length / requiredClasses.length) * 100);
+                
+                statusEl.innerHTML = `
+                    <div class="status ${loadPercentage === 100 ? 'status-success' : 'status-error'}">
+                        Integration Status: ${loadPercentage}% (${loadedClasses.length}/${requiredClasses.length} modules)
+                    </div>
+                    <ul>
+                        ${requiredClasses.map(className => 
+                            `<li>${typeof window[className] !== 'undefined' ? '✅' : '❌'} ${className}</li>`
+                        ).join('')}
+                    </ul>
+                `;
+                
+            } catch (error) {
+                statusEl.innerHTML = `
+                    <div class="status status-error">
+                        Integration Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Template integration test initialized');
+            checkIntegrationStatus();
+            updateResults();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App AIManager Fix Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 2em;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .results {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e1e5e9;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 5px 10px;
+            margin-bottom: 3px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log-info { background: #e3f2fd; color: #1976d2; }
+        .log-success { background: #e8f5e8; color: #2e7d32; }
+        .log-error { background: #ffebee; color: #d32f2f; }
+        .log-warning { background: #fff3e0; color: #f57c00; }
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .status-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        .status-error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 App AIManager Fix Test</h1>
+            <p>Тестирование исправленной инициализации AIManager в приложении</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Тесты приложения</h2>
+            
+            <div class="input-group">
+                <label for="topicInput">Тема для AI генерации:</label>
+                <input type="text" id="topicInput" placeholder="Введите тему..." value="продуктивность">
+            </div>
+            
+            <button class="btn" onclick="testAppCreation()">🚀 Тест создания приложения</button>
+            <button class="btn" onclick="testAIManagerInApp()">🤖 Тест AIManager в приложении</button>
+            <button class="btn" onclick="testAIGeneration()">🎯 Тест AI генерации</button>
+            <button class="btn" onclick="clearResults()">🧹 Очистить</button>
+
+            <div id="status"></div>
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let testApp = null;
+
+        // Тест создания приложения
+        function testAppCreation() {
+            log('info', '🚀 Начинаем тест создания приложения...');
+            
+            try {
+                // Создаем приложение
+                testApp = new FlashPostApp();
+                log('success', '✅ FlashPostApp создан успешно');
+                
+                // Проверяем основные компоненты
+                if (testApp.state) {
+                    log('success', '✅ state инициализирован');
+                } else {
+                    log('error', '❌ state не инициализирован');
+                }
+
+                if (testApp.aiManager) {
+                    log('success', '✅ aiManager инициализирован');
+                } else {
+                    log('error', '❌ aiManager не инициализирован');
+                }
+
+                if (testApp.renderer) {
+                    log('success', '✅ renderer инициализирован');
+                } else {
+                    log('error', '❌ renderer не инициализирован');
+                }
+
+                updateStatus('success', '✅ Приложение создано успешно');
+                
+            } catch (error) {
+                log('error', `❌ Ошибка создания приложения: ${error.message}`);
+                updateStatus('error', `❌ Ошибка создания приложения: ${error.message}`);
+                console.error('App creation error:', error);
+            }
+        }
+
+        // Тест AIManager в приложении
+        function testAIManagerInApp() {
+            log('info', '🤖 Начинаем тест AIManager в приложении...');
+            
+            if (!testApp) {
+                log('warning', '⚠️ Приложение не создано, создаем...');
+                testAppCreation();
+            }
+
+            if (!testApp) {
+                log('error', '❌ Не удалось создать приложение');
+                return;
+            }
+
+            try {
+                // Детальная проверка aiManager
+                log('info', `ℹ️ aiManager существует: ${!!testApp.aiManager}`);
+                log('info', `ℹ️ aiManager тип: ${typeof testApp.aiManager}`);
+                
+                if (testApp.aiManager) {
+                    // Проверяем основные методы
+                    const methods = [
+                        'isAvailable',
+                        'generateHighQualityCarousel',
+                        'generateProModeCarousel',
+                        'generateCarousel'
+                    ];
+
+                    methods.forEach(method => {
+                        if (typeof testApp.aiManager[method] === 'function') {
+                            log('success', `✅ Метод ${method} доступен`);
+                        } else {
+                            log('error', `❌ Метод ${method} недоступен`);
+                        }
+                    });
+
+                    // Проверяем доступность AI
+                    if (typeof testApp.aiManager.isAvailable === 'function') {
+                        const available = testApp.aiManager.isAvailable();
+                        log('info', `ℹ️ AI доступность: ${available}`);
+                    }
+
+                    // Проверяем свойства
+                    if (testApp.aiManager.state) {
+                        log('success', '✅ aiManager.state установлен');
+                    } else {
+                        log('error', '❌ aiManager.state не установлен');
+                    }
+
+                    updateStatus('success', '✅ AIManager в приложении работает корректно');
+                } else {
+                    log('error', '❌ aiManager не существует в приложении');
+                    updateStatus('error', '❌ aiManager не существует в приложении');
+                }
+                
+            } catch (error) {
+                log('error', `❌ Ошибка тестирования AIManager: ${error.message}`);
+                updateStatus('error', `❌ Ошибка тестирования AIManager: ${error.message}`);
+                console.error('AIManager test error:', error);
+            }
+        }
+
+        // Тест AI генерации
+        async function testAIGeneration() {
+            log('info', '🎯 Начинаем тест AI генерации...');
+            
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                log('error', '❌ Введите тему для генерации');
+                return;
+            }
+
+            if (!testApp) {
+                log('warning', '⚠️ Приложение не создано, создаем...');
+                testAppCreation();
+            }
+
+            if (!testApp || !testApp.aiManager) {
+                log('error', '❌ AIManager недоступен');
+                return;
+            }
+
+            try {
+                log('info', `🎯 Тестируем AI генерацию для темы: "${topic}"`);
+                
+                // Проверяем метод handleAIGenerate
+                if (typeof testApp.handleAIGenerate === 'function') {
+                    log('success', '✅ Метод handleAIGenerate доступен');
+                    
+                    // Создаем временный элемент topicInput для теста
+                    const tempInput = document.createElement('input');
+                    tempInput.id = 'topicInput';
+                    tempInput.value = topic;
+                    document.body.appendChild(tempInput);
+                    
+                    log('info', '🚀 Вызываем handleAIGenerate...');
+                    await testApp.handleAIGenerate();
+                    
+                    // Удаляем временный элемент
+                    document.body.removeChild(tempInput);
+                    
+                    log('success', '✅ handleAIGenerate выполнен без ошибок');
+                    updateStatus('success', '✅ AI генерация работает корректно');
+                    
+                } else {
+                    log('error', '❌ Метод handleAIGenerate недоступен');
+                    updateStatus('error', '❌ Метод handleAIGenerate недоступен');
+                }
+                
+            } catch (error) {
+                log('error', `❌ Ошибка AI генерации: ${error.message}`);
+                updateStatus('error', `❌ Ошибка AI генерации: ${error.message}`);
+                console.error('AI generation error:', error);
+            }
+        }
+
+        // Обновление статуса
+        function updateStatus(type, message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status status-${type}`;
+            statusDiv.textContent = message;
+        }
+
+        // Логирование
+        function log(type, message) {
+            const resultsDiv = document.getElementById('results');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Очистка результатов
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+            log('info', '🧹 Результаты очищены');
+        }
+
+        // Автоматический тест при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            log('info', '🚀 Страница загружена, начинаем автоматическое тестирование...');
+            
+            setTimeout(() => {
+                testAppCreation();
+            }, 500);
+        });
+
+        // Обработка ошибок
+        window.addEventListener('error', function(event) {
+            log('error', `❌ JavaScript ошибка: ${event.error.message}`);
+            console.error('JavaScript ошибка:', event.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            log('error', `❌ Необработанная ошибка промиса: ${event.reason}`);
+            console.error('Необработанная ошибка промиса:', event.reason);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple App Fix - FlashPost</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .test-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .test-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .test-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .test-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .results-container {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #333;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .slide-preview {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            color: white;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Test Simple App Fix</h1>
+        <p>Тестирование исправлений для простого приложения</p>
+        
+        <!-- Тест ручной генерации -->
+        <div class="test-section">
+            <h2>📝 Тест ручной генерации</h2>
+            <div class="input-group">
+                <label class="input-label">Тема для карусели:</label>
+                <textarea 
+                    id="topicInput" 
+                    class="test-input" 
+                    placeholder="Например: Здоровое питание, Продуктивность, Финансы..."
+                    rows="2"
+                ></textarea>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Instagram (опционально):</label>
+                <input 
+                    type="text" 
+                    id="instagramInput" 
+                    class="test-input" 
+                    placeholder="@your_instagram"
+                    style="min-height: auto; height: 50px;"
+                />
+            </div>
+            <button class="test-button" id="testManualBtn">
+                🎯 Тест ручной генерации
+            </button>
+        </div>
+        
+        <!-- Тест создания из текста -->
+        <div class="test-section">
+            <h2>📄 Тест создания из текста</h2>
+            <div class="input-group">
+                <label class="input-label">Готовый текст (разделите слайды двойным переносом строки):</label>
+                <textarea 
+                    id="manualTextInput" 
+                    class="test-input" 
+                    placeholder="Первый слайд
+
+Второй слайд
+
+Третий слайд"
+                    rows="6"
+                ></textarea>
+            </div>
+            <button class="test-button" id="testTextBtn">
+                📝 Тест создания из текста
+            </button>
+        </div>
+        
+        <!-- Результаты -->
+        <div class="test-section">
+            <h2>📊 Результаты</h2>
+            <div id="testResults">
+                <p>Нажмите кнопки выше для тестирования...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Простая реализация FlashPost App для тестирования
+        class SimpleFlashPostApp {
+            constructor() {
+                this.slides = [];
+                this.isGenerating = false;
+                this.bindEvents();
+                console.log('✅ Simple FlashPost App initialized');
+            }
+
+            bindEvents() {
+                const testManualBtn = document.getElementById('testManualBtn');
+                const testTextBtn = document.getElementById('testTextBtn');
+
+                if (testManualBtn) {
+                    testManualBtn.addEventListener('click', () => this.testManualGeneration());
+                }
+
+                if (testTextBtn) {
+                    testTextBtn.addEventListener('click', () => this.testTextGeneration());
+                }
+            }
+
+            // Тест ручной генерации
+            async testManualGeneration() {
+                const topicInput = document.getElementById('topicInput');
+                const topic = topicInput.value.trim();
+
+                if (!topic) {
+                    this.showResult('❌ Введите тему для карусели', 'error');
+                    return;
+                }
+
+                if (this.isGenerating) {
+                    this.showResult('⚠️ Генерация уже выполняется', 'info');
+                    return;
+                }
+
+                try {
+                    this.isGenerating = true;
+                    this.showResult('🔄 Генерируем карусель...', 'info');
+
+                    // Имитация генерации
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Генерируем слайды
+                    const slides = this.generateManualSlides(topic);
+                    this.slides = slides;
+
+                    this.showResult(`✅ Создано ${slides.length} слайдов для темы "${topic}"`, 'success');
+                    this.displaySlides(slides);
+
+                } catch (error) {
+                    console.error('❌ Ошибка генерации:', error);
+                    this.showResult('❌ Ошибка генерации карусели', 'error');
+                } finally {
+                    this.isGenerating = false;
+                }
+            }
+
+            // Тест создания из текста
+            async testTextGeneration() {
+                const manualTextInput = document.getElementById('manualTextInput');
+                const text = manualTextInput.value.trim();
+
+                if (!text) {
+                    this.showResult('❌ Введите текст для создания слайдов', 'error');
+                    return;
+                }
+
+                if (this.isGenerating) {
+                    this.showResult('⚠️ Генерация уже выполняется', 'info');
+                    return;
+                }
+
+                try {
+                    this.isGenerating = true;
+                    this.showResult('🔄 Создаем слайды из текста...', 'info');
+
+                    // Имитация обработки
+                    await new Promise(resolve => setTimeout(resolve, 800));
+
+                    // Создаем слайды из текста
+                    const slides = this.generateSlidesFromText(text);
+                    this.slides = slides;
+
+                    this.showResult(`✅ Создано ${slides.length} слайдов из текста`, 'success');
+                    this.displaySlides(slides);
+
+                } catch (error) {
+                    console.error('❌ Ошибка создания из текста:', error);
+                    this.showResult(`❌ Ошибка: ${error.message}`, 'error');
+                } finally {
+                    this.isGenerating = false;
+                }
+            }
+
+            // Генерация слайдов по теме
+            generateManualSlides(topic) {
+                const templates = [
+                    { title: `${topic}`, subtitle: 'Полное руководство' },
+                    { title: 'Что это такое?', subtitle: `Основы ${topic.toLowerCase()}` },
+                    { title: 'Почему это важно?', subtitle: 'Ключевые преимущества' },
+                    { title: 'Как начать?', subtitle: 'Первые шаги' },
+                    { title: 'Частые ошибки', subtitle: 'Чего избегать' },
+                    { title: 'Полезные советы', subtitle: 'Лайфхаки и рекомендации' },
+                    { title: 'Заключение', subtitle: 'Главные выводы' }
+                ];
+
+                const slideCount = Math.floor(Math.random() * 3) + 5; // 5-7 слайдов
+                const colors = ['#833ab4', '#fd1d1d', '#fcb045', '#28a745', '#007bff', '#6f42c1'];
+
+                return templates.slice(0, slideCount).map((template, index) => ({
+                    id: `slide_${Date.now()}_${index}`,
+                    title: template.title,
+                    subtitle: template.subtitle,
+                    text: `${template.title}\n\n${template.subtitle}`,
+                    color: colors[index % colors.length]
+                }));
+            }
+
+            // Создание слайдов из текста
+            generateSlidesFromText(text) {
+                console.log('📝 Создание слайдов из текста...');
+                
+                // Разбиваем текст на слайды по двойному переносу строки
+                const slides = text.split('\n\n')
+                    .map(slideText => slideText.trim())
+                    .filter(slideText => slideText.length > 0);
+
+                if (slides.length === 0) {
+                    throw new Error('Текст не содержит слайдов');
+                }
+
+                if (slides.length > 15) {
+                    throw new Error('Слишком много слайдов (максимум 15)');
+                }
+
+                const colors = ['#833ab4', '#fd1d1d', '#fcb045', '#28a745', '#007bff', '#6f42c1'];
+
+                return slides.map((slideText, index) => {
+                    const lines = slideText.split('\n').filter(line => line.trim().length > 0);
+                    const title = lines[0] || `Слайд ${index + 1}`;
+                    
+                    return {
+                        id: `text_slide_${Date.now()}_${index}`,
+                        title: title,
+                        subtitle: lines.length > 1 ? lines.slice(1).join(' ') : '',
+                        text: slideText,
+                        color: colors[index % colors.length]
+                    };
+                });
+            }
+
+            // Показ результата
+            showResult(message, type) {
+                const testResults = document.getElementById('testResults');
+                const statusClass = `status-${type}`;
+                
+                testResults.innerHTML = `
+                    <div class="status ${statusClass}">
+                        ${message}
+                    </div>
+                `;
+            }
+
+            // Отображение слайдов
+            displaySlides(slides) {
+                const testResults = document.getElementById('testResults');
+                const instagramNickname = document.getElementById('instagramInput').value.trim();
+                
+                let slidesHTML = '<div class="results-container">';
+                
+                slides.forEach((slide, index) => {
+                    const isFirstSlide = index === 0;
+                    const isLastSlide = index === slides.length - 1;
+                    const showInstagram = (isFirstSlide || isLastSlide) && instagramNickname;
+                    
+                    slidesHTML += `
+                        <div class="slide-preview" style="background: ${slide.color}">
+                            <div class="slide-number">${index + 1}/${slides.length}</div>
+                            <div>${slide.text}</div>
+                            ${showInstagram ? `<div style="position: absolute; bottom: 10px; left: 10px; font-size: 12px;">📷 ${instagramNickname}</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                slidesHTML += '</div>';
+                
+                testResults.innerHTML += slidesHTML;
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            window.testApp = new SimpleFlashPostApp();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Design Restoration</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; color: #fff; font-family: Arial; }
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; margin: 10px 0; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Test Design Restoration</h1>
+        <p>Проверка восстановления дизайна приложения</p>
+        
+        <button class="btn" onclick="testDesignElements()">🎨 Тест элементов дизайна</button>
+        <button class="btn" onclick="testAppInitialization()">🚀 Тест инициализации</button>
+        <button class="btn" onclick="openMainApp()">📱 Открыть основное приложение</button>
+        <button class="btn" onclick="openRestoreDesign()">🎨 Открыть восстановленный дизайн</button>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const className = type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info');
+            logElement.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function testDesignElements() {
+            log('🎨 Тестирование элементов дизайна...', 'info');
+            
+            // Проверяем загрузку CSS
+            const cssFiles = ['/app.css'];
+            
+            cssFiles.forEach(cssFile => {
+                fetch(cssFile)
+                    .then(response => {
+                        if (response.ok) {
+                            log(`✅ CSS файл загружен: ${cssFile}`, 'success');
+                        } else {
+                            log(`❌ Ошибка загрузки CSS: ${cssFile} (${response.status})`, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        log(`❌ Сетевая ошибка CSS: ${cssFile} - ${error.message}`, 'error');
+                    });
+            });
+            
+            // Проверяем Google Fonts
+            const fontTest = document.createElement('div');
+            fontTest.style.fontFamily = 'Montserrat, sans-serif';
+            fontTest.style.position = 'absolute';
+            fontTest.style.visibility = 'hidden';
+            fontTest.textContent = 'Test';
+            document.body.appendChild(fontTest);
+            
+            setTimeout(() => {
+                const computedFont = window.getComputedStyle(fontTest).fontFamily;
+                if (computedFont.includes('Montserrat')) {
+                    log('✅ Google Fonts (Montserrat) загружены', 'success');
+                } else {
+                    log('⚠️ Google Fonts могут не загружаться', 'error');
+                }
+                document.body.removeChild(fontTest);
+            }, 1000);
+            
+            // Проверяем цвета и стили
+            const bodyStyles = window.getComputedStyle(document.body);
+            const backgroundColor = bodyStyles.backgroundColor;
+            const color = bodyStyles.color;
+            
+            log(`🎨 Body background: ${backgroundColor}`, 'info');
+            log(`🎨 Body color: ${color}`, 'info');
+            
+            if (backgroundColor.includes('15, 15, 20') || backgroundColor.includes('#0f0f14')) {
+                log('✅ Темный фон установлен правильно', 'success');
+            } else {
+                log('❌ Проблема с темным фоном', 'error');
+            }
+        }
+
+        function testAppInitialization() {
+            log('🚀 Тестирование инициализации приложения...', 'info');
+            
+            // Проверяем наличие основных элементов DOM
+            const appElement = document.getElementById('app');
+            const loadingElement = document.getElementById('loading');
+            
+            if (appElement) {
+                log('✅ #app элемент найден', 'success');
+            } else {
+                log('❌ #app элемент НЕ найден', 'error');
+            }
+            
+            if (loadingElement) {
+                log('✅ #loading элемент найден', 'success');
+            } else {
+                log('⚠️ #loading элемент НЕ найден (может быть нормально)', 'info');
+            }
+            
+            // Проверяем доступность модулей
+            const modules = [
+                '/src/state.js',
+                '/src/renderer.js',
+                '/src/app.js'
+            ];
+            
+            let loadedModules = 0;
+            modules.forEach(module => {
+                fetch(module)
+                    .then(response => {
+                        if (response.ok) {
+                            log(`✅ Модуль доступен: ${module}`, 'success');
+                            loadedModules++;
+                            if (loadedModules === modules.length) {
+                                log('✅ Все основные модули доступны', 'success');
+                            }
+                        } else {
+                            log(`❌ Ошибка модуля: ${module} (${response.status})`, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        log(`❌ Сетевая ошибка модуля: ${module} - ${error.message}`, 'error');
+                    });
+            });
+        }
+
+        function openMainApp() {
+            log('📱 Открытие основного приложения...', 'info');
+            window.open('/index.html', '_blank');
+        }
+
+        function openRestoreDesign() {
+            log('🎨 Открытие восстановленного дизайна...', 'info');
+            window.open('/restore-design.html', '_blank');
+        }
+
+        // Автотест при загрузке
+        window.addEventListener('load', () => {
+            log('🧪 Test Design Restoration загружен', 'info');
+            setTimeout(() => {
+                log('🚀 Запуск автотестов...', 'info');
+                testDesignElements();
+                setTimeout(testAppInitialization, 2000);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

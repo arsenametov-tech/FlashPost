@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplified Keyword/Glow System - FlashPost</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Inter, sans-serif;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .demo-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .demo-block {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .slide-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #dee2e6;
+            margin-bottom: 16px;
+            background: #4ecdc4;
+        }
+        
+        .slide-text-block {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            transform: translate(-50%, -50%);
+            user-select: none;
+            font-size: 16px;
+            font-family: Inter;
+        }
+        
+        /* Упрощенная система: glow только на ключевых словах */
+        .manual-keyword {
+            background: linear-gradient(45deg, #48cae4, #0077b6);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            filter: drop-shadow(0 0 6px rgba(72, 202, 228, 0.8));
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        .auto-keyword {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            filter: drop-shadow(0 0 6px rgba(255, 107, 107, 0.8));
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-pulse {
+            from { filter: drop-shadow(0 0 6px rgba(72, 202, 228, 0.8)); }
+            to { filter: drop-shadow(0 0 12px rgba(72, 202, 228, 1)); }
+        }
+        
+        .info-panel {
+            background: #e9ecef;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            margin-top: 16px;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .old-system, .new-system {
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        
+        .old-system {
+            background: #ffebee;
+            border: 2px solid #f44336;
+        }
+        
+        .new-system {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+        }
+        
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 4px;
+        }
+        
+        .btn-primary { background: #833ab4; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔧 Упрощенная система keyword/glow</h1>
+        
+        <div class="comparison">
+            <div class="old-system">
+                <h4>❌ Старая система (сложная)</h4>
+                <pre>// На уровне блока
+block.glow = true/false
+block.highlightEnabled = true/false  
+block.isKeyword = true/false
+block.keywordColor = '#ff6b6b'
+
+// На уровне слайда
+slide.autoKeywords = []
+
+// Проблемы:
+- Много флагов
+- Свечение всего блока
+- Сложная логика</pre>
+            </div>
+            
+            <div class="new-system">
+                <h4>✅ Новая система (упрощенная)</h4>
+                <pre>// Только на уровне слайда
+slide.autoKeywords = []
+
+// Логика:
+1. *слово* → .manual-keyword + glow
+2. autoKeywords → .auto-keyword + glow  
+3. обычный текст → без эффектов
+
+// Преимущества:
+- Меньше флагов
+- Glow только на ключевых
+- Четкая логика</pre>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <!-- Демо слайда -->
+            <div class="demo-block">
+                <h3>Демо новой системы</h3>
+                
+                <div class="slide-container" id="slideContainer">
+                    <!-- Слайды будут добавлены через JS -->
+                </div>
+                
+                <div class="info-panel">
+                    <strong>Тестовые блоки:</strong><br>
+                    1. "Изучайте *рынок* для получения прибыли"<br>
+                    2. "Инвестиции в будущее"<br>
+                    3. "Достигайте финансовой свободы"<br><br>
+                    <strong>autoKeywords:</strong> ['прибыль', 'инвестиции', 'свободы']
+                </div>
+            </div>
+            
+            <!-- Контролы -->
+            <div class="demo-block">
+                <h3>Контролы тестирования</h3>
+                
+                <button class="btn btn-primary" onclick="testApp.updateText(0, 'Изучайте *рынок* и *тренды*')">Добавить ручные ключевые</button>
+                <button class="btn btn-success" onclick="testApp.updateAutoKeywords(['прибыль', 'тренды', 'рынок'])">Обновить autoKeywords</button>
+                <button class="btn btn-info" onclick="testApp.updateText(1, 'Инвестиции и *стратегии* работают')">Смешанные ключевые</button>
+                <button class="btn btn-primary" onclick="testApp.resetDemo()">Сброс демо</button>
+                
+                <div class="info-panel">
+                    <strong>Результат:</strong><br>
+                    • <span class="manual-keyword">ручные</span> - синий градиент + glow<br>
+                    • <span class="auto-keyword">автоматические</span> - красный градиент + glow<br>
+                    • обычный текст - без эффектов<br><br>
+                    <strong>Убрано:</strong><br>
+                    ❌ block.glow<br>
+                    ❌ block.highlightEnabled<br>
+                    ❌ block.isKeyword<br>
+                    ❌ block.keywordColor
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Тестовое приложение для упрощенной системы keyword/glow
+        class SimplifiedKeywordGlowApp {
+            constructor() {
+                // Упрощенная структура данных
+                this.slide = {
+                    id: 'slide_1',
+                    background: { type: 'color', color: '#4ecdc4' },
+                    textBlocks: [
+                        {
+                            id: 'block_1',
+                            text: 'Изучайте *рынок* для получения прибыли',
+                            x: 30, y: 30, width: 40,
+                            font: 'Inter', size: 16, weight: 600, color: '#ffffff'
+                            // ❌ Убрано: glow, highlightEnabled, isKeyword, keywordColor
+                        },
+                        {
+                            id: 'block_2',
+                            text: 'Инвестиции в будущее',
+                            x: 70, y: 50, width: 35,
+                            font: 'Inter', size: 14, weight: 600, color: '#ffffff'
+                        },
+                        {
+                            id: 'block_3',
+                            text: 'Достигайте финансовой свободы',
+                            x: 50, y: 80, width: 45,
+                            font: 'Inter', size: 15, weight: 600, color: '#ffffff'
+                        }
+                    ],
+                    autoKeywords: ['прибыль', 'инвестиции', 'свободы']
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.render();
+                console.log('🔧 Упрощенная система keyword/glow загружена');
+            }
+            
+            // Рендеринг слайда
+            render() {
+                const container = document.getElementById('slideContainer');
+                if (!container) return;
+                
+                // Очищаем контейнер
+                container.innerHTML = '';
+                
+                // Добавляем текстовые блоки
+                this.slide.textBlocks.forEach(block => {
+                    const blockElement = this.createTextBlock(block, this.slide.autoKeywords);
+                    container.appendChild(blockElement);
+                });
+                
+                console.log('✅ Слайд отрендерен с упрощенной системой');
+            }
+            
+            // Создание текстового блока
+            createTextBlock(block, autoKeywords = []) {
+                const blockEl = document.createElement('div');
+                blockEl.className = 'slide-text-block';
+                blockEl.dataset.blockId = block.id;
+                
+                // Позиционирование
+                blockEl.style.left = block.x + '%';
+                blockEl.style.top = block.y + '%';
+                blockEl.style.width = block.width + '%';
+                blockEl.style.fontSize = block.size + 'px';
+                blockEl.style.fontFamily = block.font;
+                blockEl.style.fontWeight = block.weight;
+                blockEl.style.color = block.color;
+                
+                // Всегда обрабатываем ключевые слова (убрана проверка highlightEnabled)
+                this.setTextWithKeywords(blockEl, block.text, autoKeywords);
+                
+                return blockEl;
+            }
+            
+            // Установка текста с ключевыми словами (упрощенная версия)
+            setTextWithKeywords(element, text, autoKeywords = []) {
+                // Очищаем элемент
+                element.innerHTML = '';
+                
+                let processedText = text;
+                const fragments = [];
+                
+                // 1. Обрабатываем ручные ключевые слова (*слово*)
+                const manualKeywordRegex = /\*([^*]+)\*/g;
+                let lastIndex = 0;
+                let match;
+                
+                while ((match = manualKeywordRegex.exec(text)) !== null) {
+                    // Добавляем текст до ключевого слова
+                    if (match.index > lastIndex) {
+                        fragments.push({
+                            type: 'text',
+                            content: text.substring(lastIndex, match.index)
+                        });
+                    }
+                    
+                    // Добавляем ручное ключевое слово
+                    fragments.push({
+                        type: 'manual-keyword',
+                        content: match[1]
+                    });
+                    
+                    lastIndex = match.index + match[0].length;
+                }
+                
+                // Добавляем оставшийся текст
+                if (lastIndex < text.length) {
+                    fragments.push({
+                        type: 'text',
+                        content: text.substring(lastIndex)
+                    });
+                }
+                
+                // 2. Создаем DOM элементы
+                fragments.forEach(fragment => {
+                    if (fragment.type === 'manual-keyword') {
+                        const span = document.createElement('span');
+                        span.className = 'manual-keyword';
+                        span.textContent = fragment.content;
+                        element.appendChild(span);
+                    } else {
+                        // 3. Обрабатываем автоматические ключевые слова в обычном тексте
+                        this.addTextWithAutoKeywords(element, fragment.content, autoKeywords);
+                    }
+                });
+            }
+            
+            // Добавление текста с автоматическими ключевыми словами
+            addTextWithAutoKeywords(parent, text, autoKeywords) {
+                if (autoKeywords.length === 0) {
+                    parent.appendChild(document.createTextNode(text));
+                    return;
+                }
+                
+                let processedText = text;
+                
+                // Заменяем автоматические ключевые слова на маркеры
+                autoKeywords.forEach(keyword => {
+                    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                    processedText = processedText.replace(regex, `<AUTO_KEYWORD>$1</AUTO_KEYWORD>`);
+                });
+                
+                // Разбиваем на части
+                const segments = processedText.split(/<AUTO_KEYWORD>|<\/AUTO_KEYWORD>/);
+                let isKeyword = false;
+                
+                segments.forEach(segment => {
+                    if (segment) {
+                        if (isKeyword) {
+                            const span = document.createElement('span');
+                            span.className = 'auto-keyword';
+                            span.textContent = segment;
+                            parent.appendChild(span);
+                        } else {
+                            parent.appendChild(document.createTextNode(segment));
+                        }
+                    }
+                    isKeyword = !isKeyword;
+                });
+            }
+            
+            // ===== МЕТОДЫ ТЕСТИРОВАНИЯ =====
+            
+            // Обновление текста блока
+            updateText(blockIndex, newText) {
+                if (this.slide.textBlocks[blockIndex]) {
+                    this.slide.textBlocks[blockIndex].text = newText;
+                    this.render();
+                    console.log(`✅ Обновлен текст блока ${blockIndex}: ${newText}`);
+                }
+            }
+            
+            // Обновление автоматических ключевых слов
+            updateAutoKeywords(newKeywords) {
+                this.slide.autoKeywords = newKeywords;
+                this.render();
+                console.log(`✅ Обновлены autoKeywords:`, newKeywords);
+            }
+            
+            // Сброс демо
+            resetDemo() {
+                this.slide.textBlocks[0].text = 'Изучайте *рынок* для получения прибыли';
+                this.slide.textBlocks[1].text = 'Инвестиции в будущее';
+                this.slide.textBlocks[2].text = 'Достигайте финансовой свободы';
+                this.slide.autoKeywords = ['прибыль', 'инвестиции', 'свободы'];
+                this.render();
+                console.log('🔄 Демо сброшено');
+            }
+        }
+        
+        // Инициализация тестового приложения
+        let testApp;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            testApp = new SimplifiedKeywordGlowApp();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест шаблонов и экспорта - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .test-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .test-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        
+        .test-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .test-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .test-steps {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .test-steps h4 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+        }
+        
+        .test-steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .test-steps li {
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .start-btn:hover {
+            background: #6d2d96;
+            transform: translateY(-2px);
+        }
+        
+        .tech-specs {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .tech-specs h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .spec-value {
+            font-weight: 600;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🎨 Тест шаблонов и экспорта</h1>
+        
+        <div class="test-info">
+            <strong>Что тестируем:</strong><br>
+            Систему шаблонов (сохранение только стилей) и экспорт слайдов 
+            в JPEG 1080x1080 с упаковкой в ZIP архив.
+        </div>
+        
+        <h3>Функции шаблонов:</h3>
+        <ul class="test-features">
+            <li><span class="feature-icon">💾</span>Сохранение шаблона (только стили)</li>
+            <li><span class="feature-icon">📋</span>Список шаблонов</li>
+            <li><span class="feature-icon">🎨</span>Применение ко всем слайдам</li>
+            <li><span class="feature-icon">🚫</span>НЕ сохраняет тексты и позиции</li>
+        </ul>
+        
+        <h3>Функции экспорта:</h3>
+        <ul class="test-features">
+            <li><span class="feature-icon">📷</span>Экспорт текущего слайда</li>
+            <li><span class="feature-icon">📦</span>Экспорт всех слайдов в ZIP</li>
+            <li><span class="feature-icon">📊</span>Прогресс экспорта</li>
+            <li><span class="feature-icon">🖼️</span>JPEG 1080x1080</li>
+        </ul>
+        
+        <div class="tech-specs">
+            <h4>📋 Технические характеристики:</h4>
+            <div class="spec-item">
+                <span>Хранение шаблонов:</span>
+                <span class="spec-value">localStorage</span>
+            </div>
+            <div class="spec-item">
+                <span>Формат экспорта:</span>
+                <span class="spec-value">JPEG</span>
+            </div>
+            <div class="spec-item">
+                <span>Размер изображений:</span>
+                <span class="spec-value">1080x1080</span>
+            </div>
+            <div class="spec-item">
+                <span>Архив:</span>
+                <span class="spec-value">ZIP</span>
+            </div>
+            <div class="spec-item">
+                <span>Библиотеки:</span>
+                <span class="spec-value">html2canvas, JSZip, FileSaver</span>
+            </div>
+        </div>
+        
+        <div class="test-steps">
+            <h4>Шаги тестирования:</h4>
+            <ol>
+                <li>Создать карусель с несколькими слайдами</li>
+                <li>Открыть редактор</li>
+                <li>Настроить стили (фон, шрифты, эффекты)</li>
+                <li>Нажать кнопку "Сохранить шаблон" 💾</li>
+                <li>Ввести название шаблона</li>
+                <li>Нажать кнопку "Шаблоны" 📋</li>
+                <li>Применить шаблон ко всем слайдам</li>
+                <li>Нажать "Экспорт текущего слайда" 📷</li>
+                <li>Нажать "Экспорт всех слайдов" 📦</li>
+                <li>Проверить ZIP архив</li>
+            </ol>
+        </div>
+        
+        <button class="start-btn" onclick="startTest()">🚀 Начать тест</button>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function startTest() {
+            console.log('🎨 Запуск теста шаблонов и экспорта');
+            
+            // Создаем экземпляр приложения
+            window.testApp = new FlashPostApp();
+            
+            // Переопределяем метод показа приложения для автоматического тестирования
+            const originalShowApp = window.testApp.showApp;
+            window.testApp.showApp = function() {
+                originalShowApp.call(this);
+                
+                // Автоматически заполняем тему и создаем карусель
+                setTimeout(() => {
+                    const topicInput = document.getElementById('topicInput');
+                    if (topicInput) {
+                        topicInput.value = 'Тестирование системы шаблонов и экспорта слайдов';
+                        this.updateInputCounter();
+                        
+                        // Автоматически генерируем карусель
+                        setTimeout(() => {
+                            this.handleGenerate();
+                        }, 500);
+                    }
+                }, 1000);
+            };
+            
+            // Скрываем тестовый контейнер
+            document.querySelector('.test-container').style.display = 'none';
+            
+            // Создаем контейнер для приложения
+            const appContainer = document.createElement('div');
+            appContainer.id = 'app';
+            appContainer.style.display = 'block';
+            document.body.appendChild(appContainer);
+            
+            // Создаем loading экран
+            const loadingContainer = document.createElement('div');
+            loadingContainer.id = 'loading';
+            loadingContainer.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: white;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">🎨</div>
+                        <div>Загрузка теста...</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingContainer);
+        }
+        
+        // Функции для отладки
+        window.debugTemplates = {
+            // Показать все шаблоны
+            showAll: () => {
+                const templates = JSON.parse(localStorage.getItem('flashpost_templates') || '[]');
+                console.table(templates);
+                return templates;
+            },
+            
+            // Очистить все шаблоны
+            clearAll: () => {
+                localStorage.removeItem('flashpost_templates');
+                console.log('✅ Все шаблоны удалены');
+            },
+            
+            // Проверить поддержку экспорта
+            checkExport: () => {
+                console.log('🔧 Проверка поддержки экспорта:');
+                console.log('Canvas:', !!document.createElement('canvas').getContext);
+                console.log('Download:', 'download' in document.createElement('a'));
+                console.log('Blob:', !!window.Blob);
+                console.log('URL.createObjectURL:', !!window.URL?.createObjectURL);
+            }
+        };
+        
+        // Логирование для отладки
+        console.log('🎨 Тестовая страница шаблонов и экспорта загружена');
+        console.log('🔧 Доступные методы отладки:');
+        console.log('- debugTemplates.showAll() - показать все шаблоны');
+        console.log('- debugTemplates.clearAll() - очистить все шаблоны');
+        console.log('- debugTemplates.checkExport() - проверить поддержку экспорта');
+        console.log('- startTest() - запуск автоматического теста');
+        
+        // Проверяем поддержку браузера
+        debugTemplates.checkExport();
+    </script>
+</body>
+</html>

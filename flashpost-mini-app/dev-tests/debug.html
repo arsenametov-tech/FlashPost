@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug FlashPost Mini App</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .debug-panel { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .debug-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: #333; }
+        .debug-info { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .test-btn { padding: 10px 20px; background: #833ab4; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .test-btn:hover { background: #6d2d96; }
+        #console-output { background: #000; color: #0f0; padding: 10px; border-radius: 5px; font-family: monospace; height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="debug-panel">
+        <div class="debug-title">🔧 FlashPost Mini App Debug Panel</div>
+        <div class="debug-info">Проверка работы популярных тем</div>
+        
+        <button class="test-btn" onclick="testIdeasGrid()">Проверить ideasGrid</button>
+        <button class="test-btn" onclick="testLoadQuickIdeas()">Тест loadQuickIdeas</button>
+        <button class="test-btn" onclick="clearConsole()">Очистить консоль</button>
+        <button class="test-btn" onclick="location.href='index.html'">Открыть приложение</button>
+    </div>
+
+    <div class="debug-panel">
+        <div class="debug-title">📊 Console Output</div>
+        <div id="console-output"></div>
+    </div>
+
+    <div class="debug-panel">
+        <div class="debug-title">🎯 Test Ideas Grid</div>
+        <div id="test-ideas-container">
+            <div class="ideas glass-card">
+                <h3>💡 Популярные темы (тест)</h3>
+                <div class="ideas-grid" id="ideasGrid">
+                    <!-- Заполняется JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Перехватываем console.log
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(message, type = 'log') {
+            const output = document.getElementById('console-output');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#f00' : type === 'warn' ? '#ff0' : '#0f0';
+            output.innerHTML += `<div style="color: ${color}">[${time}] ${message}</div>`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole(args.join(' '), 'warn');
+        };
+
+        function testIdeasGrid() {
+            const ideasGrid = document.getElementById('ideasGrid');
+            console.log('🔍 Тестируем ideasGrid...');
+            console.log('ideasGrid element:', ideasGrid);
+            console.log('ideasGrid innerHTML:', ideasGrid ? ideasGrid.innerHTML : 'null');
+            console.log('ideasGrid children count:', ideasGrid ? ideasGrid.children.length : 'null');
+        }
+
+        function testLoadQuickIdeas() {
+            console.log('🔍 Тестируем loadQuickIdeas...');
+            
+            const ideas = [
+                "AI и нейросети",
+                "Криптовалюты", 
+                "NFT и Web3",
+                "Пассивный доход",
+                "Личный бренд"
+            ];
+
+            const ideasGrid = document.getElementById('ideasGrid');
+            if (ideasGrid) {
+                console.log('✅ ideasGrid найден');
+                ideasGrid.innerHTML = '';
+                
+                ideas.forEach((idea, index) => {
+                    console.log(`📝 Создаем элемент ${index + 1}: ${idea}`);
+                    const ideaElement = document.createElement('div');
+                    ideaElement.className = 'idea';
+                    ideaElement.textContent = idea;
+                    ideaElement.style.cssText = `
+                        background: rgba(255, 255, 255, 0.15);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        border-radius: 12px;
+                        padding: 12px 16px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        text-align: center;
+                        cursor: pointer;
+                        margin: 5px;
+                        display: inline-block;
+                        color: #333;
+                        background: #e0e0e0;
+                    `;
+                    ideaElement.addEventListener('click', () => {
+                        console.log(`🔥 Клик по идее: ${idea}`);
+                        alert(`Выбрана тема: ${idea}`);
+                    });
+                    ideasGrid.appendChild(ideaElement);
+                });
+                
+                console.log(`✅ Добавлено ${ideas.length} идей`);
+            } else {
+                console.error('❌ ideasGrid не найден!');
+            }
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '';
+        }
+
+        // Автотест при загрузке
+        window.addEventListener('load', () => {
+            console.log('🚀 Debug panel загружен');
+            testIdeasGrid();
+        });
+    </script>
+</body>
+</html>

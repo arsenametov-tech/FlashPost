@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost React Demo</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .editor-placeholder {
+            text-align: center;
+            padding: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            border: 1px solid var(--glass-border);
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .editor-placeholder h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимированные пузырьки -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <!-- React App будет монтироваться здесь -->
+    <div id="react-root"></div>
+
+    <!-- React CDN для демо -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- React компонент -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Simplified React version based on your JSX structure
+        const SimpleCarousel = ({ slides }) => {
+            const [currentSlide, setCurrentSlide] = useState(0);
+            const [isSaving, setIsSaving] = useState(false);
+
+            // Save slide function using html2canvas
+            const saveSlide = async (slideIndex) => {
+                setIsSaving(true);
+                
+                try {
+                    const slideElement = document.getElementById(`react-slide-${slideIndex}`);
+                    if (!slideElement) {
+                        throw new Error('Slide element not found');
+                    }
+
+                    const canvas = await html2canvas(slideElement, {
+                        backgroundColor: null,
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        width: 1080,
+                        height: 1080
+                    });
+
+                    const link = document.createElement('a');
+                    link.download = `flashpost-react-slide-${slideIndex + 1}.png`;
+                    link.href = canvas.toDataURL('image/png', 1.0);
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                } catch (error) {
+                    console.error('Error saving slide:', error);
+                    alert('Ошибка сохранения слайда');
+                } finally {
+                    setIsSaving(false);
+                }
+            };
+
+            return (
+                <div className="carousel">
+                    {slides.map((s, i) => (
+                        <div 
+                            key={i} 
+                            id={`react-slide-${i}`}
+                            className={`slide ${i === currentSlide ? 'active' : ''}`}
+                            style={{ display: i === currentSlide ? 'flex' : 'none' }}
+                        >
+                            <div className="slide-content">
+                                <h2 style={{ color: 'white', marginBottom: '16px', fontSize: '18px' }}>
+                                    {s.title}
+                                </h2>
+                                <p style={{ color: 'white', fontSize: '16px', lineHeight: '1.4' }}>
+                                    {s.text}
+                                </p>
+                            </div>
+                            <div className="slide-number">{i + 1}/{slides.length}</div>
+                            
+                            {/* Save button for current slide */}
+                            {i === currentSlide && (
+                                <button 
+                                    className="slide-save-btn"
+                                    onClick={() => saveSlide(i)}
+                                    disabled={isSaving}
+                                    title="Сохранить слайд"
+                                >
+                                    {isSaving ? (
+                                        <div className="spinner-small"></div>
+                                    ) : (
+                                        '💾'
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                    
+                    <div className="carousel-nav" style={{ marginTop: '16px' }}>
+                        <button 
+                            className="nav-btn" 
+                            onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
+                            disabled={currentSlide === 0}
+                        >
+                            ‹
+                        </button>
+                        
+                        <div className="indicators">
+                            {slides.map((_, index) => (
+                                <div
+                                    key={index}
+                                    className={`indicator ${index === currentSlide ? 'active' : ''}`}
+                                    onClick={() => setCurrentSlide(index)}
+                                />
+                            ))}
+                        </div>
+                        
+                        <button 
+                            className="nav-btn" 
+                            onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
+                            disabled={currentSlide === slides.length - 1}
+                        >
+                            ›
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const FlashPostReactDemo = () => {
+            const [slides, setSlides] = useState([]);
+            const [topic, setTopic] = useState('');
+            const [currentView, setCurrentView] = useState('start');
+            const [isGenerating, setIsGenerating] = useState(false);
+
+            const popularTopics = [
+                "AI и нейросети", "Криптовалюты", "Личный бренд", 
+                "Продуктивность", "Инвестиции", "Саморазвитие"
+            ];
+
+            const generateSlides = async (selectedTopic) => {
+                setIsGenerating(true);
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const generatedSlides = [
+                    { title: "Hook", text: `🔥 Секреты ${selectedTopic.toLowerCase()}, которые изменят жизнь` },
+                    { title: "Problem", text: `❌ Главная ошибка в ${selectedTopic.toLowerCase()}` },
+                    { title: "Solution", text: `✅ Проверенная стратегия успеха` },
+                    { title: "Step1", text: `1️⃣ Первый шаг к мастерству` },
+                    { title: "Step2", text: `2️⃣ Как избежать ошибок` },
+                    { title: "Step3", text: `3️⃣ Продвинутые техники` },
+                    { title: "Tools", text: `🛠️ Must-have инструменты` },
+                    { title: "Results", text: `📊 Реальные результаты` },
+                    { title: "CTA", text: `🎯 Начните применять сегодня!` }
+                ];
+                
+                setSlides(generatedSlides);
+                setCurrentView('carousel');
+                setIsGenerating(false);
+            };
+
+            if (currentView === 'carousel') {
+                return (
+                    <div className="app">
+                        <div className="carousel-section">
+                            <div className="carousel-header glass-card">
+                                <h2>Ваша карусель готова!</h2>
+                                <p>Слайдов: {slides.length} • React версия</p>
+                            </div>
+                            
+                            <div className="carousel-container glass-card">
+                                <SimpleCarousel slides={slides} />
+                            </div>
+                            
+                            <div className="actions">
+                                <button 
+                                    className="btn btn-secondary" 
+                                    onClick={() => setCurrentView('start')}
+                                >
+                                    ← Новая карусель
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="app">
+                    <div className="section active">
+                        <div className="start-section">
+                            <div className="glass-card header">
+                                <h1 className="title">⚡ FlashPost React</h1>
+                                <p className="subtitle">Создай карусель за 30 секунд</p>
+                            </div>
+                            
+                            <div className="ideas glass-card">
+                                <h3>💡 Популярные темы</h3>
+                                <div className="ideas-grid">
+                                    {popularTopics.map((topicItem, index) => (
+                                        <div 
+                                            key={index}
+                                            className="idea"
+                                            onClick={() => setTopic(topicItem)}
+                                        >
+                                            {topicItem}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className="input-section glass-card">
+                                <label className="input-label">О чем создать карусель?</label>
+                                <div className="input-wrapper">
+                                    <textarea 
+                                        className="topic-input" 
+                                        placeholder="Например: Здоровое питание, Продуктивность..."
+                                        rows="2"
+                                        value={topic}
+                                        onChange={(e) => setTopic(e.target.value)}
+                                    />
+                                    <div className="input-counter">{topic.length}/200</div>
+                                </div>
+                            </div>
+                            
+                            <div className="actions">
+                                <button 
+                                    className="btn btn-primary" 
+                                    onClick={() => generateSlides(topic)}
+                                    disabled={isGenerating || topic.length < 3}
+                                >
+                                    {isGenerating ? (
+                                        <>
+                                            <div className="spinner"></div>
+                                            Создание...
+                                        </>
+                                    ) : (
+                                        '🚀 Создать'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<FlashPostReactDemo />, document.getElementById('react-root'));
+    </script>
+</body>
+</html>

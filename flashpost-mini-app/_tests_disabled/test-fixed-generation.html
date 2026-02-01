@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Fixed Generation</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; color: #fff; font-family: Arial; }
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .input { width: 100%; padding: 10px; margin: 10px 0; background: rgba(255,255,255,0.1); border: 1px solid #444; border-radius: 5px; color: #fff; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; margin: 10px 0; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test Fixed Generation</h1>
+        
+        <input type="text" id="topicInput" class="input" placeholder="Введите тему" value="Как начать инвестировать">
+        <button class="btn" onclick="testGeneration()">🎯 Тест генерации</button>
+        <button class="btn" onclick="openMainApp()">🚀 Открыть основное приложение</button>
+        
+        <div id="log" class="log"></div>
+        <div id="result"></div>
+    </div>
+
+    <!-- Модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const className = type === 'error' ? 'error' : (type === 'success' ? 'success' : '');
+            logElement.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function testGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            
+            if (!topic) {
+                log('❌ Введите тему для теста', 'error');
+                return;
+            }
+            
+            log(`🚀 Тестируем исправленную генерацию для темы: "${topic}"`);
+            
+            try {
+                // Проверяем доступность FlashPostApp
+                if (typeof FlashPostApp === 'undefined') {
+                    log('❌ FlashPostApp не найден', 'error');
+                    return;
+                }
+                
+                log('✅ FlashPostApp найден', 'success');
+                
+                // Создаем приложение
+                const app = new FlashPostApp();
+                log('✅ FlashPostApp создан', 'success');
+                
+                // Проверяем метод generateManualSlides
+                if (typeof app.generateManualSlides === 'function') {
+                    log('✅ Метод generateManualSlides найден', 'success');
+                    
+                    const slides = app.generateManualSlides(topic);
+                    log(`✅ Сгенерировано ${slides.length} слайдов`, 'success');
+                    
+                    // Показываем результат
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.innerHTML = `
+                        <div style="background: rgba(76, 175, 80, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <h3 style="color: #4CAF50;">✅ Генерация работает!</h3>
+                            <p><strong>Тема:</strong> ${topic}</p>
+                            <p><strong>Слайдов:</strong> ${slides.length}</p>
+                            <div style="margin-top: 10px;">
+                                ${slides.map((slide, index) => `
+                                    <div style="background: rgba(255,255,255,0.1); padding: 8px; margin: 3px 0; border-radius: 5px; font-size: 12px;">
+                                        ${index + 1}. ${slide.title} - ${slide.subtitle}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                } else {
+                    log('❌ Метод generateManualSlides НЕ найден', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error');
+                console.error('Ошибка тестирования:', error);
+            }
+        }
+
+        function openMainApp() {
+            window.open('/index.html', '_blank');
+        }
+
+        // Автотест при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🚀 Автотест запущен');
+                testGeneration();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест улучшенной системы текстовых блоков - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Дополнительные стили для демонстрации */
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            max-width: 300px;
+        }
+        
+        .test-controls h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #833ab4;
+        }
+        
+        .test-controls button {
+            margin: 2px;
+            padding: 6px 12px;
+            border: 1px solid #833ab4;
+            background: white;
+            color: #833ab4;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            width: 100%;
+        }
+        
+        .test-controls button:hover {
+            background: #833ab4;
+            color: white;
+        }
+        
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: monospace;
+            z-index: 10000;
+            max-width: 300px;
+        }
+        
+        .debug-info div {
+            margin: 2px 0;
+        }
+        
+        .selected-block-info {
+            background: rgba(131, 58, 180, 0.1);
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+        
+        .blocks-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            margin: 5px 0;
+        }
+        
+        .block-item {
+            padding: 4px;
+            margin: 2px 0;
+            background: #f5f5f5;
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .block-item.active {
+            background: #833ab4;
+            color: white;
+        }
+        
+        .block-item:hover {
+            background: #e0e0e0;
+        }
+        
+        .block-item.active:hover {
+            background: #6d2d96;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Загрузка FlashPost...</div>
+    </div>
+
+    <div id="app" class="app"></div>
+    
+    <!-- Контролы для тестирования -->
+    <div class="test-controls">
+        <h3>🧪 Тест текстовых блоков</h3>
+        
+        <button onclick="testCreateCarousel()">1. Создать тестовую карусель</button>
+        <button onclick="testOpenEditor()">2. Открыть редактор</button>
+        <button onclick="testAddTextBlock()">3. Добавить текстовый блок</button>
+        <button onclick="testSelectFirstBlock()">4. Выбрать первый блок</button>
+        <button onclick="testSelectSecondBlock()">5. Выбрать второй блок</button>
+        <button onclick="testDeleteSelectedBlock()">6. Удалить выбранный блок</button>
+        <button onclick="testUpdateBlockText()">7. Изменить текст блока</button>
+        <button onclick="testUpdateBlockStyle()">8. Изменить стиль блока</button>
+        <button onclick="showBlocksStructure()">9. Показать структуру блоков</button>
+        
+        <div class="blocks-list" id="testBlocksList"></div>
+    </div>
+    
+    <!-- Отладочная информация -->
+    <div class="debug-info" id="debugInfo">
+        <div>Режим: <span id="currentMode">start</span></div>
+        <div>Слайдов: <span id="slidesCount">0</span></div>
+        <div>Текущий слайд: <span id="currentSlide">0</span></div>
+        <div>Блоков на слайде: <span id="blocksCount">0</span></div>
+        <div>Выбранный блок: <span id="selectedBlock">none</span></div>
+        
+        <div class="selected-block-info" id="selectedBlockInfo" style="display: none;">
+            <div><strong>Выбранный блок:</strong></div>
+            <div>ID: <span id="blockId"></span></div>
+            <div>Текст: <span id="blockText"></span></div>
+            <div>Шрифт: <span id="blockFont"></span></div>
+            <div>Размер: <span id="blockSize"></span></div>
+            <div>Позиция: <span id="blockPosition"></span></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        const app = new FlashPostApp();
+        
+        // Тестовые функции
+        function testCreateCarousel() {
+            console.log('🧪 Создаем тестовую карусель...');
+            
+            // Создаем тестовые слайды
+            app.slides = [
+                {
+                    id: "slide_test_1",
+                    title: "Тестовый слайд 1",
+                    text: "Первый тестовый слайд",
+                    background: { type: "color", color: "#833ab4" },
+                    textBlocks: [
+                        {
+                            id: "block_test_1",
+                            text: "Первый текстовый блок",
+                            position: { x: 30, y: 30 },
+                            width: 60,
+                            font: "Inter",
+                            size: 18,
+                            weight: 700,
+                            color: "#ffffff",
+                            glow: false,
+                            isKeyword: false,
+                            keywordColor: "#ff6b6b",
+                            highlightEnabled: true,
+                            autoHighlight: true
+                        }
+                    ],
+                    autoKeywords: ["тестовый", "блок"]
+                },
+                {
+                    id: "slide_test_2",
+                    title: "Тестовый слайд 2",
+                    text: "Второй тестовый слайд",
+                    background: { type: "color", color: "#28a745" },
+                    textBlocks: [
+                        {
+                            id: "block_test_2",
+                            text: "Второй текстовый блок",
+                            position: { x: 50, y: 50 },
+                            width: 70,
+                            font: "Montserrat",
+                            size: 16,
+                            weight: 600,
+                            color: "#ffffff",
+                            glow: true,
+                            isKeyword: false,
+                            keywordColor: "#4ecdc4",
+                            highlightEnabled: true,
+                            autoHighlight: true
+                        }
+                    ],
+                    autoKeywords: ["второй", "слайд"]
+                }
+            ];
+            
+            // Инициализируем slideStyles для совместимости
+            app.initializeSlideStyles();
+            
+            // Синхронизируем все блоки
+            app.slides.forEach((slide, index) => {
+                app.syncAllTextBlocksToSlideStyles(index);
+            });
+            
+            app.currentSlide = 0;
+            app.currentEditingSlide = 0;
+            
+            app.enterPreviewMode();
+            updateDebugInfo();
+            
+            console.log('✅ Тестовая карусель создана');
+        }
+        
+        function testOpenEditor() {
+            if (app.slides.length === 0) {
+                alert('Сначала создайте тестовую карусель!');
+                return;
+            }
+            
+            console.log('🧪 Открываем редактор...');
+            app.enterEditMode();
+            updateDebugInfo();
+        }
+        
+        function testAddTextBlock() {
+            if (!app.isMode("edit")) {
+                alert('Сначала откройте редактор!');
+                return;
+            }
+            
+            console.log('🧪 Добавляем новый текстовый блок...');
+            const newBlock = app.addTextBlock();
+            updateDebugInfo();
+            updateBlocksList();
+            
+            console.log('✅ Добавлен блок:', newBlock.id);
+        }
+        
+        function testSelectFirstBlock() {
+            const blocks = app.getCurrentTextBlocks();
+            if (blocks.length === 0) {
+                alert('Нет текстовых блоков для выбора!');
+                return;
+            }
+            
+            console.log('🧪 Выбираем первый блок...');
+            app.selectTextBlock(blocks[0].id);
+            updateDebugInfo();
+            updateBlocksList();
+        }
+        
+        function testSelectSecondBlock() {
+            const blocks = app.getCurrentTextBlocks();
+            if (blocks.length < 2) {
+                alert('Нет второго блока для выбора!');
+                return;
+            }
+            
+            console.log('🧪 Выбираем второй блок...');
+            app.selectTextBlock(blocks[1].id);
+            updateDebugInfo();
+            updateBlocksList();
+        }
+        
+        function testDeleteSelectedBlock() {
+            if (!app.selectedTextBlockId) {
+                alert('Нет выбранного блока для удаления!');
+                return;
+            }
+            
+            console.log('🧪 Удаляем выбранный блок...');
+            app.deleteTextBlock(app.selectedTextBlockId);
+            updateDebugInfo();
+            updateBlocksList();
+        }
+        
+        function testUpdateBlockText() {
+            const selectedBlock = app.getSelectedTextBlock();
+            if (!selectedBlock) {
+                alert('Нет выбранного блока!');
+                return;
+            }
+            
+            const newText = prompt('Введите новый текст:', selectedBlock.text);
+            if (newText !== null) {
+                console.log('🧪 Обновляем текст блока...');
+                app.updateTextBlockProperty(selectedBlock.id, 'text', newText);
+                updateDebugInfo();
+            }
+        }
+        
+        function testUpdateBlockStyle() {
+            const selectedBlock = app.getSelectedTextBlock();
+            if (!selectedBlock) {
+                alert('Нет выбранного блока!');
+                return;
+            }
+            
+            console.log('🧪 Обновляем стиль блока...');
+            app.updateTextBlockProperty(selectedBlock.id, 'size', 24);
+            app.updateTextBlockProperty(selectedBlock.id, 'color', '#ff6b6b');
+            app.updateTextBlockProperty(selectedBlock.id, 'font', 'Bebas Neue');
+            updateDebugInfo();
+        }
+        
+        function showBlocksStructure() {
+            const currentSlide = app.slides[app.currentEditingSlide];
+            if (!currentSlide) {
+                alert('Нет текущего слайда!');
+                return;
+            }
+            
+            console.log('📊 Структура текстовых блоков:');
+            console.log('Основная структура (slides):', currentSlide.textBlocks);
+            console.log('Совместимость (slideStyles):', app.slideStyles[app.currentEditingSlide]?.textBlocks);
+            
+            alert(`Блоков в основной структуре: ${currentSlide.textBlocks?.length || 0}\nБлоков в slideStyles: ${app.slideStyles[app.currentEditingSlide]?.textBlocks?.length || 0}`);
+        }
+        
+        // Обновление отладочной информации
+        function updateDebugInfo() {
+            document.getElementById('currentMode').textContent = app.getMode();
+            document.getElementById('slidesCount').textContent = app.slides.length;
+            document.getElementById('currentSlide').textContent = app.currentEditingSlide + 1;
+            
+            const blocks = app.getCurrentTextBlocks();
+            document.getElementById('blocksCount').textContent = blocks.length;
+            
+            const selectedBlock = app.getSelectedTextBlock();
+            const selectedBlockInfo = document.getElementById('selectedBlockInfo');
+            
+            if (selectedBlock) {
+                document.getElementById('selectedBlock').textContent = selectedBlock.id;
+                document.getElementById('blockId').textContent = selectedBlock.id;
+                document.getElementById('blockText').textContent = selectedBlock.text.substring(0, 20) + '...';
+                document.getElementById('blockFont').textContent = selectedBlock.font;
+                document.getElementById('blockSize').textContent = selectedBlock.size + 'px';
+                document.getElementById('blockPosition').textContent = `${selectedBlock.position.x}%, ${selectedBlock.position.y}%`;
+                selectedBlockInfo.style.display = 'block';
+            } else {
+                document.getElementById('selectedBlock').textContent = 'none';
+                selectedBlockInfo.style.display = 'none';
+            }
+        }
+        
+        // Обновление списка блоков
+        function updateBlocksList() {
+            const blocksList = document.getElementById('testBlocksList');
+            const blocks = app.getCurrentTextBlocks();
+            
+            blocksList.innerHTML = '';
+            
+            blocks.forEach((block, index) => {
+                const blockItem = document.createElement('div');
+                blockItem.className = `block-item ${app.selectedTextBlockId === block.id ? 'active' : ''}`;
+                blockItem.textContent = `${index + 1}. ${block.text.substring(0, 15)}... (${block.font}, ${block.size}px)`;
+                blockItem.onclick = () => {
+                    app.selectTextBlock(block.id);
+                    updateDebugInfo();
+                    updateBlocksList();
+                };
+                blocksList.appendChild(blockItem);
+            });
+        }
+        
+        // Обновляем информацию каждую секунду
+        setInterval(() => {
+            updateDebugInfo();
+            updateBlocksList();
+        }, 1000);
+        
+        // Начальное обновление
+        setTimeout(() => {
+            updateDebugInfo();
+            updateBlocksList();
+        }, 500);
+        
+        console.log('🧪 Тест улучшенной системы текстовых блоков запущен');
+        console.log('📋 Используйте кнопки справа для тестирования функций');
+    </script>
+</body>
+</html>

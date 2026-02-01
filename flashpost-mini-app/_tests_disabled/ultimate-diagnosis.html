@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ultimate Diagnosis - FlashPost</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            height: 100vh;
+            height: 100dvh;
+        }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 4s ease infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+            font-size: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .app {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+        
+        /* Ultimate Diagnosis Styles */
+        .ultimate-diagnosis {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            z-index: 20000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .diagnosis-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+        
+        .diagnosis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .diagnosis-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .section-title {
+            color: #ffff00;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        .diagnosis-log {
+            margin: 3px 0;
+            font-size: 12px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .success { 
+            color: #00ff00; 
+            background: rgba(0, 255, 0, 0.1);
+        }
+        .error { 
+            color: #ff0000; 
+            background: rgba(255, 0, 0, 0.1);
+        }
+        .warning { 
+            color: #ffaa00; 
+            background: rgba(255, 170, 0, 0.1);
+        }
+        .info {
+            color: #00aaff;
+            background: rgba(0, 170, 255, 0.1);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .final-result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .result-success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .result-failure {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .result-partial {
+            background: rgba(255, 170, 0, 0.2);
+            border: 2px solid #ffaa00;
+            color: #ffaa00;
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимированные пузырьки -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <!-- Загрузка -->
+    <div class="loading" id="loading">
+        <div class="loading-icon">⚡</div>
+        <div class="loading-text">FlashPost Mini App</div>
+    </div>
+
+    <!-- Приложение -->
+    <div class="app" id="app">
+        <!-- Контент загружается через JS -->
+    </div>
+
+    <!-- Ultimate Diagnosis Panel -->
+    <div class="ultimate-diagnosis" id="ultimate-diagnosis">
+        <div class="diagnosis-header">
+            <h1>🔍 ULTIMATE FLASHPOST DIAGNOSIS</h1>
+            <p>Полная диагностика всех компонентов системы</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="overall-progress">0%</div>
+            </div>
+        </div>
+        
+        <div class="diagnosis-grid">
+            <div class="diagnosis-section">
+                <div class="section-title">📦 Module Loading</div>
+                <div id="module-logs"></div>
+            </div>
+            
+            <div class="diagnosis-section">
+                <div class="section-title">🌐 DOM Elements</div>
+                <div id="dom-logs"></div>
+            </div>
+            
+            <div class="diagnosis-section">
+                <div class="section-title">🚀 App Initialization</div>
+                <div id="init-logs"></div>
+            </div>
+            
+            <div class="diagnosis-section">
+                <div class="section-title">⚠️ Errors & Warnings</div>
+                <div id="error-logs"></div>
+            </div>
+            
+            <div class="diagnosis-section">
+                <div class="section-title">📊 Performance</div>
+                <div id="performance-logs"></div>
+            </div>
+            
+            <div class="diagnosis-section">
+                <div class="section-title">🔧 System Info</div>
+                <div id="system-logs"></div>
+            </div>
+        </div>
+        
+        <div class="final-result" id="final-result">
+            🔄 Диагностика в процессе...
+        </div>
+    </div>
+
+    <!-- Стили и скрипты -->
+    <link rel="stylesheet" href="app.css">
+    
+    <script>
+        // Ultimate Diagnosis System
+        class UltimateDiagnosis {
+            constructor() {
+                this.startTime = Date.now();
+                this.logs = {
+                    module: [],
+                    dom: [],
+                    init: [],
+                    error: [],
+                    performance: [],
+                    system: []
+                };
+                this.progress = 0;
+                this.totalSteps = 20;
+                this.currentStep = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                this.addSystemLog('🚀 Ultimate Diagnosis Started');
+                this.addSystemLog(`⏰ Start Time: ${new Date().toLocaleString()}`);
+                this.addSystemLog(`🌐 URL: ${window.location.href}`);
+                this.addSystemLog(`📱 User Agent: ${navigator.userAgent.substring(0, 50)}...`);
+                
+                this.setupErrorHandling();
+                this.startDiagnosis();
+            }
+            
+            setupErrorHandling() {
+                const originalError = console.error;
+                const originalWarn = console.warn;
+                const originalLog = console.log;
+                
+                console.error = (...args) => {
+                    const message = args.join(' ');
+                    this.addErrorLog(`❌ ${message}`, 'error');
+                    originalError.apply(console, args);
+                };
+                
+                console.warn = (...args) => {
+                    const message = args.join(' ');
+                    this.addErrorLog(`⚠️ ${message}`, 'warning');
+                    originalWarn.apply(console, args);
+                };
+                
+                console.log = (...args) => {
+                    const message = args.join(' ');
+                    if (message.includes('FlashPost') || message.includes('модул') || message.includes('DOM') || message.includes('инициализ')) {
+                        if (message.includes('❌')) {
+                            this.addInitLog(message, 'error');
+                        } else if (message.includes('✅')) {
+                            this.addInitLog(message, 'success');
+                        } else if (message.includes('⏳') || message.includes('⚠️')) {
+                            this.addInitLog(message, 'warning');
+                        } else {
+                            this.addInitLog(message, 'info');
+                        }
+                    }
+                    originalLog.apply(console, args);
+                };
+                
+                window.addEventListener('error', (event) => {
+                    this.addErrorLog(`❌ RUNTIME ERROR: ${event.message} at ${event.filename}:${event.lineno}`, 'error');
+                });
+                
+                window.addEventListener('unhandledrejection', (event) => {
+                    this.addErrorLog(`❌ PROMISE REJECTION: ${event.reason}`, 'error');
+                });
+            }
+            
+            addLog(category, message, type = 'info') {
+                const timestamp = Date.now() - this.startTime;
+                const logEntry = {
+                    timestamp,
+                    message,
+                    type,
+                    time: new Date().toLocaleTimeString()
+                };
+                
+                this.logs[category].push(logEntry);
+                this.updateLogDisplay(category, logEntry);
+            }
+            
+            addModuleLog(message, type = 'info') { this.addLog('module', message, type); }
+            addDomLog(message, type = 'info') { this.addLog('dom', message, type); }
+            addInitLog(message, type = 'info') { this.addLog('init', message, type); }
+            addErrorLog(message, type = 'error') { this.addLog('error', message, type); }
+            addPerformanceLog(message, type = 'info') { this.addLog('performance', message, type); }
+            addSystemLog(message, type = 'info') { this.addLog('system', message, type); }
+            
+            updateLogDisplay(category, logEntry) {
+                const container = document.getElementById(`${category}-logs`);
+                if (container) {
+                    const div = document.createElement('div');
+                    div.className = `diagnosis-log ${logEntry.type}`;
+                    div.innerHTML = `[+${logEntry.timestamp}ms] ${logEntry.message}`;
+                    container.appendChild(div);
+                    
+                    // Ограничиваем количество логов
+                    if (container.children.length > 20) {
+                        container.removeChild(container.firstChild);
+                    }
+                }
+            }
+            
+            updateProgress(step, message) {
+                this.currentStep = step;
+                this.progress = Math.round((step / this.totalSteps) * 100);
+                
+                const progressBar = document.getElementById('overall-progress');
+                if (progressBar) {
+                    progressBar.style.width = `${this.progress}%`;
+                    progressBar.textContent = `${this.progress}% - ${message}`;
+                }
+                
+                this.addPerformanceLog(`📊 Progress: ${this.progress}% - ${message}`);
+            }
+            
+            async startDiagnosis() {
+                this.updateProgress(1, 'Checking DOM State');
+                await this.checkDOMState();
+                
+                this.updateProgress(3, 'Checking Required Elements');
+                await this.checkRequiredElements();
+                
+                this.updateProgress(5, 'Testing Module Loading');
+                await this.testModuleLoading();
+                
+                this.updateProgress(10, 'Waiting for App Initialization');
+                await this.waitForAppInitialization();
+                
+                this.updateProgress(15, 'Testing App Functionality');
+                await this.testAppFunctionality();
+                
+                this.updateProgress(18, 'Generating Performance Report');
+                await this.generatePerformanceReport();
+                
+                this.updateProgress(20, 'Diagnosis Complete');
+                this.generateFinalReport();
+            }
+            
+            async checkDOMState() {
+                this.addDomLog(`📄 DOM Ready State: ${document.readyState}`, 
+                    document.readyState === 'complete' ? 'success' : 'warning');
+                
+                if (document.readyState === 'loading') {
+                    this.addDomLog('⏳ Waiting for DOM to load...', 'warning');
+                    await new Promise(resolve => {
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', resolve);
+                        } else {
+                            resolve();
+                        }
+                    });
+                    this.addDomLog('✅ DOM loaded', 'success');
+                }
+            }
+            
+            async checkRequiredElements() {
+                const requiredElements = ['app', 'loading'];
+                
+                requiredElements.forEach(elementId => {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        this.addDomLog(`✅ #${elementId} element found`, 'success');
+                    } else {
+                        this.addDomLog(`❌ #${elementId} element NOT found`, 'error');
+                    }
+                });
+            }
+            
+            async testModuleLoading() {
+                const requiredModules = [
+                    'StateManager', 'Renderer', 'Editor', 'DragManager',
+                    'ExportManager', 'AIManager', 'TemplateManager', 'FlashPostApp'
+                ];
+                
+                // Проверяем модули каждые 500мс в течение 5 секунд
+                for (let i = 0; i < 10; i++) {
+                    let loadedCount = 0;
+                    
+                    requiredModules.forEach(module => {
+                        if (typeof window[module] !== 'undefined') {
+                            if (!this.logs.module.find(log => log.message.includes(`✅ ${module}`))) {
+                                this.addModuleLog(`✅ ${module} loaded`, 'success');
+                            }
+                            loadedCount++;
+                        }
+                    });
+                    
+                    this.addModuleLog(`📊 Modules loaded: ${loadedCount}/${requiredModules.length}`, 
+                        loadedCount === requiredModules.length ? 'success' : 'warning');
+                    
+                    if (loadedCount === requiredModules.length) break;
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
+            
+            async waitForAppInitialization() {
+                // Ждем инициализации приложения до 10 секунд
+                for (let i = 0; i < 20; i++) {
+                    if (typeof window.flashPostApp !== 'undefined') {
+                        this.addInitLog('✅ FlashPostApp instance created!', 'success');
+                        
+                        if (window.flashPostApp.state) {
+                            this.addInitLog('✅ State manager available', 'success');
+                            try {
+                                const mode = window.flashPostApp.state.getMode();
+                                this.addInitLog(`🎯 Current mode: ${mode}`, 'success');
+                            } catch (error) {
+                                this.addInitLog(`❌ Error getting mode: ${error.message}`, 'error');
+                            }
+                        }
+                        
+                        if (window.flashPostApp.renderer) {
+                            this.addInitLog('✅ Renderer available', 'success');
+                        }
+                        
+                        break;
+                    } else {
+                        if (i % 4 === 0) { // Логируем каждые 2 секунды
+                            this.addInitLog(`⏳ Waiting for app initialization... (${i/2}s)`, 'warning');
+                        }
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                if (typeof window.flashPostApp === 'undefined') {
+                    this.addInitLog('❌ FlashPostApp failed to initialize after 10 seconds', 'error');
+                }
+            }
+            
+            async testAppFunctionality() {
+                if (typeof window.flashPostApp !== 'undefined') {
+                    try {
+                        // Тестируем основные методы
+                        const slidesCount = window.flashPostApp.state.getSlidesCount();
+                        this.addInitLog(`📊 Slides count: ${slidesCount}`, 'info');
+                        
+                        const mode = window.flashPostApp.state.getMode();
+                        this.addInitLog(`🎯 App mode: ${mode}`, 'info');
+                        
+                        this.addInitLog('✅ Basic functionality test passed', 'success');
+                    } catch (error) {
+                        this.addInitLog(`❌ Functionality test failed: ${error.message}`, 'error');
+                    }
+                } else {
+                    this.addInitLog('❌ Cannot test functionality - app not initialized', 'error');
+                }
+            }
+            
+            async generatePerformanceReport() {
+                const totalTime = Date.now() - this.startTime;
+                this.addPerformanceLog(`⏱️ Total diagnosis time: ${totalTime}ms`);
+                
+                const errorCount = this.logs.error.length;
+                const warningCount = this.logs.error.filter(log => log.type === 'warning').length;
+                
+                this.addPerformanceLog(`📊 Total errors: ${errorCount}`);
+                this.addPerformanceLog(`⚠️ Total warnings: ${warningCount}`);
+                
+                // Проверяем производительность
+                if (totalTime < 5000) {
+                    this.addPerformanceLog('✅ Good performance (< 5s)', 'success');
+                } else if (totalTime < 10000) {
+                    this.addPerformanceLog('⚠️ Moderate performance (5-10s)', 'warning');
+                } else {
+                    this.addPerformanceLog('❌ Poor performance (> 10s)', 'error');
+                }
+            }
+            
+            generateFinalReport() {
+                const totalErrors = this.logs.error.filter(log => log.type === 'error').length;
+                const totalWarnings = this.logs.error.filter(log => log.type === 'warning').length;
+                const appInitialized = typeof window.flashPostApp !== 'undefined';
+                const totalTime = Date.now() - this.startTime;
+                
+                const finalResult = document.getElementById('final-result');
+                
+                let resultClass, resultText;
+                
+                if (appInitialized && totalErrors === 0) {
+                    resultClass = 'result-success';
+                    resultText = '🎉 ДИАГНОСТИКА УСПЕШНА!\n✅ FlashPostApp инициализирован\n✅ Ошибок не найдено';
+                } else if (appInitialized && totalErrors < 3) {
+                    resultClass = 'result-partial';
+                    resultText = `⚠️ ЧАСТИЧНЫЙ УСПЕХ\n✅ FlashPostApp инициализирован\n⚠️ Найдено ошибок: ${totalErrors}`;
+                } else {
+                    resultClass = 'result-failure';
+                    resultText = `❌ ДИАГНОСТИКА ПРОВАЛЕНА\n${appInitialized ? '✅' : '❌'} FlashPostApp ${appInitialized ? 'инициализирован' : 'НЕ инициализирован'}\n❌ Найдено ошибок: ${totalErrors}`;
+                }
+                
+                finalResult.className = `final-result ${resultClass}`;
+                finalResult.innerHTML = `
+                    ${resultText}<br><br>
+                    📊 Время диагностики: ${totalTime}ms<br>
+                    ⚠️ Предупреждений: ${totalWarnings}<br>
+                    🔍 Всего проверок: ${this.totalSteps}
+                `;
+                
+                // Выводим итоговый отчет в консоль
+                console.log('='.repeat(60));
+                console.log('ULTIMATE FLASHPOST DIAGNOSIS REPORT');
+                console.log('='.repeat(60));
+                console.log(`Status: ${appInitialized ? 'SUCCESS' : 'FAILURE'}`);
+                console.log(`App Initialized: ${appInitialized}`);
+                console.log(`Total Errors: ${totalErrors}`);
+                console.log(`Total Warnings: ${totalWarnings}`);
+                console.log(`Diagnosis Time: ${totalTime}ms`);
+                console.log('='.repeat(60));
+            }
+        }
+        
+        // Запускаем Ultimate Diagnosis
+        let ultimateDiagnosis;
+        
+        // Ждем загрузки DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                ultimateDiagnosis = new UltimateDiagnosis();
+            });
+        } else {
+            ultimateDiagnosis = new UltimateDiagnosis();
+        }
+    </script>
+    
+    <!-- Модульная архитектура -->
+    <script src="src/state.js" defer></script>
+    <script src="src/renderer.js" defer></script>
+    <script src="src/editor.js" defer></script>
+    <script src="src/drag.js" defer></script>
+    <script src="src/export.js" defer></script>
+    <script src="src/ai.js" defer></script>
+    <script src="src/template-manager.js" defer></script>
+    <script src="src/app.js" defer></script>
+</body>
+</html>

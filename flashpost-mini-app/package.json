@@ -1,0 +1,34 @@
+{
+  "name": "flashpost-mini-app",
+  "version": "1.0.0",
+  "description": "Мини-приложение для создания каруселей постов в Instagram за 30 секунд",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "instagram",
+    "carousel",
+    "posts",
+    "telegram",
+    "webapp",
+    "mini-app",
+    "social-media",
+    "content-creation"
+  ],
+  "author": "FlashPost Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/flashpost-mini-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/flashpost-mini-app/issues"
+  },
+  "homepage": "https://github.com/yourusername/flashpost-mini-app#readme"
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Проверка модулей</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .module { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .loaded { background: #d4edda; color: #155724; }
+        .missing { background: #f8d7da; color: #721c24; }
+        .error { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Проверка загрузки модулей</h1>
+    <div id="results"></div>
+
+    <script>
+        function checkModule(name) {
+            const resultsDiv = document.getElementById('results');
+            const isLoaded = typeof window[name] !== 'undefined';
+            const className = isLoaded ? 'loaded' : 'missing';
+            const icon = isLoaded ? '✅' : '❌';
+            
+            resultsDiv.innerHTML += `
+                <div class="module ${className}">
+                    ${icon} ${name}: ${isLoaded ? 'Загружен' : 'НЕ загружен'}
+                </div>
+            `;
+            
+            console.log(`${icon} ${name}: ${isLoaded ? 'Загружен' : 'НЕ загружен'}`);
+            return isLoaded;
+        }
+
+        function checkAllModules() {
+            const modules = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager',
+                'FlashPostApp'
+            ];
+
+            let allLoaded = true;
+            modules.forEach(module => {
+                if (!checkModule(module)) {
+                    allLoaded = false;
+                }
+            });
+
+            const resultsDiv = document.getElementById('results');
+            if (allLoaded) {
+                resultsDiv.innerHTML += `
+                    <div class="module loaded">
+                        🎉 Все модули загружены! Можно инициализировать приложение.
+                    </div>
+                `;
+                
+                // Пробуем создать приложение
+                try {
+                    window.flashPostApp = new FlashPostApp();
+                    resultsDiv.innerHTML += `
+                        <div class="module loaded">
+                            ✅ FlashPostApp успешно создан!
+                        </div>
+                    `;
+                } catch (error) {
+                    resultsDiv.innerHTML += `
+                        <div class="module error">
+                            ❌ Ошибка создания FlashPostApp: ${error.message}
+                        </div>
+                    `;
+                }
+            } else {
+                resultsDiv.innerHTML += `
+                    <div class="module missing">
+                        ❌ Не все модули загружены. Приложение не может быть инициализировано.
+                    </div>
+                `;
+            }
+        }
+
+        // Проверяем после загрузки всех скриптов
+        window.addEventListener('load', () => {
+            setTimeout(checkAllModules, 100);
+        });
+    </script>
+
+    <!-- Загружаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/templates.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>

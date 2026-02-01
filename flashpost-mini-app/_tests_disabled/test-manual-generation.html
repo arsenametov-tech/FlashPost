@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Manual Generation - FlashPost</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Основные стили приложения -->
+    <link rel="stylesheet" href="app.css">
+    
+    <style>
+        .test-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #0f0f14;
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            margin: 10px 0;
+            resize: vertical;
+        }
+        
+        .test-btn {
+            background: linear-gradient(45deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            padding: 15px 30px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(131, 58, 180, 0.6);
+        }
+        
+        .log {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Manual Generation</h1>
+        <p>Тестирование ручной генерации карусели без AI</p>
+        
+        <div class="test-section">
+            <h3>📝 Ручная генерация карусели</h3>
+            <label for="testTopic">Введите тему для карусели:</label>
+            <textarea 
+                id="testTopic" 
+                class="test-input" 
+                rows="3" 
+                placeholder="Например: Как начать инвестировать, Здоровое питание, Продуктивность..."
+            ></textarea>
+            
+            <button class="test-btn" onclick="testManualGeneration()">🎯 Создать карусель</button>
+            <button class="test-btn" onclick="openMainApp()">🚀 Открыть основное приложение</button>
+            
+            <div id="status" class="status info">Готов к тестированию</div>
+            <div id="log" class="log"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Результат генерации</h3>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <!-- Модульная архитектура -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let testApp;
+        
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        function testManualGeneration() {
+            const topic = document.getElementById('testTopic').value.trim();
+            
+            if (!topic) {
+                updateStatus('❌ Введите тему для карусели', 'error');
+                return;
+            }
+            
+            log('🚀 Начинаем тест ручной генерации...');
+            updateStatus('🔄 Тестирование генерации...', 'info');
+            
+            try {
+                // Инициализируем тестовое приложение если еще не создано
+                if (!testApp) {
+                    log('📦 Инициализация тестового приложения...');
+                    testApp = new FlashPostApp();
+                }
+                
+                // Симулируем ввод темы
+                log(`📝 Тема: "${topic}"`);
+                
+                // Тестируем метод ручной генерации
+                const slidesData = testApp.generateManualSlides(topic);
+                
+                log(`✅ Сгенерировано ${slidesData.length} слайдов`);
+                
+                // Показываем результат
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <h4>📊 Результат генерации:</h4>
+                    <p><strong>Тема:</strong> ${topic}</p>
+                    <p><strong>Количество слайдов:</strong> ${slidesData.length}</p>
+                    <div style="margin-top: 15px;">
+                        <h5>📋 Список слайдов:</h5>
+                        ${slidesData.map((slide, index) => `
+                            <div style="background: rgba(255,255,255,0.1); padding: 10px; margin: 5px 0; border-radius: 8px;">
+                                <strong>${index + 1}. ${slide.title}</strong><br>
+                                <small style="color: #ccc;">${slide.subtitle}</small><br>
+                                <small style="color: #999;">Цвет: ${slide.background.color} | Блоков текста: ${slide.textBlocks.length}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                updateStatus('✅ Генерация успешна!', 'success');
+                log('✅ Тест ручной генерации завершен успешно');
+                
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`);
+                updateStatus('❌ Ошибка генерации', 'error');
+                console.error('Ошибка тестирования:', error);
+            }
+        }
+
+        function openMainApp() {
+            log('🚀 Открытие основного приложения...');
+            window.open('/index.html', '_blank');
+        }
+
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            log('🧪 Test Manual Generation загружен');
+            
+            // Предзаполняем тестовую тему
+            document.getElementById('testTopic').value = 'Как начать инвестировать';
+        });
+
+        // Enter для генерации
+        document.getElementById('testTopic').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                testManualGeneration();
+            }
+        });
+    </script>
+</body>
+</html>

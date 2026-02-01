@@ -15,7 +15,7 @@
     --border: rgba(131, 58, 180, 0.2);
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     --radius: 12px;
-    --transition: all 0.2s ease;
+    --transition: all 0.15s ease;
 }
 
 /* Темная тема */
@@ -30,13 +30,30 @@
 }
 
 /* Основные стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--tg-bg);
+    color: var(--tg-text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    height: 100vh;
+    height: 100dvh;
+}
+
 .app {
     background: var(--tg-bg);
     color: var(--tg-text);
     min-height: 100vh;
     min-height: 100dvh;
     padding: 16px;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.2s ease;
 }
 
 /* Секции */
@@ -46,12 +63,12 @@
 
 .section.active {
     display: block;
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn 0.2s ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ===== ГЛАВНЫЙ ЭКРАН ===== */
@@ -118,7 +135,7 @@
 .idea:active {
     background: var(--primary);
     color: white;
-    transform: scale(0.95);
+    transform: scale(0.98);
 }
 
 /* Ввод темы */
@@ -207,7 +224,7 @@
 
 .btn-secondary:active {
     background: var(--primary-light);
-    transform: scale(0.95);
+    transform: scale(0.98);
 }
 
 .btn-primary {
@@ -217,7 +234,7 @@
 
 .btn-primary:active {
     background: #6d2d96;
-    transform: scale(0.95);
+    transform: scale(0.98);
 }
 
 .btn:disabled {
@@ -300,9 +317,10 @@
     justify-content: center;
     opacity: 0;
     transform: translateX(100%);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     padding: 20px;
     background: linear-gradient(135deg, var(--primary) 0%, #fd1d1d 50%, #fcb045 100%);
+    will-change: transform, opacity;
 }
 
 .slide.active {
@@ -572,12 +590,12 @@
     position: relative;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
-    transition: all 0.3s ease;
+    transition: transform 0.15s ease;
+    will-change: transform;
 }
 
 .slide-preview.updating {
-    transform: scale(0.95);
-    opacity: 0.7;
+    transform: scale(0.98);
 }
 
 .preview-text {

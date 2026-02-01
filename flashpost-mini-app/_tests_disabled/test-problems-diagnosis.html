@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problems Diagnosis - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+        
+        .log-container {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-section">
+            <h1>🔍 Problems Diagnosis</h1>
+            <p>Комплексная диагностика проблем FlashPost Mini App</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Quick Tests</h2>
+            <div>
+                <button class="test-button" onclick="testModuleLoading()">
+                    🔧 Test Module Loading
+                </button>
+                <button class="test-button" onclick="testAppInitialization()">
+                    🚀 Test App Initialization
+                </button>
+                <button class="test-button" onclick="testUIElements()">
+                    🎨 Test UI Elements
+                </button>
+                <button class="test-button" onclick="testStateManagement()">
+                    💾 Test State Management
+                </button>
+                <button class="test-button" onclick="testTemplateSystem()">
+                    🎯 Test Template System
+                </button>
+                <button class="test-button" onclick="testBackgroundImages()">
+                    🖼️ Test Background Images
+                </button>
+                <button class="test-button" onclick="runAllTests()">
+                    🚀 Run All Tests
+                </button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div id="testResults">
+                <p>Нажмите кнопки выше для запуска тестов...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Diagnostic Log</h2>
+            <div class="log-container" id="diagnosticLog">
+                <div class="log-entry log-info">🔄 Diagnostic system initialized...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загружаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let testResults = {
+            moduleLoading: false,
+            appInitialization: false,
+            uiElements: false,
+            stateManagement: false,
+            templateSystem: false,
+            backgroundImages: false
+        };
+
+        // Logging function
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('diagnosticLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Test module loading
+        function testModuleLoading() {
+            log('🔧 Testing module loading...', 'info');
+            
+            try {
+                const requiredClasses = [
+                    'StateManager',
+                    'Renderer', 
+                    'Editor',
+                    'DragManager',
+                    'ExportManager',
+                    'AIManager',
+                    'TemplateManager',
+                    'FlashPostApp'
+                ];
+                
+                let loadedModules = 0;
+                let missingModules = [];
+                
+                requiredClasses.forEach(className => {
+                    if (typeof window[className] !== 'undefined') {
+                        loadedModules++;
+                        log(`✅ ${className} loaded`, 'success');
+                    } else {
+                        missingModules.push(className);
+                        log(`❌ ${className} missing`, 'error');
+                    }
+                });
+                
+                if (missingModules.length === 0) {
+                    log('✅ All modules loaded successfully', 'success');
+                    testResults.moduleLoading = true;
+                } else {
+                    log(`❌ Missing modules: ${missingModules.join(', ')}`, 'error');
+                    testResults.moduleLoading = false;
+                }
+                
+            } catch (error) {
+                log(`❌ Module loading error: ${error.message}`, 'error');
+                testResults.moduleLoading = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test app initialization
+        function testAppInitialization() {
+            log('🚀 Testing app initialization...', 'info');
+            
+            try {
+                // Try to create app instance
+                const app = new FlashPostApp();
+                
+                if (app && app.state && app.renderer && app.editor) {
+                    log('✅ App instance created successfully', 'success');
+                    
+                    // Test state initialization
+                    if (app.state.getMode() === 'start') {
+                        log('✅ Initial state is correct', 'success');
+                        testResults.appInitialization = true;
+                    } else {
+                        log(`❌ Wrong initial state: ${app.state.getMode()}`, 'error');
+                        testResults.appInitialization = false;
+                    }
+                } else {
+                    log('❌ App instance creation failed', 'error');
+                    testResults.appInitialization = false;
+                }
+                
+            } catch (error) {
+                log(`❌ App initialization error: ${error.message}`, 'error');
+                testResults.appInitialization = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test UI elements
+        function testUIElements() {
+            log('🎨 Testing UI elements...', 'info');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                
+                // Test start screen creation
+                const startDOM = renderer.createStartDOM();
+                if (startDOM && startDOM.querySelector('#topicInput')) {
+                    log('✅ Start screen DOM created', 'success');
+                } else {
+                    log('❌ Start screen DOM creation failed', 'error');
+                    testResults.uiElements = false;
+                    updateResults();
+                    return;
+                }
+                
+                // Test Instagram input
+                if (startDOM.querySelector('#instagramInput')) {
+                    log('✅ Instagram input field created', 'success');
+                } else {
+                    log('❌ Instagram input field missing', 'error');
+                }
+                
+                // Test UI element creation methods
+                const testNickname = renderer.createInstagramNickname('testuser');
+                const testCTA = renderer.createCTAText('Test CTA');
+                const testSwipe = renderer.createSwipeIndicator();
+                const testArrow = renderer.createCustomArrow();
+                
+                if (testNickname && testCTA && testSwipe && testArrow) {
+                    log('✅ All UI element methods work', 'success');
+                    testResults.uiElements = true;
+                } else {
+                    log('❌ Some UI element methods failed', 'error');
+                    testResults.uiElements = false;
+                }
+                
+            } catch (error) {
+                log(`❌ UI elements error: ${error.message}`, 'error');
+                testResults.uiElements = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test state management
+        function testStateManagement() {
+            log('💾 Testing state management...', 'info');
+            
+            try {
+                const state = new StateManager();
+                
+                // Test Instagram nickname
+                state.setInstagramNickname('testuser');
+                if (state.getInstagramNickname() === 'testuser') {
+                    log('✅ Instagram nickname state works', 'success');
+                } else {
+                    log('❌ Instagram nickname state failed', 'error');
+                }
+                
+                // Test CTA text
+                state.setCTAText('Test CTA');
+                if (state.getCTAText() === 'Test CTA') {
+                    log('✅ CTA text state works', 'success');
+                } else {
+                    log('❌ CTA text state failed', 'error');
+                }
+                
+                // Test slide management
+                state.clearProject();
+                const testSlide = {
+                    id: 'test-slide',
+                    textBlocks: [],
+                    background: { type: 'color', color: '#833ab4' }
+                };
+                
+                state.addSlide(testSlide);
+                if (state.getSlidesCount() === 1) {
+                    log('✅ Slide management works', 'success');
+                    testResults.stateManagement = true;
+                } else {
+                    log('❌ Slide management failed', 'error');
+                    testResults.stateManagement = false;
+                }
+                
+            } catch (error) {
+                log(`❌ State management error: ${error.message}`, 'error');
+                testResults.stateManagement = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test template system
+        function testTemplateSystem() {
+            log('🎯 Testing template system...', 'info');
+            
+            try {
+                const state = new StateManager();
+                const templateManager = new TemplateManager(state);
+                
+                // Create test slide
+                const testSlide = {
+                    id: 'test-slide',
+                    textBlocks: [{
+                        id: 'test-block',
+                        text: 'Test Text',
+                        font: 'Inter',
+                        size: 24,
+                        color: '#ffffff'
+                    }],
+                    background: { type: 'color', color: '#833ab4' }
+                };
+                
+                state.addSlide(testSlide);
+                state.setActiveSlideByIndex(0);
+                
+                // Test template creation
+                const success = templateManager.saveCurrentSlideAsTemplate('Test Template');
+                if (success) {
+                    log('✅ Template creation works', 'success');
+                    
+                    // Test template retrieval
+                    const templates = templateManager.getTemplatesFromStorage();
+                    if (templates.length > 0) {
+                        log('✅ Template storage works', 'success');
+                        testResults.templateSystem = true;
+                    } else {
+                        log('❌ Template storage failed', 'error');
+                        testResults.templateSystem = false;
+                    }
+                } else {
+                    log('❌ Template creation failed', 'error');
+                    testResults.templateSystem = false;
+                }
+                
+            } catch (error) {
+                log(`❌ Template system error: ${error.message}`, 'error');
+                testResults.templateSystem = false;
+            }
+            
+            updateResults();
+        }
+
+        // Test background images
+        function testBackgroundImages() {
+            log('🖼️ Testing background images...', 'info');
+            
+            try {
+                const state = new StateManager();
+                const renderer = new Renderer(state);
+                const editor = new Editor(state, renderer);
+                
+                // Test background methods
+                const methods = [
+                    'handleBackgroundImageUpload',
+                    'removeBackgroundImage',
+                    'updateSlideBackground',
+                    'updateBackgroundControls'
+                ];
+                
+                let allMethodsExist = true;
+                methods.forEach(method => {
+                    if (typeof editor[method] === 'function') {
+                        log(`✅ Method ${method} exists`, 'success');
+                    } else {
+                        log(`❌ Method ${method} missing`, 'error');
+                        allMethodsExist = false;
+                    }
+                });
+                
+                // Test background controls creation
+                const backgroundGroup = renderer.createBackgroundPropertiesGroup();
+                if (backgroundGroup && backgroundGroup.querySelector('#backgroundImageUpload')) {
+                    log('✅ Background controls created', 'success');
+                } else {
+                    log('❌ Background controls creation failed', 'error');
+                    allMethodsExist = false;
+                }
+                
+                testResults.backgroundImages = allMethodsExist;
+                
+            } catch (error) {
+                log(`❌ Background images error: ${error.message}`, 'error');
+                testResults.backgroundImages = false;
+            }
+            
+            updateResults();
+        }
+
+        // Run all tests
+        function runAllTests() {
+            log('🚀 Running comprehensive diagnostic...', 'info');
+            
+            // Reset results
+            Object.keys(testResults).forEach(key => {
+                testResults[key] = false;
+            });
+            
+            // Run tests sequentially
+            setTimeout(() => testModuleLoading(), 100);
+            setTimeout(() => testAppInitialization(), 500);
+            setTimeout(() => testUIElements(), 1000);
+            setTimeout(() => testStateManagement(), 1500);
+            setTimeout(() => testTemplateSystem(), 2000);
+            setTimeout(() => testBackgroundImages(), 2500);
+            
+            setTimeout(() => {
+                const passedTests = Object.values(testResults).filter(result => result).length;
+                const totalTests = Object.keys(testResults).length;
+                
+                if (passedTests === totalTests) {
+                    log('🎉 All tests passed! No problems detected.', 'success');
+                } else {
+                    log(`⚠️ ${totalTests - passedTests} test(s) failed. Problems detected.`, 'warning');
+                }
+                
+                generateProblemReport();
+            }, 3000);
+        }
+
+        // Generate problem report
+        function generateProblemReport() {
+            const failedTests = Object.entries(testResults)
+                .filter(([key, value]) => !value)
+                .map(([key, value]) => key);
+            
+            if (failedTests.length > 0) {
+                log('📋 Problem Report:', 'warning');
+                failedTests.forEach(test => {
+                    log(`❌ Failed: ${test}`, 'error');
+                });
+                
+                // Suggest fixes
+                log('💡 Suggested fixes:', 'info');
+                failedTests.forEach(test => {
+                    switch(test) {
+                        case 'moduleLoading':
+                            log('- Check if all JS files are loaded correctly', 'info');
+                            log('- Verify script tags in HTML', 'info');
+                            break;
+                        case 'appInitialization':
+                            log('- Check FlashPostApp constructor', 'info');
+                            log('- Verify module dependencies', 'info');
+                            break;
+                        case 'uiElements':
+                            log('- Check renderer UI methods', 'info');
+                            log('- Verify DOM creation functions', 'info');
+                            break;
+                        case 'stateManagement':
+                            log('- Check StateManager methods', 'info');
+                            log('- Verify state persistence', 'info');
+                            break;
+                        case 'templateSystem':
+                            log('- Check TemplateManager integration', 'info');
+                            log('- Verify localStorage access', 'info');
+                            break;
+                        case 'backgroundImages':
+                            log('- Check Editor background methods', 'info');
+                            log('- Verify Renderer background controls', 'info');
+                            break;
+                    }
+                });
+            }
+        }
+
+        // Update results display
+        function updateResults() {
+            const resultsEl = document.getElementById('testResults');
+            const totalTests = Object.keys(testResults).length;
+            const passedTests = Object.values(testResults).filter(result => result).length;
+            
+            resultsEl.innerHTML = `
+                <h3>Diagnostic Results</h3>
+                <div class="status ${passedTests === totalTests ? 'status-success' : passedTests > 0 ? 'status-warning' : 'status-error'}">
+                    ${passedTests}/${totalTests} tests passed
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                    ${Object.entries(testResults).map(([key, value]) => `
+                        <div>
+                            <strong>${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong><br>
+                            <span class="status ${value ? 'status-success' : 'status-error'}">
+                                ${value ? 'PASSED' : 'FAILED'}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Problems diagnosis initialized', 'success');
+            updateResults();
+        });
+    </script>
+</body>
+</html>

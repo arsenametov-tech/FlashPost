@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template System Test - FlashPost</title>
+    <link rel="stylesheet" href="../app.css">
+    <style>
+        body {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .test-btn {
+            padding: 10px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .test-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+        
+        .test-results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin: 5px 0;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎯 Template System Test</h1>
+            <p>Тестирование системы шаблонов FlashPost</p>
+        </div>
+
+        <!-- Инициализация -->
+        <div class="test-section">
+            <h3>1. Инициализация модулей</h3>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="initializeModules()">Инициализировать модули</button>
+                <button class="test-btn" onclick="checkModules()">Проверить модули</button>
+            </div>
+            <div id="init-results" class="test-results"></div>
+        </div>
+
+        <!-- Создание тестовых данных -->
+        <div class="test-section">
+            <h3>2. Создание тестовых данных</h3>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="createTestProject()">Создать тестовый проект</button>
+                <button class="test-btn" onclick="addTestSlides()">Добавить слайды</button>
+                <button class="test-btn" onclick="addTextBlocks()">Добавить текстовые блоки</button>
+            </div>
+            <div id="data-results" class="test-results"></div>
+        </div>
+
+        <!-- Тестирование шаблонов -->
+        <div class="test-section">
+            <h3>3. Тестирование системы шаблонов</h3>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testSaveTemplate()">Сохранить шаблон</button>
+                <button class="test-btn" onclick="testLoadTemplates()">Загрузить шаблоны</button>
+                <button class="test-btn" onclick="testApplyTemplate()">Применить шаблон</button>
+                <button class="test-btn" onclick="testApplyToAll()">Применить ко всем</button>
+                <button class="test-btn" onclick="testDeleteTemplate()">Удалить шаблон</button>
+            </div>
+            <div id="template-results" class="test-results"></div>
+        </div>
+
+        <!-- Тестирование UI -->
+        <div class="test-section">
+            <h3>4. Тестирование UI шаблонов</h3>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testSaveModal()">Модальное окно сохранения</button>
+                <button class="test-btn" onclick="testSelectModal()">Модальное окно выбора</button>
+                <button class="test-btn" onclick="testTemplateButtons()">Кнопки шаблонов</button>
+            </div>
+            <div id="ui-results" class="test-results"></div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="test-section">
+            <h3>5. Статистика и экспорт</h3>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="showTemplateStats()">Статистика шаблонов</button>
+                <button class="test-btn" onclick="exportTemplates()">Экспорт шаблонов</button>
+                <button class="test-btn" onclick="clearAllTemplates()">Очистить все шаблоны</button>
+            </div>
+            <div id="stats-results" class="test-results"></div>
+        </div>
+    </div>
+
+    <!-- Модули -->
+    <script src="../src/state.js"></script>
+    <script src="../src/renderer.js"></script>
+    <script src="../src/editor.js"></script>
+    <script src="../src/drag.js"></script>
+    <script src="../src/export.js"></script>
+    <script src="../src/ai.js"></script>
+    <script src="../src/template-manager.js"></script>
+    <script src="../src/app.js"></script>
+
+    <script>
+        // Глобальные переменные для тестирования
+        let state, renderer, editor, templateManager;
+        let testResults = {
+            init: [],
+            data: [],
+            template: [],
+            ui: [],
+            stats: []
+        };
+
+        // Утилиты для логирования
+        function log(section, message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            
+            testResults[section].push({ message: logMessage, type });
+            updateResults(section);
+            
+            console.log(`${type.toUpperCase()}: ${logMessage}`);
+        }
+
+        function updateResults(section) {
+            const container = document.getElementById(`${section}-results`);
+            if (!container) return;
+            
+            container.innerHTML = testResults[section]
+                .map(result => `<div class="status ${result.type}">${result.message}</div>`)
+                .join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 1. Инициализация модулей
+        function initializeModules() {
+            try {
+                log('init', 'Начало инициализации модулей...', 'info');
+                
+                // Инициализируем модули
+                state = new StateManager();
+                renderer = new Renderer(state);
+                editor = new Editor(state, renderer);
+                templateManager = new TemplateManager(state);
+                
+                // Делаем доступными глобально
+                window.state = state;
+                window.renderer = renderer;
+                window.editor = editor;
+                window.templateManager = templateManager;
+                
+                log('init', '✅ Все модули успешно инициализированы', 'success');
+                
+            } catch (error) {
+                log('init', `❌ Ошибка инициализации: ${error.message}`, 'error');
+                console.error('Ошибка инициализации:', error);
+            }
+        }
+
+        function checkModules() {
+            const modules = [
+                { name: 'StateManager', instance: window.StateManager },
+                { name: 'Renderer', instance: window.Renderer },
+                { name: 'Editor', instance: window.Editor },
+                { name: 'TemplateManager', instance: window.TemplateManager },
+                { name: 'state', instance: window.state },
+                { name: 'templateManager', instance: window.templateManager }
+            ];
+            
+            modules.forEach(module => {
+                if (module.instance) {
+                    log('init', `✅ ${module.name} доступен`, 'success');
+                } else {
+                    log('init', `❌ ${module.name} не найден`, 'error');
+                }
+            });
+        }
+
+        // 2. Создание тестовых данных
+        function createTestProject() {
+            try {
+                if (!state) {
+                    log('data', '❌ StateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                state.clearProject();
+                log('data', '✅ Тестовый проект создан', 'success');
+                
+            } catch (error) {
+                log('data', `❌ Ошибка создания проекта: ${error.message}`, 'error');
+            }
+        }
+
+        function addTestSlides() {
+            try {
+                if (!state) {
+                    log('data', '❌ StateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                // Создаем 3 тестовых слайда
+                for (let i = 1; i <= 3; i++) {
+                    const slide = state.createSlide({
+                        title: `Тестовый слайд ${i}`,
+                        text: `Содержимое слайда ${i}`,
+                        background: {
+                            type: 'color',
+                            color: i === 1 ? '#833ab4' : i === 2 ? '#fd1d1d' : '#fcb045',
+                            image: null,
+                            x: 50,
+                            y: 50,
+                            brightness: 100
+                        },
+                        textBlocks: [],
+                        autoKeywords: [`ключевое${i}`, `слово${i}`]
+                    });
+                    
+                    log('data', `✅ Создан слайд ${i}: ${slide.id}`, 'success');
+                }
+                
+                state.setActiveSlideByIndex(0);
+                log('data', `✅ Создано ${state.getSlidesCount()} слайдов`, 'success');
+                
+            } catch (error) {
+                log('data', `❌ Ошибка создания слайдов: ${error.message}`, 'error');
+            }
+        }
+
+        function addTextBlocks() {
+            try {
+                if (!state) {
+                    log('data', '❌ StateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const slides = state.getAllSlides();
+                
+                slides.forEach((slide, slideIndex) => {
+                    // Добавляем 2-3 текстовых блока на каждый слайд
+                    const blocksCount = 2 + slideIndex; // 2, 3, 4 блока
+                    
+                    for (let i = 0; i < blocksCount; i++) {
+                        const block = state.createTextBlock(slide.id, {
+                            text: `Текстовый блок ${i + 1} на слайде ${slideIndex + 1}`,
+                            x: 20 + (i * 25),
+                            y: 20 + (i * 15),
+                            width: 60,
+                            height: 'auto',
+                            font: i === 0 ? 'Inter' : i === 1 ? 'Montserrat' : 'Oswald',
+                            size: 16 + (i * 4),
+                            weight: 700,
+                            color: '#ffffff',
+                            backgroundColor: 'transparent'
+                        });
+                        
+                        log('data', `✅ Добавлен блок ${block.id} на слайд ${slideIndex + 1}`, 'success');
+                    }
+                });
+                
+                log('data', '✅ Текстовые блоки добавлены на все слайды', 'success');
+                
+            } catch (error) {
+                log('data', `❌ Ошибка добавления блоков: ${error.message}`, 'error');
+            }
+        }
+
+        // 3. Тестирование шаблонов
+        function testSaveTemplate() {
+            try {
+                if (!templateManager) {
+                    log('template', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const templateName = `Тестовый шаблон ${Date.now()}`;
+                const success = templateManager.saveCurrentSlideAsTemplate(templateName);
+                
+                if (success) {
+                    log('template', `✅ Шаблон "${templateName}" сохранен`, 'success');
+                } else {
+                    log('template', '❌ Ошибка сохранения шаблона', 'error');
+                }
+                
+            } catch (error) {
+                log('template', `❌ Ошибка сохранения: ${error.message}`, 'error');
+            }
+        }
+
+        function testLoadTemplates() {
+            try {
+                if (!templateManager) {
+                    log('template', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const templates = templateManager.getTemplatesFromStorage();
+                log('template', `✅ Загружено ${templates.length} шаблонов`, 'success');
+                
+                templates.forEach((template, index) => {
+                    log('template', `  ${index + 1}. "${template.name}" (${template.textBlocksLayout.length} блоков)`, 'info');
+                });
+                
+            } catch (error) {
+                log('template', `❌ Ошибка загрузки: ${error.message}`, 'error');
+            }
+        }
+
+        function testApplyTemplate() {
+            try {
+                if (!templateManager) {
+                    log('template', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const templates = templateManager.getTemplatesFromStorage();
+                if (templates.length === 0) {
+                    log('template', '❌ Нет сохраненных шаблонов для применения', 'error');
+                    return;
+                }
+                
+                const template = templates[0];
+                const success = templateManager.applyTemplateToCurrentSlide(template.id, true);
+                
+                if (success) {
+                    log('template', `✅ Шаблон "${template.name}" применен к текущему слайду`, 'success');
+                } else {
+                    log('template', '❌ Ошибка применения шаблона', 'error');
+                }
+                
+            } catch (error) {
+                log('template', `❌ Ошибка применения: ${error.message}`, 'error');
+            }
+        }
+
+        function testApplyToAll() {
+            try {
+                if (!templateManager) {
+                    log('template', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const templates = templateManager.getTemplatesFromStorage();
+                if (templates.length === 0) {
+                    log('template', '❌ Нет сохраненных шаблонов для применения', 'error');
+                    return;
+                }
+                
+                const template = templates[0];
+                const success = templateManager.applyTemplateToAllSlides(template.id, true);
+                
+                if (success) {
+                    log('template', `✅ Шаблон "${template.name}" применен ко всем слайдам`, 'success');
+                } else {
+                    log('template', '❌ Ошибка применения шаблона ко всем слайдам', 'error');
+                }
+                
+            } catch (error) {
+                log('template', `❌ Ошибка применения ко всем: ${error.message}`, 'error');
+            }
+        }
+
+        function testDeleteTemplate() {
+            try {
+                if (!templateManager) {
+                    log('template', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const templates = templateManager.getTemplatesFromStorage();
+                if (templates.length === 0) {
+                    log('template', '❌ Нет шаблонов для удаления', 'error');
+                    return;
+                }
+                
+                const template = templates[templates.length - 1]; // Удаляем последний
+                const success = templateManager.deleteTemplate(template.id);
+                
+                if (success) {
+                    log('template', `✅ Шаблон "${template.name}" удален`, 'success');
+                } else {
+                    log('template', '❌ Ошибка удаления шаблона', 'error');
+                }
+                
+            } catch (error) {
+                log('template', `❌ Ошибка удаления: ${error.message}`, 'error');
+            }
+        }
+
+        // 4. Тестирование UI
+        function testSaveModal() {
+            try {
+                if (!renderer) {
+                    log('ui', '❌ Renderer не инициализирован', 'error');
+                    return;
+                }
+                
+                renderer.showSaveTemplateModal();
+                log('ui', '✅ Модальное окно сохранения показано', 'success');
+                
+                // Автоматически закрываем через 3 секунды
+                setTimeout(() => {
+                    renderer.closeSaveTemplateModal();
+                    log('ui', '✅ Модальное окно сохранения закрыто', 'success');
+                }, 3000);
+                
+            } catch (error) {
+                log('ui', `❌ Ошибка показа модального окна: ${error.message}`, 'error');
+            }
+        }
+
+        function testSelectModal() {
+            try {
+                if (!renderer) {
+                    log('ui', '❌ Renderer не инициализирован', 'error');
+                    return;
+                }
+                
+                renderer.showSelectTemplateModal('Тестовое окно выбора', '🎯 Применить');
+                log('ui', '✅ Модальное окно выбора показано', 'success');
+                
+                // Автоматически закрываем через 3 секунды
+                setTimeout(() => {
+                    renderer.closeSelectTemplateModal();
+                    log('ui', '✅ Модальное окно выбора закрыто', 'success');
+                }, 3000);
+                
+            } catch (error) {
+                log('ui', `❌ Ошибка показа модального окна выбора: ${error.message}`, 'error');
+            }
+        }
+
+        function testTemplateButtons() {
+            try {
+                // Создаем тестовые кнопки
+                const testContainer = document.createElement('div');
+                testContainer.innerHTML = `
+                    <div class="template-actions">
+                        <button class="btn btn-template" id="saveTemplateBtn">💾 Сохранить шаблон</button>
+                        <button class="btn btn-template" id="applyTemplateToSlideBtn">🎯 Применить к слайду</button>
+                        <button class="btn btn-template" id="applyTemplateToAllBtn">📄 Применить ко всем</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(testContainer);
+                log('ui', '✅ Кнопки шаблонов созданы', 'success');
+                
+                // Проверяем наличие кнопок
+                const buttons = ['saveTemplateBtn', 'applyTemplateToSlideBtn', 'applyTemplateToAllBtn'];
+                buttons.forEach(buttonId => {
+                    const button = document.getElementById(buttonId);
+                    if (button) {
+                        log('ui', `✅ Кнопка ${buttonId} найдена`, 'success');
+                    } else {
+                        log('ui', `❌ Кнопка ${buttonId} не найдена`, 'error');
+                    }
+                });
+                
+                // Удаляем тестовые кнопки через 5 секунд
+                setTimeout(() => {
+                    testContainer.remove();
+                    log('ui', '✅ Тестовые кнопки удалены', 'success');
+                }, 5000);
+                
+            } catch (error) {
+                log('ui', `❌ Ошибка тестирования кнопок: ${error.message}`, 'error');
+            }
+        }
+
+        // 5. Статистика
+        function showTemplateStats() {
+            try {
+                if (!templateManager) {
+                    log('stats', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const stats = templateManager.getTemplateStats();
+                log('stats', `✅ Статистика шаблонов:`, 'success');
+                log('stats', `  Всего шаблонов: ${stats.total}`, 'info');
+                
+                if (stats.newest) {
+                    log('stats', `  Новейший: "${stats.newest.name}" (${new Date(stats.newest.createdAt).toLocaleString()})`, 'info');
+                }
+                
+                if (stats.oldest) {
+                    log('stats', `  Старейший: "${stats.oldest.name}" (${new Date(stats.oldest.createdAt).toLocaleString()})`, 'info');
+                }
+                
+            } catch (error) {
+                log('stats', `❌ Ошибка получения статистики: ${error.message}`, 'error');
+            }
+        }
+
+        function exportTemplates() {
+            try {
+                if (!templateManager) {
+                    log('stats', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const exportData = templateManager.exportTemplates();
+                log('stats', `✅ Экспорт выполнен (${exportData.length} символов)`, 'success');
+                
+                // Показываем первые 200 символов
+                const preview = exportData.substring(0, 200) + (exportData.length > 200 ? '...' : '');
+                log('stats', `Превью: ${preview}`, 'info');
+                
+            } catch (error) {
+                log('stats', `❌ Ошибка экспорта: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllTemplates() {
+            try {
+                if (!templateManager) {
+                    log('stats', '❌ TemplateManager не инициализирован', 'error');
+                    return;
+                }
+                
+                const success = templateManager.clearAllTemplates();
+                
+                if (success) {
+                    log('stats', '✅ Все шаблоны удалены', 'success');
+                } else {
+                    log('stats', '❌ Ошибка очистки шаблонов', 'error');
+                }
+                
+            } catch (error) {
+                log('stats', `❌ Ошибка очистки: ${error.message}`, 'error');
+            }
+        }
+
+        // Автоматическая инициализация при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('init', 'Страница загружена, готов к тестированию', 'info');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

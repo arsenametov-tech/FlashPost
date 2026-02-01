@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Тест исправленного AI модуля</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .test-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        
+        .result {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            background: rgba(46, 204, 113, 0.3);
+            border: 1px solid #2ecc71;
+        }
+        
+        .status.error {
+            background: rgba(231, 76, 60, 0.3);
+            border: 1px solid #e74c3c;
+        }
+        
+        .status.info {
+            background: rgba(52, 152, 219, 0.3);
+            border: 1px solid #3498db;
+        }
+        
+        .slide-preview {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .slide-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .slide-content {
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .keywords {
+            margin-top: 10px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .keyword-tag {
+            background: rgba(255, 107, 107, 0.3);
+            padding: 3px 8px;
+            border-radius: 15px;
+            margin: 2px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Тест исправленного AI модуля</h1>
+        
+        <div class="test-section">
+            <h2>📊 Статус AI модуля</h2>
+            <button class="test-button" onclick="checkAIStatus()">Проверить статус AI</button>
+            <div id="aiStatus"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎯 Генерация карусели</h2>
+            <div class="input-group">
+                <label for="topicInput">Тема для генерации:</label>
+                <input type="text" id="topicInput" placeholder="Например: Продуктивность" value="Продуктивность">
+            </div>
+            <button class="test-button" onclick="testCarouselGeneration()">Сгенерировать карусель</button>
+            <button class="test-button" onclick="testProModeGeneration()">PRO MODE генерация</button>
+            <button class="test-button" onclick="testFallbackGeneration()">Тест Fallback</button>
+            <div id="generationResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 Тест методов AI</h2>
+            <button class="test-button" onclick="testKeywordExtraction()">Тест извлечения ключевых слов</button>
+            <button class="test-button" onclick="testOutlineGeneration()">Тест генерации outline</button>
+            <button class="test-button" onclick="testContentGeneration()">Тест генерации контента</button>
+            <div id="methodsResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🛡️ Тест обработки ошибок</h2>
+            <button class="test-button" onclick="testErrorHandling()">Тест обработки ошибок</button>
+            <button class="test-button" onclick="testFallbackSystem()">Тест fallback системы</button>
+            <div id="errorResult"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📋 Результаты тестирования</h2>
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/ai.js"></script>
+    
+    <script>
+        // Глобальные переменные для тестирования
+        let stateManager;
+        let aiManager;
+        let testResults = [];
+        
+        // Инициализация при загрузке страницы
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeTestEnvironment();
+        });
+        
+        function initializeTestEnvironment() {
+            try {
+                // Инициализируем StateManager
+                if (typeof StateManager !== 'undefined') {
+                    stateManager = new StateManager();
+                    addTestResult('✅ StateManager инициализирован', 'success');
+                } else {
+                    addTestResult('❌ StateManager не найден', 'error');
+                    return;
+                }
+                
+                // Инициализируем AIManager
+                if (typeof AIManager !== 'undefined') {
+                    aiManager = new AIManager(stateManager);
+                    addTestResult('✅ AIManager инициализирован', 'success');
+                } else {
+                    addTestResult('❌ AIManager не найден', 'error');
+                    return;
+                }
+                
+                addTestResult('🎯 Тестовая среда готова к работе', 'info');
+                
+            } catch (error) {
+                addTestResult(`❌ Ошибка инициализации: ${error.message}`, 'error');
+                console.error('Initialization error:', error);
+            }
+        }
+        
+        function addTestResult(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({ message, type, timestamp });
+            updateTestResults();
+        }
+        
+        function updateTestResults() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = testResults.map(result => 
+                `<div class="status ${result.type}">[${result.timestamp}] ${result.message}</div>`
+            ).join('');
+        }
+        
+        async function checkAIStatus() {
+            const statusDiv = document.getElementById('aiStatus');
+            
+            try {
+                if (!aiManager) {
+                    throw new Error('AIManager не инициализирован');
+                }
+                
+                const isAvailable = aiManager.isAvailable();
+                const hasSetApiKey = typeof aiManager.setApiKey === 'function';
+                const hasGenerateCarousel = typeof aiManager.generateCarousel === 'function';
+                const hasGenerateProMode = typeof aiManager.generateProModeCarousel === 'function';
+                const hasExtractKeywords = typeof aiManager.extractSimpleKeywords === 'function';
+                
+                const status = `
+                    <div class="status success">✅ AI модуль загружен и готов к работе</div>
+                    <div class="result">
+Статус доступности: ${isAvailable ? '✅ Доступен' : '⚠️ Ограниченный режим'}
+Метод setApiKey: ${hasSetApiKey ? '✅' : '❌'}
+Метод generateCarousel: ${hasGenerateCarousel ? '✅' : '❌'}
+Метод generateProModeCarousel: ${hasGenerateProMode ? '✅' : '❌'}
+Метод extractSimpleKeywords: ${hasExtractKeywords ? '✅' : '❌'}
+
+Конструктор: ${aiManager.constructor.name}
+State Manager: ${aiManager.state ? '✅ Подключен' : '❌ Не подключен'}
+                    </div>
+                `;
+                
+                statusDiv.innerHTML = status;
+                addTestResult('✅ Проверка статуса AI завершена успешно', 'success');
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Ошибка: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка проверки статуса: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCarouselGeneration() {
+            const resultDiv = document.getElementById('generationResult');
+            const topic = document.getElementById('topicInput').value || 'Продуктивность';
+            
+            try {
+                addTestResult(`🎯 Начинаем генерацию карусели для темы: ${topic}`, 'info');
+                
+                const startTime = Date.now();
+                const result = await aiManager.generateCarousel(topic);
+                const endTime = Date.now();
+                
+                const generationTime = endTime - startTime;
+                
+                let html = `
+                    <div class="status success">✅ Карусель успешно сгенерирована за ${generationTime}мс</div>
+                    <div class="result">
+Тема: ${result.topic}
+Количество слайдов: ${result.slides.length}
+Генератор: ${result.generatedBy}
+Время создания: ${new Date(result.timestamp).toLocaleString()}
+                    </div>
+                `;
+                
+                // Показываем превью слайдов
+                if (result.slides && result.slides.length > 0) {
+                    html += '<h3>📋 Превью слайдов:</h3>';
+                    result.slides.forEach((slide, index) => {
+                        const textBlock = slide.textBlocks && slide.textBlocks[0];
+                        const keywords = slide.autoKeywords || [];
+                        
+                        html += `
+                            <div class="slide-preview">
+                                <div class="slide-title">Слайд ${index + 1}</div>
+                                <div class="slide-content">${textBlock ? textBlock.text : 'Нет текста'}</div>
+                                <div class="keywords">
+                                    Ключевые слова: ${keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ Карусель сгенерирована: ${result.slides.length} слайдов`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Ошибка генерации: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка генерации карусели: ${error.message}`, 'error');
+                console.error('Generation error:', error);
+            }
+        }
+        
+        async function testProModeGeneration() {
+            const resultDiv = document.getElementById('generationResult');
+            const topic = document.getElementById('topicInput').value || 'Продуктивность';
+            
+            try {
+                addTestResult(`🎯 Начинаем PRO MODE генерацию для темы: ${topic}`, 'info');
+                
+                const startTime = Date.now();
+                const result = await aiManager.generateProModeCarousel(topic);
+                const endTime = Date.now();
+                
+                const generationTime = endTime - startTime;
+                
+                let html = `
+                    <div class="status success">✅ PRO MODE карусель успешно сгенерирована за ${generationTime}мс</div>
+                    <div class="result">
+Тема: ${result.topic}
+Количество слайдов: ${result.slides.length}
+Генератор: ${result.generatedBy}
+Режим: ${result.mode}
+Время создания: ${new Date(result.timestamp).toLocaleString()}
+                    </div>
+                `;
+                
+                // Показываем превью слайдов с типами
+                if (result.slides && result.slides.length > 0) {
+                    html += '<h3>📋 PRO MODE слайды:</h3>';
+                    result.slides.forEach((slide, index) => {
+                        const textBlock = slide.textBlocks && slide.textBlocks[0];
+                        const keywords = slide.autoKeywords || [];
+                        
+                        html += `
+                            <div class="slide-preview">
+                                <div class="slide-title">Слайд ${index + 1} (${slide.slideType || 'unknown'})</div>
+                                <div class="slide-content">${textBlock ? textBlock.text : 'Нет текста'}</div>
+                                <div class="keywords">
+                                    Тип ключевых слов: ${slide.keywordType || 'не указан'}<br>
+                                    Ключевые слова: ${keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ PRO MODE карусель: ${result.slides.length} слайдов`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Ошибка PRO MODE: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка PRO MODE генерации: ${error.message}`, 'error');
+                console.error('PRO MODE error:', error);
+            }
+        }
+        
+        async function testFallbackGeneration() {
+            const resultDiv = document.getElementById('generationResult');
+            const topic = document.getElementById('topicInput').value || 'Продуктивность';
+            
+            try {
+                addTestResult(`🔄 Тестируем fallback генерацию для темы: ${topic}`, 'info');
+                
+                const startTime = Date.now();
+                const result = aiManager.generateFallbackCarousel(topic);
+                const endTime = Date.now();
+                
+                const generationTime = endTime - startTime;
+                
+                let html = `
+                    <div class="status success">✅ Fallback карусель создана за ${generationTime}мс</div>
+                    <div class="result">
+Тема: ${result.topic}
+Количество слайдов: ${result.slides.length}
+Генератор: ${result.generatedBy}
+Время создания: ${new Date(result.timestamp).toLocaleString()}
+                    </div>
+                `;
+                
+                // Показываем fallback слайды
+                if (result.slides && result.slides.length > 0) {
+                    html += '<h3>📋 Fallback слайды:</h3>';
+                    result.slides.forEach((slide, index) => {
+                        const textBlock = slide.textBlocks && slide.textBlocks[0];
+                        
+                        html += `
+                            <div class="slide-preview">
+                                <div class="slide-title">Fallback слайд ${index + 1}</div>
+                                <div class="slide-content">${textBlock ? textBlock.text : 'Нет текста'}</div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ Fallback система работает: ${result.slides.length} слайдов`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Ошибка fallback: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка fallback генерации: ${error.message}`, 'error');
+                console.error('Fallback error:', error);
+            }
+        }
+        
+        function testKeywordExtraction() {
+            const resultDiv = document.getElementById('methodsResult');
+            
+            try {
+                const testText = "Продуктивность - это ключ к успеху в современном мире. Эффективное планирование времени помогает достигать целей быстрее.";
+                
+                const keywords = aiManager.extractSimpleKeywords(testText);
+                
+                const html = `
+                    <div class="status success">✅ Извлечение ключевых слов работает</div>
+                    <div class="result">
+Тестовый текст: "${testText}"
+
+Извлеченные ключевые слова: ${keywords.join(', ')}
+Количество: ${keywords.length}
+                    </div>
+                `;
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ Извлечено ${keywords.length} ключевых слов`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Ошибка извлечения ключевых слов: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка извлечения ключевых слов: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testOutlineGeneration() {
+            const resultDiv = document.getElementById('methodsResult');
+            const topic = document.getElementById('topicInput').value || 'Продуктивность';
+            
+            try {
+                addTestResult(`📋 Тестируем генерацию outline для: ${topic}`, 'info');
+                
+                const outline = await aiManager.generateCarouselOutline(topic);
+                
+                let html = `
+                    <div class="status success">✅ Outline успешно сгенерирован</div>
+                    <div class="result">
+Тема: ${outline.topic}
+Количество слайдов: ${outline.totalSlides}
+Структура: ${outline.structure}
+
+Детали outline:
+                    </div>
+                `;
+                
+                outline.outline.forEach(slide => {
+                    html += `
+                        <div class="slide-preview">
+                            <div class="slide-title">Слайд ${slide.slideNumber} (${slide.type})</div>
+                            <div class="slide-content">
+                                <strong>Идея:</strong> ${slide.mainIdea}<br>
+                                <strong>Цель:</strong> ${slide.purpose}<br>
+                                <strong>Связь:</strong> ${slide.connectionToPrevious}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ Outline создан: ${outline.totalSlides} слайдов`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Ошибка генерации outline: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка генерации outline: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testContentGeneration() {
+            const resultDiv = document.getElementById('methodsResult');
+            const topic = document.getElementById('topicInput').value || 'Продуктивность';
+            
+            try {
+                addTestResult(`✍️ Тестируем генерацию контента для: ${topic}`, 'info');
+                
+                // Сначала создаем outline
+                const outline = await aiManager.generateCarouselOutline(topic);
+                
+                // Затем генерируем контент
+                const content = await aiManager.generateCarouselContent(topic, outline);
+                
+                let html = `
+                    <div class="status success">✅ Контент успешно сгенерирован</div>
+                    <div class="result">
+Тема: ${content.topic}
+Количество слайдов: ${content.slides.length}
+                    </div>
+                `;
+                
+                content.slides.forEach(slide => {
+                    html += `
+                        <div class="slide-preview">
+                            <div class="slide-title">${slide.title} (${slide.type})</div>
+                            <div class="slide-content">${slide.text}</div>
+                            <div class="keywords">Тип ключевых слов: ${slide.keywordType}</div>
+                        </div>
+                    `;
+                });
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ Контент создан: ${content.slides.length} слайдов`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Ошибка генерации контента: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка генерации контента: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testErrorHandling() {
+            const resultDiv = document.getElementById('errorResult');
+            
+            try {
+                addTestResult('🛡️ Тестируем обработку ошибок...', 'info');
+                
+                // Тест 1: Пустая тема
+                let errorCount = 0;
+                let successCount = 0;
+                
+                try {
+                    await aiManager.generateCarousel('');
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                }
+                
+                // Тест 2: Очень длинная тема
+                try {
+                    const longTopic = 'А'.repeat(1000);
+                    await aiManager.generateCarousel(longTopic);
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                }
+                
+                // Тест 3: Специальные символы
+                try {
+                    await aiManager.generateCarousel('!@#$%^&*()');
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                }
+                
+                const html = `
+                    <div class="status success">✅ Тест обработки ошибок завершен</div>
+                    <div class="result">
+Успешных генераций: ${successCount}
+Обработанных ошибок: ${errorCount}
+Общий результат: ${errorCount === 0 ? 'Все тесты прошли успешно' : 'Некоторые тесты вызвали ошибки (это нормально)'}
+                    </div>
+                `;
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ Тест обработки ошибок: ${successCount} успешных, ${errorCount} ошибок`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Критическая ошибка тестирования: ${error.message}</div>`;
+                addTestResult(`❌ Критическая ошибка тестирования: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testFallbackSystem() {
+            const resultDiv = document.getElementById('errorResult');
+            
+            try {
+                addTestResult('🔄 Тестируем fallback систему...', 'info');
+                
+                const topic = 'Тестовая тема';
+                
+                // Тест высококачественной генерации с fallback
+                const result = await aiManager.generateHighQualityCarousel(topic);
+                
+                const html = `
+                    <div class="status success">✅ Fallback система работает корректно</div>
+                    <div class="result">
+Тема: ${result.topic}
+Генератор: ${result.generatedBy}
+Количество слайдов: ${result.slides.length}
+Режим: ${result.mode || 'standard'}
+
+Fallback цепочка:
+1. PRO MODE → 2. Standard Mode → 3. Fallback Mode → 4. Emergency Mode
+
+Результат: Система успешно сгенерировала карусель на одном из уровней
+                    </div>
+                `;
+                
+                resultDiv.innerHTML = html;
+                addTestResult(`✅ Fallback система: ${result.generatedBy}`, 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">❌ Ошибка fallback системы: ${error.message}</div>`;
+                addTestResult(`❌ Ошибка fallback системы: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

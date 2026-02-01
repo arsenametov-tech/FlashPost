@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Тест синхронизации DOM</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 10000;
+            font-size: 12px;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .debug-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #833ab4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .debug-log {
+            background: #1a1a1a;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <!-- Загрузочный экран -->
+    <div id="loading" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">🔄</div>
+            <h2>Диагностика синхронизации DOM</h2>
+            <div class="loading-spinner"></div>
+            <p>Проверка связи состояния и DOM...</p>
+        </div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="app" style="display: none;"></div>
+
+    <!-- Панель отладки -->
+    <div class="debug-panel">
+        <h3>🔄 Диагностика DOM синхронизации</h3>
+        
+        <button class="debug-button" onclick="debugAddBlock()">
+            ➕ Добавить блок с отладкой
+        </button>
+        
+        <button class="debug-button" onclick="debugEditText()">
+            ✍️ Изменить текст с отладкой
+        </button>
+        
+        <button class="debug-button" onclick="debugDragBlock()">
+            🖱 Переместить блок с отладкой
+        </button>
+        
+        <button class="debug-button" onclick="debugDOMState()">
+            🔍 Проверить состояние DOM
+        </button>
+        
+        <button class="debug-button" onclick="debugCallbacks()">
+            📞 Проверить колбэки
+        </button>
+        
+        <button class="debug-button" onclick="clearLog()">
+            🧹 Очистить лог
+        </button>
+
+        <div id="debugLog" class="debug-log"></div>
+    </div>
+
+    <!-- Подключение модулей -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/templates.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let app = null;
+        let debugLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            debugLog.push({ message: logEntry, type });
+            
+            const logDiv = document.getElementById('debugLog');
+            logDiv.innerHTML += `<div class="${type}">${logEntry}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+
+        function clearLog() {
+            debugLog = [];
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        // Инициализация приложения
+        function initDebugApp() {
+            try {
+                app = window.flashPostApp;
+                
+                if (!app) {
+                    throw new Error('FlashPostApp не инициализировано');
+                }
+
+                // Создаем тестовый слайд
+                const testSlide = app.state.createSlide({
+                    title: 'Тестовый слайд для отладки',
+                    text: 'Отладка синхронизации DOM',
+                    background: { type: 'color', color: '#833ab4' }
+                });
+
+                // Переходим в режим редактирования
+                app.enterEditMode();
+                
+                log('Приложение инициализировано для отладки', 'success');
+                
+            } catch (error) {
+                log(`Ошибка инициализации: ${error.message}`, 'error');
+            }
+        }
+
+        // Отладка добавления блока
+        function debugAddBlock() {
+            try {
+                log('=== НАЧАЛО ОТЛАДКИ ДОБАВЛЕНИЯ БЛОКА ===', 'info');
+                
+                const beforeState = app.state.getActiveSlide();
+                const beforeCount = beforeState?.textBlocks.length || 0;
+                const beforeDOM = document.querySelectorAll('[data-block-id]').length;
+                
+                log(`Состояние ДО: блоков в состоянии=${beforeCount}, в DOM=${beforeDOM}`, 'info');
+                
+                // Добавляем блок
+                const newBlock = app.state.addTextBlock();
+                
+                if (!newBlock) {
+                    log('Блок не был создан!', 'error');
+                    return;
+                }
+                
+                log(`Создан блок: ${newBlock.id}`, 'success');
+                
+                // Проверяем состояние сразу
+                const afterState = app.state.getActiveSlide();
+                const afterCount = afterState?.textBlocks.length || 0;
+                
+                log(`Состояние ПОСЛЕ: блоков в состоянии=${afterCount}`, 'info');
+                
+                // Проверяем DOM через задержки
+                setTimeout(() => {
+                    const afterDOM = document.querySelectorAll('[data-block-id]').length;
+                    const blockInDOM = document.querySelector(`[data-block-id="${newBlock.id}"]`);
+                    
+                    log(`DOM через 100мс: всего блоков=${afterDOM}, новый блок найден=${!!blockInDOM}`, blockInDOM ? 'success' : 'error');
+                    
+                    if (blockInDOM) {
+                        log(`Стили блока: left=${blockInDOM.style.left}, top=${blockInDOM.style.top}, width=${blockInDOM.style.width}`, 'info');
+                        log(`Текст блока: "${blockInDOM.textContent}"`, 'info');
+                    }
+                }, 100);
+                
+                setTimeout(() => {
+                    const afterDOM2 = document.querySelectorAll('[data-block-id]').length;
+                    const blockInDOM2 = document.querySelector(`[data-block-id="${newBlock.id}"]`);
+                    
+                    log(`DOM через 500мс: всего блоков=${afterDOM2}, новый блок найден=${!!blockInDOM2}`, blockInDOM2 ? 'success' : 'error');
+                }, 500);
+                
+                log('=== КОНЕЦ ОТЛАДКИ ДОБАВЛЕНИЯ БЛОКА ===', 'info');
+                
+            } catch (error) {
+                log(`Ошибка отладки добавления: ${error.message}`, 'error');
+            }
+        }
+
+        // Отладка редактирования текста
+        function debugEditText() {
+            try {
+                log('=== НАЧАЛО ОТЛАДКИ РЕДАКТИРОВАНИЯ ТЕКСТА ===', 'info');
+                
+                const activeSlide = app.state.getActiveSlide();
+                if (!activeSlide || activeSlide.textBlocks.length === 0) {
+                    log('Нет блоков для редактирования', 'error');
+                    return;
+                }
+
+                const blockId = activeSlide.textBlocks[0].id;
+                const originalText = activeSlide.textBlocks[0].text;
+                const newText = 'ОТЛАДКА_' + Date.now();
+
+                log(`Блок для редактирования: ${blockId}`, 'info');
+                log(`Исходный текст: "${originalText}"`, 'info');
+                log(`Новый текст: "${newText}"`, 'info');
+
+                // Проверяем DOM до изменения
+                const blockBefore = document.querySelector(`[data-block-id="${blockId}"]`);
+                log(`DOM до изменения: блок найден=${!!blockBefore}, текст="${blockBefore?.textContent || 'НЕТ'}"`, 'info');
+
+                // Изменяем текст
+                const success = app.state.updateTextBlockProperty(blockId, 'text', newText);
+                log(`Обновление в состоянии: ${success ? 'УСПЕШНО' : 'ОШИБКА'}`, success ? 'success' : 'error');
+
+                // Проверяем состояние сразу
+                const updatedSlide = app.state.getActiveSlide();
+                const updatedBlock = updatedSlide.textBlocks.find(b => b.id === blockId);
+                log(`Текст в состоянии после обновления: "${updatedBlock.text}"`, 'info');
+
+                // Проверяем DOM через задержки
+                setTimeout(() => {
+                    const blockAfter = document.querySelector(`[data-block-id="${blockId}"]`);
+                    const domText = blockAfter?.textContent || 'НЕТ';
+                    log(`DOM через 100мс: блок найден=${!!blockAfter}, текст="${domText}"`, 'info');
+                    
+                    if (domText === newText) {
+                        log('✅ Текст успешно синхронизирован!', 'success');
+                    } else {
+                        log('❌ Текст НЕ синхронизирован!', 'error');
+                    }
+                }, 100);
+
+                log('=== КОНЕЦ ОТЛАДКИ РЕДАКТИРОВАНИЯ ТЕКСТА ===', 'info');
+                
+            } catch (error) {
+                log(`Ошибка отладки редактирования: ${error.message}`, 'error');
+            }
+        }
+
+        // Отладка перемещения блока
+        function debugDragBlock() {
+            try {
+                log('=== НАЧАЛО ОТЛАДКИ ПЕРЕМЕЩЕНИЯ БЛОКА ===', 'info');
+                
+                const activeSlide = app.state.getActiveSlide();
+                if (!activeSlide || activeSlide.textBlocks.length === 0) {
+                    log('Нет блоков для перемещения', 'error');
+                    return;
+                }
+
+                const blockId = activeSlide.textBlocks[0].id;
+                const originalX = activeSlide.textBlocks[0].x;
+                const originalY = activeSlide.textBlocks[0].y;
+                const newX = originalX + 15;
+                const newY = originalY + 10;
+
+                log(`Блок для перемещения: ${blockId}`, 'info');
+                log(`Исходная позиция: (${originalX}%, ${originalY}%)`, 'info');
+                log(`Новая позиция: (${newX}%, ${newY}%)`, 'info');
+
+                // Проверяем DOM до изменения
+                const blockBefore = document.querySelector(`[data-block-id="${blockId}"]`);
+                log(`DOM до изменения: блок найден=${!!blockBefore}, left=${blockBefore?.style.left || 'НЕТ'}, top=${blockBefore?.style.top || 'НЕТ'}`, 'info');
+
+                // Изменяем позицию
+                const successX = app.state.updateTextBlockProperty(blockId, 'x', newX);
+                const successY = app.state.updateTextBlockProperty(blockId, 'y', newY);
+                log(`Обновление позиции: X=${successX ? 'ОК' : 'ОШИБКА'}, Y=${successY ? 'ОК' : 'ОШИБКА'}`, (successX && successY) ? 'success' : 'error');
+
+                // Проверяем состояние
+                const updatedSlide = app.state.getActiveSlide();
+                const updatedBlock = updatedSlide.textBlocks.find(b => b.id === blockId);
+                log(`Позиция в состоянии: (${updatedBlock.x}%, ${updatedBlock.y}%)`, 'info');
+
+                // Проверяем DOM через задержки
+                setTimeout(() => {
+                    const blockAfter = document.querySelector(`[data-block-id="${blockId}"]`);
+                    const domLeft = blockAfter?.style.left || 'НЕТ';
+                    const domTop = blockAfter?.style.top || 'НЕТ';
+                    log(`DOM через 100мс: left=${domLeft}, top=${domTop}`, 'info');
+                    
+                    if (domLeft === `${newX}%` && domTop === `${newY}%`) {
+                        log('✅ Позиция успешно синхронизирована!', 'success');
+                    } else {
+                        log('❌ Позиция НЕ синхронизирована!', 'error');
+                    }
+                }, 100);
+
+                log('=== КОНЕЦ ОТЛАДКИ ПЕРЕМЕЩЕНИЯ БЛОКА ===', 'info');
+                
+            } catch (error) {
+                log(`Ошибка отладки перемещения: ${error.message}`, 'error');
+            }
+        }
+
+        // Проверка состояния DOM
+        function debugDOMState() {
+            try {
+                log('=== ПРОВЕРКА СОСТОЯНИЯ DOM ===', 'info');
+                
+                const activeSlide = app.state.getActiveSlide();
+                const stateBlocks = activeSlide?.textBlocks || [];
+                const domBlocks = document.querySelectorAll('[data-block-id]');
+                
+                log(`Блоков в состоянии: ${stateBlocks.length}`, 'info');
+                log(`Блоков в DOM: ${domBlocks.length}`, 'info');
+                
+                // Проверяем каждый блок из состояния
+                stateBlocks.forEach((block, index) => {
+                    const blockInDOM = document.querySelector(`[data-block-id="${block.id}"]`);
+                    log(`Блок ${index + 1} (${block.id}): в DOM=${!!blockInDOM}`, blockInDOM ? 'success' : 'error');
+                    
+                    if (blockInDOM) {
+                        log(`  Текст: состояние="${block.text}", DOM="${blockInDOM.textContent}"`, 'info');
+                        log(`  Позиция: состояние=(${block.x}%, ${block.y}%), DOM=(${blockInDOM.style.left}, ${blockInDOM.style.top})`, 'info');
+                    }
+                });
+                
+                // Проверяем блоки в DOM, которых нет в состоянии
+                domBlocks.forEach(domBlock => {
+                    const blockId = domBlock.dataset.blockId;
+                    const inState = stateBlocks.find(b => b.id === blockId);
+                    if (!inState) {
+                        log(`Блок ${blockId} есть в DOM, но НЕТ в состоянии!`, 'warning');
+                    }
+                });
+                
+                log('=== КОНЕЦ ПРОВЕРКИ СОСТОЯНИЯ DOM ===', 'info');
+                
+            } catch (error) {
+                log(`Ошибка проверки DOM: ${error.message}`, 'error');
+            }
+        }
+
+        // Проверка колбэков
+        function debugCallbacks() {
+            try {
+                log('=== ПРОВЕРКА СИСТЕМЫ КОЛБЭКОВ ===', 'info');
+                
+                // Проверяем, установлен ли колбэк
+                const hasCallback = !!app.state.onPropertyChangeCallback;
+                log(`Колбэк установлен: ${hasCallback}`, hasCallback ? 'success' : 'error');
+                
+                if (hasCallback) {
+                    // Тестируем колбэк
+                    const originalCallback = app.state.onPropertyChangeCallback;
+                    let callbackCalled = false;
+                    
+                    app.state.onPropertyChangeCallback = (hookData) => {
+                        callbackCalled = true;
+                        log(`Колбэк вызван: блок=${hookData.blockId}, свойство=${hookData.property}`, 'success');
+                        
+                        // Восстанавливаем оригинальный колбэк
+                        app.state.onPropertyChangeCallback = originalCallback;
+                        
+                        // Вызываем оригинальный колбэк
+                        if (originalCallback) {
+                            originalCallback(hookData);
+                        }
+                    };
+                    
+                    // Тестируем изменение
+                    const activeSlide = app.state.getActiveSlide();
+                    if (activeSlide && activeSlide.textBlocks.length > 0) {
+                        const blockId = activeSlide.textBlocks[0].id;
+                        app.state.updateTextBlockProperty(blockId, 'test', 'callback_test');
+                        
+                        setTimeout(() => {
+                            if (!callbackCalled) {
+                                log('Колбэк НЕ был вызван!', 'error');
+                            }
+                        }, 100);
+                    }
+                }
+                
+                log('=== КОНЕЦ ПРОВЕРКИ КОЛБЭКОВ ===', 'info');
+                
+            } catch (error) {
+                log(`Ошибка проверки колбэков: ${error.message}`, 'error');
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                
+                setTimeout(() => {
+                    initDebugApp();
+                }, 1000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

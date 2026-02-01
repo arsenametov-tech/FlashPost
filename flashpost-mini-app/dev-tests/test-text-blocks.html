@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Test Text Blocks</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Oswald:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Bebas+Neue:wght@400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div id="loading" class="loading">
+        <div class="loading-content">
+            <div class="loading-logo">⚡</div>
+            <div class="loading-text">FlashPost AI</div>
+            <div class="loading-subtitle">Загрузка...</div>
+        </div>
+    </div>
+
+    <div id="app" class="app" style="display: none;"></div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        window.app = new FlashPostApp();
+        
+        // Тестовые данные для проверки функциональности текстовых блоков
+        setTimeout(() => {
+            console.log('🧪 Testing text blocks functionality...');
+            
+            // Создаем тестовые слайды
+            app.slides = [
+                { text: "Заголовок слайда 1" },
+                { text: "Заголовок слайда 2" },
+                { text: "Заголовок слайда 3" }
+            ];
+            
+            // Инициализируем стили слайдов с текстовыми блоками
+            app.initializeSlideStyles();
+            
+            // Добавляем дополнительные тестовые блоки с разными шрифтами
+            app.slideStyles[0].textBlocks.push({
+                id: 'test_block_2',
+                text: 'Montserrat Font',
+                font: 'Montserrat',
+                size: 14,
+                weight: 600,
+                color: '#f9ca24',
+                glow: false,
+                isKeyword: false,
+                position: { x: 30, y: 70 },
+                width: 60
+            });
+            
+            app.slideStyles[1].textBlocks.push({
+                id: 'test_block_3',
+                text: 'OSWALD CAPS',
+                font: 'Oswald',
+                size: 18,
+                weight: 600,
+                color: '#ffffff',
+                glow: true,
+                isKeyword: false,
+                position: { x: 70, y: 65 },
+                width: 50
+            });
+            
+            app.slideStyles[2].textBlocks.push({
+                id: 'test_block_4',
+                text: 'Playfair Elegance',
+                font: 'Playfair Display',
+                size: 16,
+                weight: 600,
+                color: '#ff6b6b',
+                glow: false,
+                isKeyword: true,
+                position: { x: 50, y: 30 },
+                width: 70
+            });
+            
+            app.slideStyles[2].textBlocks.push({
+                id: 'test_block_5',
+                text: 'BEBAS NEUE STYLE',
+                font: 'Bebas Neue',
+                size: 20,
+                weight: 400,
+                color: '#4ecdc4',
+                glow: false,
+                isKeyword: false,
+                position: { x: 50, y: 75 },
+                width: 80
+            });
+            
+            // Проверяем, что новые свойства добавлены
+            console.log('✅ Slide styles with text blocks initialized:', app.slideStyles);
+            
+            // Показываем редактор для тестирования
+            app.openEditor();
+            
+        }, 2000);
+    </script>
+</body>
+</html>

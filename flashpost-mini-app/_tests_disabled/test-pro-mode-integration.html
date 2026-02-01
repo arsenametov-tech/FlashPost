@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO MODE Integration Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 2em;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .results {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e1e5e9;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 5px 10px;
+            margin-bottom: 3px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log-info { background: #e3f2fd; color: #1976d2; }
+        .log-success { background: #e8f5e8; color: #2e7d32; }
+        .log-error { background: #ffebee; color: #d32f2f; }
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .status-loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        .status-error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 PRO MODE Integration Test</h1>
+            <p>Тестирование интеграции PRO MODE с основным приложением</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Тест интеграции PRO MODE</h2>
+            
+            <div class="input-group">
+                <label for="topicInput">Тема для генерации:</label>
+                <input type="text" id="topicInput" placeholder="Введите тему..." value="продуктивность">
+            </div>
+
+            <button class="btn" onclick="testProModeIntegration()">🎯 Тест PRO MODE</button>
+            <button class="btn" onclick="testHighQualityGeneration()">⭐ Тест High Quality</button>
+            <button class="btn" onclick="clearResults()">🧹 Очистить</button>
+
+            <div id="status"></div>
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/ai.js"></script>
+
+    <script>
+        let stateManager, aiManager;
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                stateManager = new StateManager();
+                aiManager = new AIManager(stateManager);
+                
+                log('info', '✅ Система инициализирована');
+                updateStatus('success', 'Система готова к тестированию');
+            } catch (error) {
+                log('error', `❌ Ошибка инициализации: ${error.message}`);
+                updateStatus('error', `Ошибка инициализации: ${error.message}`);
+            }
+        });
+
+        // Тест PRO MODE интеграции
+        async function testProModeIntegration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Введите тему');
+                return;
+            }
+
+            updateStatus('loading', `🎯 Тестирование PRO MODE для темы: "${topic}"`);
+            log('info', `🎯 Начало тестирования PRO MODE для темы: "${topic}"`);
+
+            const startTime = Date.now();
+
+            try {
+                // Тестируем прямой вызов PRO MODE
+                log('info', '📋 Этап 1: Генерация outline...');
+                const outline = await aiManager.generateCarouselOutline(topic);
+                log('success', `✅ Outline создан: ${outline.outline.length} слайдов`);
+
+                log('info', '✍️ Этап 2: Генерация контента...');
+                const content = await aiManager.generateCarouselContent(topic, outline);
+                log('success', `✅ Контент создан: ${content.slides.length} слайдов`);
+
+                log('info', '🔄 Этап 3: Конвертация в слайды проекта...');
+                const slides = await aiManager.convertToProModeSlides(content);
+                log('success', `✅ Слайды проекта созданы: ${slides.length} слайдов`);
+
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('success', `🎉 PRO MODE интеграция успешна! Время: ${duration}ms`);
+                updateStatus('success', `✅ PRO MODE работает корректно! Создано ${slides.length} слайдов за ${duration}ms`);
+
+                // Показываем детали слайдов
+                slides.forEach((slide, index) => {
+                    const slideType = slide.slideType || 'unknown';
+                    const keywordsCount = slide.autoKeywords ? slide.autoKeywords.length : 0;
+                    log('info', `📄 Слайд ${index + 1}: ${slideType}, ключевых слов: ${keywordsCount}`);
+                });
+
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('error', `❌ Ошибка PRO MODE интеграции: ${error.message}`);
+                updateStatus('error', `❌ Ошибка PRO MODE: ${error.message}`);
+                console.error('Детали ошибки:', error);
+            }
+        }
+
+        // Тест высококачественной генерации (должна использовать PRO MODE)
+        async function testHighQualityGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Введите тему');
+                return;
+            }
+
+            updateStatus('loading', `⭐ Тестирование High Quality Generation для темы: "${topic}"`);
+            log('info', `⭐ Начало тестирования High Quality Generation для темы: "${topic}"`);
+
+            const startTime = Date.now();
+
+            try {
+                // Тестируем метод, который использует основное приложение
+                const result = await aiManager.generateHighQualityCarousel(topic);
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('success', `✅ High Quality Generation завершена за ${duration}ms`);
+                log('info', `📊 Создано слайдов: ${result.slides.length}`);
+                log('info', `🎭 Режим генерации: ${result.generatedBy}`);
+
+                // Проверяем, что используется PRO MODE
+                if (result.generatedBy === 'AI-ProMode') {
+                    log('success', '🎯 Подтверждено: используется PRO MODE!');
+                    updateStatus('success', `✅ High Quality использует PRO MODE! Создано ${result.slides.length} слайдов`);
+                } else {
+                    log('info', `ℹ️ Используется режим: ${result.generatedBy} (fallback)`);
+                    updateStatus('success', `✅ Генерация работает в режиме: ${result.generatedBy}`);
+                }
+
+                // Показываем структуру результата
+                if (result.outline) {
+                    log('info', `📋 Outline структура: ${result.outline.structure}`);
+                }
+
+            } catch (error) {
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+
+                log('error', `❌ Ошибка High Quality Generation: ${error.message}`);
+                updateStatus('error', `❌ Ошибка High Quality: ${error.message}`);
+                console.error('Детали ошибки:', error);
+            }
+        }
+
+        // Обновление статуса
+        function updateStatus(type, message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status status-${type}`;
+            statusDiv.textContent = message;
+        }
+
+        // Логирование
+        function log(type, message) {
+            const resultsDiv = document.getElementById('results');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Очистка результатов
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+            log('info', '🧹 Результаты очищены');
+        }
+    </script>
+</body>
+</html>

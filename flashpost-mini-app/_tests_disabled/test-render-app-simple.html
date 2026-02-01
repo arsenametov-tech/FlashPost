@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple RenderApp Test</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #0f0f14;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+        }
+        
+        #app {
+            min-height: 100vh;
+            background: #0f0f14;
+            color: #fff;
+            display: block;
+            position: relative;
+        }
+        
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 2px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #6c2e8f;
+        }
+        
+        .success { background: #28a745; }
+        .warning { background: #ffc107; }
+        .error { background: #dc3545; }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loading">
+        ⚡ Loading FlashPost...
+    </div>
+
+    <!-- App Container -->
+    <div id="app"></div>
+    
+    <!-- Test Controls -->
+    <div class="test-controls">
+        <div style="font-size: 12px; margin-bottom: 10px; font-weight: 600;">🧪 RenderApp Tests</div>
+        <button onclick="testSimpleRender()" class="success">✅ Simple Test</button><br>
+        <button onclick="testMainApp()" class="warning">🚀 Main App</button><br>
+        <button onclick="testErrorState()">❌ Error Test</button><br>
+        <button onclick="testEmptyState()">⚪ Empty Test</button><br>
+        <button onclick="clearApp()">🧹 Clear</button><br>
+        <button onclick="window.location.reload()">🔄 Reload</button>
+    </div>
+
+    <script>
+        // Простой тест renderApp()
+        function testSimpleRender() {
+            console.log('🧪 Testing simple renderApp()...');
+            
+            // Ваш предложенный код для теста
+            document.getElementById('app').innerHTML = `
+                <div style="
+                    min-height: 100vh;
+                    background: #0f0f14;
+                    color: red;
+                    font-size: 24px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                ">
+                    🔴 RENDER APP WORKS
+                    <div style="font-size: 16px; margin-top: 20px; color: #fff;">
+                        ✅ DOM рендеринг функционирует<br>
+                        ✅ #app элемент доступен<br>
+                        ✅ CSS стили применяются<br>
+                        ✅ JavaScript выполняется
+                    </div>
+                    <div style="
+                        margin-top: 30px;
+                        padding: 15px;
+                        background: rgba(255,255,255,0.1);
+                        border-radius: 8px;
+                        font-size: 14px;
+                        color: #ccc;
+                    ">
+                        Время теста: ${new Date().toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+            
+            // Скрываем loading
+            hideLoading();
+            
+            console.log('✅ Simple renderApp() test completed');
+        }
+        
+        function testMainApp() {
+            console.log('🚀 Testing main app renderApp()...');
+            
+            // Пытаемся вызвать renderApp() основного приложения
+            if (window.flashPostApp && window.flashPostApp.renderApp) {
+                try {
+                    window.flashPostApp.renderApp();
+                    console.log('✅ Main app renderApp() called successfully');
+                } catch (error) {
+                    console.error('❌ Error calling main app renderApp():', error);
+                    showError('Main App Error', error.message);
+                }
+            } else {
+                console.log('⚠️ Main app not available, loading modules...');
+                loadMainAppModules();
+            }
+            
+            hideLoading();
+        }
+        
+        function testErrorState() {
+            console.log('❌ Testing error state...');
+            
+            document.getElementById('app').innerHTML = `
+                <div style="
+                    min-height: 100vh;
+                    background: #0f0f14;
+                    color: #dc3545;
+                    font-size: 20px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                ">
+                    ❌ ERROR STATE TEST
+                    <div style="font-size: 14px; margin-top: 20px; color: #fff; max-width: 500px;">
+                        Это демонстрация того, как приложение должно выглядеть при ошибке.<br>
+                        Даже в случае ошибки пользователь видит информативное сообщение.
+                    </div>
+                    <button onclick="testSimpleRender()" style="
+                        margin-top: 20px;
+                        background: #28a745;
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">
+                        🔧 Восстановить
+                    </button>
+                </div>
+            `;
+            
+            hideLoading();
+        }
+        
+        function testEmptyState() {
+            console.log('⚪ Testing empty state...');
+            
+            document.getElementById('app').innerHTML = '';
+            hideLoading();
+            
+            // Показываем что происходит с пустым #app
+            setTimeout(() => {
+                if (document.getElementById('app').innerHTML.trim() === '') {
+                    console.log('⚠️ #app is empty - this causes white screen');
+                    
+                    // Показываем диагностику
+                    document.getElementById('app').innerHTML = `
+                        <div style="
+                            min-height: 100vh;
+                            background: #fff;
+                            color: #333;
+                            font-size: 18px;
+                            padding: 20px;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            text-align: center;
+                        ">
+                            ⚪ EMPTY STATE DETECTED
+                            <div style="font-size: 14px; margin-top: 20px; max-width: 500px;">
+                                Когда #app пустой, пользователь видит белый экран.<br>
+                                Это основная причина проблемы "белого экрана".
+                            </div>
+                            <button onclick="testSimpleRender()" style="
+                                margin-top: 20px;
+                                background: #833ab4;
+                                color: white;
+                                border: none;
+                                padding: 12px 24px;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-weight: 600;
+                            ">
+                                🔧 Исправить
+                            </button>
+                        </div>
+                    `;
+                }
+            }, 1000);
+        }
+        
+        function clearApp() {
+            console.log('🧹 Clearing app...');
+            document.getElementById('app').innerHTML = '';
+            showLoading();
+        }
+        
+        function showError(title, message) {
+            document.getElementById('app').innerHTML = `
+                <div style="
+                    min-height: 100vh;
+                    background: #0f0f14;
+                    color: #dc3545;
+                    font-size: 18px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                ">
+                    ❌ ${title}
+                    <div style="
+                        font-size: 14px;
+                        margin-top: 20px;
+                        color: #fff;
+                        background: rgba(220, 53, 69, 0.1);
+                        padding: 15px;
+                        border-radius: 8px;
+                        border-left: 4px solid #dc3545;
+                        max-width: 500px;
+                    ">
+                        ${message}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function loadMainAppModules() {
+            console.log('📦 Loading main app modules...');
+            
+            document.getElementById('app').innerHTML = `
+                <div style="
+                    min-height: 100vh;
+                    background: #0f0f14;
+                    color: #ffc107;
+                    font-size: 18px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                ">
+                    ⏳ LOADING MAIN APP MODULES
+                    <div style="font-size: 14px; margin-top: 20px; color: #fff;">
+                        Загружаем модули основного приложения...<br>
+                        Это может занять несколько секунд.
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button onclick="window.open('index.html', '_blank')" style="
+                            background: #833ab4;
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: 600;
+                            margin: 5px;
+                        ">
+                            🚀 Open Main App
+                        </button>
+                        <button onclick="testSimpleRender()" style="
+                            background: #28a745;
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: 600;
+                            margin: 5px;
+                        ">
+                            ✅ Back to Simple Test
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function hideLoading() {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.opacity = '0';
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        function showLoading() {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'flex';
+                loading.style.opacity = '1';
+            }
+        }
+        
+        // Мониторинг состояния #app
+        function monitorAppState() {
+            const app = document.getElementById('app');
+            const isEmpty = !app || app.innerHTML.trim() === '';
+            const isVisible = app && window.getComputedStyle(app).display !== 'none';
+            
+            console.log('📊 App State:', {
+                exists: !!app,
+                isEmpty: isEmpty,
+                isVisible: isVisible,
+                contentLength: app ? app.innerHTML.length : 0,
+                background: app ? window.getComputedStyle(app).backgroundColor : 'N/A'
+            });
+            
+            return { exists: !!app, isEmpty, isVisible };
+        }
+        
+        // Инициализация
+        window.addEventListener('load', () => {
+            console.log('🚀 Simple RenderApp Test loaded');
+            
+            // Мониторим состояние
+            monitorAppState();
+            
+            // Автоматически запускаем простой тест через 1 секунду
+            setTimeout(() => {
+                console.log('🔄 Auto-running simple test...');
+                testSimpleRender();
+            }, 1000);
+            
+            // Периодический мониторинг
+            setInterval(monitorAppState, 5000);
+        });
+        
+        // Глобальные функции для консоли
+        window.testRenderApp = testSimpleRender;
+        window.monitorApp = monitorAppState;
+        
+        console.log('🧪 Simple RenderApp Test ready');
+        console.log('💡 Available functions: testRenderApp(), monitorApp()');
+    </script>
+</body>
+</html>

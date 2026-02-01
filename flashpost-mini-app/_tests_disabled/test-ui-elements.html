@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Elements Test - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        .slide-preview {
+            width: 100%;
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            margin-bottom: 20px;
+        }
+        
+        .slide-text-block {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .slide-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .slide-tab {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .slide-tab.active {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            border-color: transparent;
+        }
+        
+        .slide-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎨 UI Elements Test</h1>
+            <p>Тестирование новых UI элементов: "Листай", стрелка, Instagram никнейм, CTA текст</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 New UI Elements</h2>
+            <ul>
+                <li>✅ "Листай" indicator - bottom-left on all slides except last</li>
+                <li>✅ Custom arrow - right side on all slides except last</li>
+                <li>✅ Instagram nickname - input once, show on first & last slide</li>
+                <li>✅ CTA text - on last slide only</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Interactive Test</h2>
+            <div class="test-grid">
+                <!-- Slide Preview -->
+                <div>
+                    <h3>Slide Preview</h3>
+                    <div class="slide-selector" id="slideSelector">
+                        <div class="slide-tab active" data-slide="0">Slide 1 (First)</div>
+                        <div class="slide-tab" data-slide="1">Slide 2 (Middle)</div>
+                        <div class="slide-tab" data-slide="2">Slide 3 (Last)</div>
+                    </div>
+                    <div class="slide-preview" id="testSlide">
+                        <!-- Text blocks -->
+                        <div class="slide-text-block" style="top: 20%; left: 10%; font-size: 24px;">
+                            Sample Title Text
+                        </div>
+                        <div class="slide-text-block" style="bottom: 30%; right: 10%; font-size: 16px;">
+                            Sample description text
+                        </div>
+                        
+                        <!-- UI Elements will be added dynamically -->
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div>
+                    <h3>Controls</h3>
+                    <div class="controls-panel">
+                        <div class="input-group">
+                            <label for="instagramNickname">Instagram Nickname:</label>
+                            <input type="text" id="instagramNickname" placeholder="username" maxlength="30">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="ctaText">CTA Text:</label>
+                            <input type="text" id="ctaText" placeholder="Подпишись на @username" maxlength="50">
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="test-button" onclick="updateUIElements()">
+                                🔄 Update UI Elements
+                            </button>
+                            <button class="test-button" onclick="testNavigation()">
+                                ➡️ Test Navigation
+                            </button>
+                            <button class="test-button" onclick="resetTest()">
+                                🔄 Reset Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Element Status</h2>
+            <div id="elementStatus">
+                <p>Configure Instagram nickname and CTA text above...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        let totalSlides = 3;
+        let instagramNickname = '';
+        let ctaText = 'Подпишись на @username';
+
+        // Initialize test
+        function initializeTest() {
+            updateSlideDisplay();
+            updateElementStatus();
+            
+            // Bind slide selector events
+            document.querySelectorAll('.slide-tab').forEach((tab, index) => {
+                tab.addEventListener('click', () => switchSlide(index));
+            });
+            
+            // Bind input events
+            document.getElementById('instagramNickname').addEventListener('input', (e) => {
+                instagramNickname = e.target.value.trim();
+                if (instagramNickname) {
+                    document.getElementById('ctaText').value = `Подпишись на @${instagramNickname}`;
+                    ctaText = `Подпишись на @${instagramNickname}`;
+                }
+                updateUIElements();
+            });
+            
+            document.getElementById('ctaText').addEventListener('input', (e) => {
+                ctaText = e.target.value.trim();
+                updateUIElements();
+            });
+        }
+
+        // Switch slide
+        function switchSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            currentSlide = index;
+            
+            // Update slide tabs
+            document.querySelectorAll('.slide-tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            
+            updateSlideDisplay();
+        }
+
+        // Update slide display
+        function updateSlideDisplay() {
+            const slideEl = document.getElementById('testSlide');
+            
+            // Clear existing UI elements
+            slideEl.querySelectorAll('.instagram-nickname, .cta-text, .swipe-indicator, .custom-arrow, .slide-number').forEach(el => el.remove());
+            
+            // Add slide number
+            const slideNumber = document.createElement('div');
+            slideNumber.className = 'slide-number';
+            slideNumber.textContent = `${currentSlide + 1}/${totalSlides}`;
+            slideEl.appendChild(slideNumber);
+            
+            // Add Instagram nickname on first and last slide
+            if (instagramNickname && (currentSlide === 0 || currentSlide === totalSlides - 1)) {
+                const nicknameEl = document.createElement('div');
+                nicknameEl.className = 'instagram-nickname';
+                nicknameEl.textContent = `@${instagramNickname}`;
+                slideEl.appendChild(nicknameEl);
+            }
+            
+            // Add CTA text on last slide
+            if (currentSlide === totalSlides - 1 && ctaText) {
+                const ctaEl = document.createElement('div');
+                ctaEl.className = 'cta-text';
+                ctaEl.textContent = ctaText;
+                slideEl.appendChild(ctaEl);
+            }
+            
+            // Add "Листай" indicator (except last slide)
+            if (currentSlide < totalSlides - 1) {
+                const swipeIndicator = document.createElement('div');
+                swipeIndicator.className = 'swipe-indicator';
+                swipeIndicator.innerHTML = `
+                    <div class="swipe-text">Листай</div>
+                    <div class="swipe-animation">
+                        <div class="swipe-dot"></div>
+                        <div class="swipe-dot"></div>
+                        <div class="swipe-dot"></div>
+                    </div>
+                `;
+                slideEl.appendChild(swipeIndicator);
+            }
+            
+            // Add custom arrow (except last slide)
+            if (currentSlide < totalSlides - 1) {
+                const arrow = document.createElement('div');
+                arrow.className = 'custom-arrow';
+                arrow.innerHTML = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M8 4L16 12L8 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                `;
+                arrow.addEventListener('click', () => {
+                    if (currentSlide < totalSlides - 1) {
+                        switchSlide(currentSlide + 1);
+                    }
+                });
+                slideEl.appendChild(arrow);
+            }
+            
+            updateElementStatus();
+        }
+
+        // Update UI elements
+        function updateUIElements() {
+            updateSlideDisplay();
+        }
+
+        // Test navigation
+        function testNavigation() {
+            let slideIndex = 0;
+            const interval = setInterval(() => {
+                switchSlide(slideIndex);
+                slideIndex++;
+                
+                if (slideIndex >= totalSlides) {
+                    clearInterval(interval);
+                    // Return to first slide
+                    setTimeout(() => switchSlide(0), 1000);
+                }
+            }, 2000);
+        }
+
+        // Reset test
+        function resetTest() {
+            currentSlide = 0;
+            instagramNickname = '';
+            ctaText = 'Подпишись на @username';
+            
+            document.getElementById('instagramNickname').value = '';
+            document.getElementById('ctaText').value = ctaText;
+            
+            switchSlide(0);
+        }
+
+        // Update element status
+        function updateElementStatus() {
+            const statusEl = document.getElementById('elementStatus');
+            
+            const elements = [];
+            
+            // Check which elements are visible
+            const slideEl = document.getElementById('testSlide');
+            
+            if (slideEl.querySelector('.slide-number')) {
+                elements.push('✅ Slide Number');
+            }
+            
+            if (slideEl.querySelector('.instagram-nickname')) {
+                elements.push('✅ Instagram Nickname');
+            }
+            
+            if (slideEl.querySelector('.cta-text')) {
+                elements.push('✅ CTA Text');
+            }
+            
+            if (slideEl.querySelector('.swipe-indicator')) {
+                elements.push('✅ Swipe Indicator ("Листай")');
+            }
+            
+            if (slideEl.querySelector('.custom-arrow')) {
+                elements.push('✅ Custom Arrow');
+            }
+            
+            statusEl.innerHTML = `
+                <h4>Current Slide: ${currentSlide + 1}/${totalSlides}</h4>
+                <h4>Visible Elements:</h4>
+                <ul>
+                    ${elements.map(el => `<li>${el}</li>`).join('')}
+                </ul>
+                <h4>Configuration:</h4>
+                <ul>
+                    <li>Instagram: ${instagramNickname || 'Not set'}</li>
+                    <li>CTA Text: ${ctaText}</li>
+                </ul>
+            `;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTest();
+        });
+    </script>
+</body>
+</html>

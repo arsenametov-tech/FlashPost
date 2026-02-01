@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест системы шаблонов - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 25%, #fcb045 50%, #f77737 75%, #e1306c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .test-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .test-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        
+        .test-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .test-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .test-steps {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .test-steps h4 {
+            margin: 0 0 10px 0;
+            color: #2e7d32;
+        }
+        
+        .test-steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .test-steps li {
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .start-btn:hover {
+            background: #6d2d96;
+            transform: translateY(-2px);
+        }
+        
+        .debug-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        
+        .debug-info h5 {
+            margin: 0 0 8px 0;
+            color: #856404;
+        }
+        
+        .debug-info code {
+            background: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">📋 Тест системы шаблонов</h1>
+        
+        <div class="test-info">
+            <strong>Что тестируем:</strong><br>
+            Полную систему шаблонов FlashPost: сохранение в localStorage, 
+            список шаблонов, применение к текущему слайду и ко всем слайдам.
+        </div>
+        
+        <h3>Функции системы:</h3>
+        <ul class="test-features">
+            <li><span class="feature-icon">💾</span>Сохранение шаблона в localStorage</li>
+            <li><span class="feature-icon">📋</span>Список всех сохраненных шаблонов</li>
+            <li><span class="feature-icon">📄</span>Применение к текущему слайду</li>
+            <li><span class="feature-icon">📚</span>Применение ко всем слайдам</li>
+            <li><span class="feature-icon">🗑️</span>Удаление шаблонов</li>
+            <li><span class="feature-icon">👁️</span>Превью шаблонов</li>
+        </ul>
+        
+        <div class="test-steps">
+            <h4>Шаги тестирования:</h4>
+            <ol>
+                <li>Создать карусель</li>
+                <li>Открыть редактор</li>
+                <li>Настроить дизайн (фон, шрифт, текстовые блоки)</li>
+                <li>Нажать кнопку "Сохранить шаблон" 💾</li>
+                <li>Ввести название шаблона</li>
+                <li>Нажать кнопку "Шаблоны" 📋</li>
+                <li>Проверить список шаблонов</li>
+                <li>Применить шаблон к текущему слайду</li>
+                <li>Применить шаблон ко всем слайдам</li>
+                <li>Удалить шаблон</li>
+            </ol>
+        </div>
+        
+        <button class="start-btn" onclick="startTemplateTest()">🚀 Начать тест шаблонов</button>
+        
+        <div class="debug-info">
+            <h5>🔧 Отладочная информация:</h5>
+            <p>Шаблоны сохраняются в <code>localStorage</code> под ключом <code>flashpost_templates</code></p>
+            <p>Для очистки: <code>localStorage.removeItem('flashpost_templates')</code></p>
+            <p>Для просмотра: <code>console.log(JSON.parse(localStorage.getItem('flashpost_templates')))</code></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function startTemplateTest() {
+            console.log('📋 Запуск теста системы шаблонов');
+            
+            // Очищаем существующие шаблоны для чистого теста
+            localStorage.removeItem('flashpost_templates');
+            console.log('🧹 Очищены существующие шаблоны');
+            
+            // Создаем экземпляр приложения
+            window.testApp = new FlashPostApp();
+            
+            // Переопределяем метод показа приложения для автоматического тестирования
+            const originalShowApp = window.testApp.showApp;
+            window.testApp.showApp = function() {
+                originalShowApp.call(this);
+                
+                // Автоматически заполняем тему и создаем карусель
+                setTimeout(() => {
+                    const topicInput = document.getElementById('topicInput');
+                    if (topicInput) {
+                        topicInput.value = 'Тестирование системы шаблонов FlashPost';
+                        this.updateInputCounter();
+                        
+                        // Автоматически генерируем карусель
+                        setTimeout(() => {
+                            this.handleGenerate();
+                        }, 500);
+                    }
+                }, 1000);
+            };
+            
+            // Скрываем тестовый контейнер
+            document.querySelector('.test-container').style.display = 'none';
+            
+            // Создаем контейнер для приложения
+            const appContainer = document.createElement('div');
+            appContainer.id = 'app';
+            appContainer.style.display = 'block';
+            document.body.appendChild(appContainer);
+            
+            // Создаем loading экран
+            const loadingContainer = document.createElement('div');
+            loadingContainer.id = 'loading';
+            loadingContainer.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: white;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 24px; margin-bottom: 10px;">📋</div>
+                        <div>Загрузка теста шаблонов...</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingContainer);
+        }
+        
+        // Функции для отладки шаблонов
+        window.debugTemplates = {
+            // Показать все шаблоны
+            showAll: () => {
+                const templates = JSON.parse(localStorage.getItem('flashpost_templates') || '[]');
+                console.table(templates);
+                return templates;
+            },
+            
+            // Очистить все шаблоны
+            clearAll: () => {
+                localStorage.removeItem('flashpost_templates');
+                console.log('✅ Все шаблоны удалены');
+            },
+            
+            // Создать тестовый шаблон
+            createTest: () => {
+                const testTemplate = {
+                    id: Date.now().toString(),
+                    name: 'Тестовый шаблон',
+                    createdAt: new Date().toISOString(),
+                    style: {
+                        backgroundColor: '#833ab4',
+                        fontFamily: 'Montserrat',
+                        fontSize: 18,
+                        textColor: '#ffffff',
+                        textBlocks: [{
+                            id: 'test-block',
+                            text: 'Тестовый текст',
+                            font: 'Montserrat',
+                            size: 18,
+                            color: '#ffffff',
+                            position: { x: 50, y: 50 },
+                            width: 60
+                        }]
+                    }
+                };
+                
+                const templates = JSON.parse(localStorage.getItem('flashpost_templates') || '[]');
+                templates.push(testTemplate);
+                localStorage.setItem('flashpost_templates', JSON.stringify(templates));
+                console.log('✅ Тестовый шаблон создан');
+                return testTemplate;
+            }
+        };
+        
+        // Логирование для отладки
+        console.log('📋 Тестовая страница шаблонов загружена');
+        console.log('🔧 Доступные методы отладки:');
+        console.log('- debugTemplates.showAll() - показать все шаблоны');
+        console.log('- debugTemplates.clearAll() - очистить все шаблоны');
+        console.log('- debugTemplates.createTest() - создать тестовый шаблон');
+        console.log('- startTemplateTest() - запуск автоматического теста');
+    </script>
+</body>
+</html>

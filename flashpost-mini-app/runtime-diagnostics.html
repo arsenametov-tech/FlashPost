@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runtime Diagnostics - FlashPost</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .diagnostic-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 15px;
+        }
+        
+        .section h3 {
+            color: #ffff00;
+            margin-top: 0;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+            font-size: 12px;
+        }
+        
+        .timestamp {
+            color: #888;
+            margin-right: 10px;
+        }
+        
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        
+        .test-button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .test-button:hover {
+            background: #444;
+        }
+        
+        .iframe-container {
+            border: 2px solid #666;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-ok { background: #00ff00; }
+        .status-error { background: #ff0000; }
+        .status-warning { background: #ffaa00; }
+        .status-unknown { background: #888; }
+    </style>
+</head>
+<body>
+    <div class="diagnostic-container">
+        <h1>🔍 FlashPost Runtime Diagnostics</h1>
+        <p>Real-time diagnostics for white screen and broken UI issues</p>
+        
+        <div class="section">
+            <h3>🎯 Quick Actions</h3>
+            <button class="test-button" onclick="runFullDiagnostics()">🚀 Run Full Diagnostics</button>
+            <button class="test-button" onclick="testMainApp()">📱 Test Main App</button>
+            <button class="test-button" onclick="checkConsoleErrors()">🐛 Check Console Errors</button>
+            <button class="test-button" onclick="clearLogs()">🧹 Clear Logs</button>
+        </div>
+        
+        <div class="section">
+            <h3>📊 System Status</h3>
+            <div id="system-status">
+                <div><span class="status-indicator status-unknown"></span>Server Status: <span id="server-status">Checking...</span></div>
+                <div><span class="status-indicator status-unknown"></span>Module Loading: <span id="module-status">Checking...</span></div>
+                <div><span class="status-indicator status-unknown"></span>App Initialization: <span id="app-status">Checking...</span></div>
+                <div><span class="status-indicator status-unknown"></span>DOM Ready: <span id="dom-status">Checking...</span></div>
+                <div><span class="status-indicator status-unknown"></span>First Render: <span id="render-status">Checking...</span></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>📝 Real-time Logs</h3>
+            <div id="diagnostic-logs" style="max-height: 300px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 4px;">
+                <!-- Logs will appear here -->
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🔧 Module Diagnostics</h3>
+            <div id="module-diagnostics">
+                <!-- Module status will appear here -->
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>🌐 Main Application Test</h3>
+            <button class="test-button" onclick="loadMainApp()">Load Main App in Frame</button>
+            <div class="iframe-container" id="app-frame-container" style="display: none;">
+                <iframe id="main-app-frame" src="about:blank"></iframe>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>❌ Error Details</h3>
+            <div id="error-details" style="background: #2a1a1a; padding: 10px; border-radius: 4px; min-height: 100px;">
+                No errors detected yet...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global diagnostic state
+        let diagnosticState = {
+            serverOnline: false,
+            modulesLoaded: false,
+            appInitialized: false,
+            domReady: false,
+            firstRender: false,
+            errors: [],
+            warnings: [],
+            logs: []
+        };
+
+        // Logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = {
+                timestamp,
+                message,
+                type
+            };
+            
+            diagnosticState.logs.push(logEntry);
+            
+            const logsContainer = document.getElementById('diagnostic-logs');
+            if (logsContainer) {
+                const logDiv = document.createElement('div');
+                logDiv.className = `log-entry ${type}`;
+                logDiv.innerHTML = `<span class="timestamp">[${timestamp}]</span>${message}`;
+                logsContainer.appendChild(logDiv);
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+            
+            console.log(`[DIAGNOSTIC] ${type.toUpperCase()}: ${message}`);
+        }
+
+        // Update status indicator
+        function updateStatus(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            const indicator = element.previousElementSibling.querySelector('.status-indicator');
+            
+            if (element) element.textContent = message;
+            if (indicator) {
+                indicator.className = `status-indicator status-${status}`;
+            }
+        }
+
+        // Check server status
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/');
+                if (response.ok) {
+                    diagnosticState.serverOnline = true;
+                    updateStatus('server-status', 'ok', 'Online');
+                    log('✅ Server is online and responding', 'success');
+                    return true;
+                } else {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+            } catch (error) {
+                diagnosticState.serverOnline = false;
+                updateStatus('server-status', 'error', 'Offline');
+                log(`❌ Server check failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Check module loading
+        async function checkModuleLoading() {
+            log('🔍 Checking module loading...', 'info');
+            
+            const requiredModules = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager'
+            ];
+            
+            const moduleResults = {};
+            let loadedCount = 0;
+            
+            // Create a test iframe to load modules
+            const testFrame = document.createElement('iframe');
+            testFrame.style.display = 'none';
+            document.body.appendChild(testFrame);
+            
+            try {
+                // Load the main app's scripts in the iframe
+                const frameDoc = testFrame.contentDocument;
+                frameDoc.open();
+                frameDoc.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <script>
+                            window.moduleLoadResults = {};
+                            window.moduleErrors = [];
+                            
+                            // Override console to capture errors
+                            const originalError = console.error;
+                            console.error = function(...args) {
+                                window.moduleErrors.push(args.join(' '));
+                                originalError.apply(console, args);
+                            };
+                        </script>
+                    </head>
+                    <body>
+                        <script src="src/state.js"></script>
+                        <script src="src/renderer.js"></script>
+                        <script src="src/editor.js"></script>
+                        <script src="src/drag.js"></script>
+                        <script src="src/export.js"></script>
+                        <script src="src/ai.js"></script>
+                        <script src="src/template-manager.js"></script>
+                        <script>
+                            // Check which modules loaded
+                            const modules = ['StateManager', 'Renderer', 'Editor', 'DragManager', 'ExportManager', 'AIManager', 'TemplateManager'];
+                            modules.forEach(module => {
+                                window.moduleLoadResults[module] = typeof window[module] !== 'undefined';
+                            });
+                        </script>
+                    </body>
+                    </html>
+                `);
+                frameDoc.close();
+                
+                // Wait for scripts to load
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Check results
+                const frameWindow = testFrame.contentWindow;
+                const results = frameWindow.moduleLoadResults || {};
+                const errors = frameWindow.moduleErrors || [];
+                
+                // Log errors first
+                if (errors.length > 0) {
+                    log(`❌ Module loading errors detected:`, 'error');
+                    errors.forEach(error => {
+                        log(`   ${error}`, 'error');
+                        diagnosticState.errors.push(`Module Error: ${error}`);
+                    });
+                }
+                
+                // Check each module
+                const moduleContainer = document.getElementById('module-diagnostics');
+                moduleContainer.innerHTML = '';
+                
+                requiredModules.forEach(module => {
+                    const isLoaded = results[module] === true;
+                    if (isLoaded) loadedCount++;
+                    
+                    const moduleDiv = document.createElement('div');
+                    moduleDiv.innerHTML = `
+                        <span class="status-indicator status-${isLoaded ? 'ok' : 'error'}"></span>
+                        ${module}: ${isLoaded ? 'Loaded' : 'Failed'}
+                    `;
+                    moduleContainer.appendChild(moduleDiv);
+                    
+                    log(`${isLoaded ? '✅' : '❌'} ${module}: ${isLoaded ? 'Loaded' : 'Failed'}`, isLoaded ? 'success' : 'error');
+                });
+                
+                const allLoaded = loadedCount === requiredModules.length;
+                diagnosticState.modulesLoaded = allLoaded;
+                updateStatus('module-status', allLoaded ? 'ok' : 'error', `${loadedCount}/${requiredModules.length} loaded`);
+                
+                if (allLoaded) {
+                    log('✅ All modules loaded successfully', 'success');
+                } else {
+                    log(`❌ Only ${loadedCount}/${requiredModules.length} modules loaded`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Module loading test failed: ${error.message}`, 'error');
+                diagnosticState.errors.push(`Module Loading Error: ${error.message}`);
+                updateStatus('module-status', 'error', 'Test failed');
+            } finally {
+                document.body.removeChild(testFrame);
+            }
+        }
+
+        // Test main app initialization
+        async function testMainApp() {
+            log('🔍 Testing main app initialization...', 'info');
+            
+            const testFrame = document.createElement('iframe');
+            testFrame.style.display = 'none';
+            document.body.appendChild(testFrame);
+            
+            try {
+                const frameDoc = testFrame.contentDocument;
+                frameDoc.open();
+                frameDoc.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <script>
+                            window.diagnosticResults = {
+                                domReady: false,
+                                appInitialized: false,
+                                firstRender: false,
+                                errors: [],
+                                warnings: [],
+                                timeline: []
+                            };
+                            
+                            function logEvent(event, status, details = '') {
+                                const timestamp = Date.now();
+                                window.diagnosticResults.timeline.push({
+                                    timestamp,
+                                    event,
+                                    status,
+                                    details
+                                });
+                                console.log(\`[DIAGNOSTIC] \${event}: \${status} \${details}\`);
+                            }
+                            
+                            // Override console methods
+                            const originalError = console.error;
+                            const originalWarn = console.warn;
+                            
+                            console.error = function(...args) {
+                                window.diagnosticResults.errors.push(args.join(' '));
+                                logEvent('ERROR', 'detected', args.join(' '));
+                                originalError.apply(console, args);
+                            };
+                            
+                            console.warn = function(...args) {
+                                window.diagnosticResults.warnings.push(args.join(' '));
+                                logEvent('WARNING', 'detected', args.join(' '));
+                                originalWarn.apply(console, args);
+                            };
+                            
+                            // Track DOM ready
+                            document.addEventListener('DOMContentLoaded', function() {
+                                window.diagnosticResults.domReady = true;
+                                logEvent('DOMContentLoaded', 'fired');
+                            });
+                            
+                            // Track window load
+                            window.addEventListener('load', function() {
+                                logEvent('window.load', 'fired');
+                            });
+                        </script>
+                    </head>
+                    <body>
+                        <div id="loading">Loading...</div>
+                        <div id="app" style="display: none;">App</div>
+                        
+                        <!-- Load modules -->
+                        <script src="src/state.js"></script>
+                        <script src="src/renderer.js"></script>
+                        <script src="src/editor.js"></script>
+                        <script src="src/drag.js"></script>
+                        <script src="src/export.js"></script>
+                        <script src="src/ai.js"></script>
+                        <script src="src/template-manager.js"></script>
+                        <script src="src/app.js"></script>
+                        
+                        <script>
+                            // Monitor app initialization
+                            let checkCount = 0;
+                            const maxChecks = 50; // 5 seconds
+                            
+                            function checkAppStatus() {
+                                checkCount++;
+                                
+                                if (window.flashPostApp) {
+                                    window.diagnosticResults.appInitialized = true;
+                                    logEvent('App Initialization', 'success', 'flashPostApp found');
+                                    
+                                    // Check if render was called
+                                    try {
+                                        if (window.flashPostApp.renderer) {
+                                            logEvent('Renderer', 'available');
+                                            window.diagnosticResults.firstRender = true;
+                                        }
+                                    } catch (e) {
+                                        logEvent('Renderer Check', 'error', e.message);
+                                    }
+                                    
+                                    return;
+                                }
+                                
+                                if (checkCount < maxChecks) {
+                                    setTimeout(checkAppStatus, 100);
+                                } else {
+                                    logEvent('App Initialization', 'timeout', 'flashPostApp not found after 5 seconds');
+                                }
+                            }
+                            
+                            // Start checking after a brief delay
+                            setTimeout(checkAppStatus, 100);
+                        </script>
+                    </body>
+                    </html>
+                `);
+                frameDoc.close();
+                
+                // Wait for initialization
+                await new Promise(resolve => setTimeout(resolve, 6000));
+                
+                // Get results
+                const frameWindow = testFrame.contentWindow;
+                const results = frameWindow.diagnosticResults || {};
+                
+                // Update diagnostic state
+                diagnosticState.domReady = results.domReady || false;
+                diagnosticState.appInitialized = results.appInitialized || false;
+                diagnosticState.firstRender = results.firstRender || false;
+                
+                // Update UI
+                updateStatus('dom-status', diagnosticState.domReady ? 'ok' : 'error', 
+                    diagnosticState.domReady ? 'Ready' : 'Not fired');
+                updateStatus('app-status', diagnosticState.appInitialized ? 'ok' : 'error', 
+                    diagnosticState.appInitialized ? 'Initialized' : 'Failed');
+                updateStatus('render-status', diagnosticState.firstRender ? 'ok' : 'error', 
+                    diagnosticState.firstRender ? 'Called' : 'Not called');
+                
+                // Log timeline
+                if (results.timeline && results.timeline.length > 0) {
+                    log('📋 Initialization Timeline:', 'info');
+                    results.timeline.forEach(event => {
+                        log(`   ${event.event}: ${event.status} ${event.details}`, 
+                            event.status === 'error' ? 'error' : 
+                            event.status === 'success' ? 'success' : 'info');
+                    });
+                }
+                
+                // Log errors and warnings
+                if (results.errors && results.errors.length > 0) {
+                    log('❌ Initialization Errors:', 'error');
+                    results.errors.forEach(error => {
+                        log(`   ${error}`, 'error');
+                        diagnosticState.errors.push(`Init Error: ${error}`);
+                    });
+                }
+                
+                if (results.warnings && results.warnings.length > 0) {
+                    log('⚠️ Initialization Warnings:', 'warning');
+                    results.warnings.forEach(warning => {
+                        log(`   ${warning}`, 'warning');
+                        diagnosticState.warnings.push(`Init Warning: ${warning}`);
+                    });
+                }
+                
+            } catch (error) {
+                log(`❌ Main app test failed: ${error.message}`, 'error');
+                diagnosticState.errors.push(`Main App Test Error: ${error.message}`);
+            } finally {
+                document.body.removeChild(testFrame);
+            }
+        }
+
+        // Check console errors
+        function checkConsoleErrors() {
+            log('🔍 Checking for console errors...', 'info');
+            
+            const errorContainer = document.getElementById('error-details');
+            
+            if (diagnosticState.errors.length === 0 && diagnosticState.warnings.length === 0) {
+                errorContainer.innerHTML = '<div class="success">✅ No errors or warnings detected</div>';
+                log('✅ No console errors found', 'success');
+            } else {
+                let errorHtml = '';
+                
+                if (diagnosticState.errors.length > 0) {
+                    errorHtml += '<h4 style="color: #ff0000;">❌ Errors:</h4>';
+                    diagnosticState.errors.forEach(error => {
+                        errorHtml += `<div style="color: #ff0000; margin: 5px 0; padding: 5px; background: #2a1a1a; border-left: 3px solid #ff0000;">${error}</div>`;
+                    });
+                }
+                
+                if (diagnosticState.warnings.length > 0) {
+                    errorHtml += '<h4 style="color: #ffaa00;">⚠️ Warnings:</h4>';
+                    diagnosticState.warnings.forEach(warning => {
+                        errorHtml += `<div style="color: #ffaa00; margin: 5px 0; padding: 5px; background: #2a1a1a; border-left: 3px solid #ffaa00;">${warning}</div>`;
+                    });
+                }
+                
+                errorContainer.innerHTML = errorHtml;
+                log(`Found ${diagnosticState.errors.length} errors and ${diagnosticState.warnings.length} warnings`, 'warning');
+            }
+        }
+
+        // Load main app in frame
+        function loadMainApp() {
+            const container = document.getElementById('app-frame-container');
+            const frame = document.getElementById('main-app-frame');
+            
+            container.style.display = 'block';
+            frame.src = '/index.html';
+            
+            log('📱 Loading main app in frame...', 'info');
+            
+            frame.onload = function() {
+                log('✅ Main app frame loaded', 'success');
+                
+                // Try to access frame content for additional diagnostics
+                try {
+                    const frameDoc = frame.contentDocument;
+                    const appElement = frameDoc.getElementById('app');
+                    const loadingElement = frameDoc.getElementById('loading');
+                    
+                    if (appElement) {
+                        log(`📱 App element found, display: ${getComputedStyle(appElement).display}`, 'info');
+                    }
+                    
+                    if (loadingElement) {
+                        log(`⏳ Loading element found, display: ${getComputedStyle(loadingElement).display}`, 'info');
+                    }
+                    
+                } catch (e) {
+                    log(`⚠️ Cannot access frame content (CORS): ${e.message}`, 'warning');
+                }
+            };
+            
+            frame.onerror = function() {
+                log('❌ Main app frame failed to load', 'error');
+            };
+        }
+
+        // Run full diagnostics
+        async function runFullDiagnostics() {
+            log('🚀 Starting full diagnostics...', 'info');
+            clearLogs();
+            
+            // Reset diagnostic state
+            diagnosticState = {
+                serverOnline: false,
+                modulesLoaded: false,
+                appInitialized: false,
+                domReady: false,
+                firstRender: false,
+                errors: [],
+                warnings: [],
+                logs: []
+            };
+            
+            // Run diagnostics in sequence
+            await checkServerStatus();
+            await checkModuleLoading();
+            await testMainApp();
+            checkConsoleErrors();
+            
+            // Final summary
+            log('📊 Diagnostic Summary:', 'info');
+            log(`   Server: ${diagnosticState.serverOnline ? '✅' : '❌'}`, diagnosticState.serverOnline ? 'success' : 'error');
+            log(`   Modules: ${diagnosticState.modulesLoaded ? '✅' : '❌'}`, diagnosticState.modulesLoaded ? 'success' : 'error');
+            log(`   App Init: ${diagnosticState.appInitialized ? '✅' : '❌'}`, diagnosticState.appInitialized ? 'success' : 'error');
+            log(`   DOM Ready: ${diagnosticState.domReady ? '✅' : '❌'}`, diagnosticState.domReady ? 'success' : 'error');
+            log(`   First Render: ${diagnosticState.firstRender ? '✅' : '❌'}`, diagnosticState.firstRender ? 'success' : 'error');
+            log(`   Errors: ${diagnosticState.errors.length}`, diagnosticState.errors.length > 0 ? 'error' : 'success');
+            log(`   Warnings: ${diagnosticState.warnings.length}`, diagnosticState.warnings.length > 0 ? 'warning' : 'success');
+            
+            log('🏁 Full diagnostics completed', 'info');
+        }
+
+        // Clear logs
+        function clearLogs() {
+            const logsContainer = document.getElementById('diagnostic-logs');
+            if (logsContainer) {
+                logsContainer.innerHTML = '';
+            }
+            diagnosticState.logs = [];
+        }
+
+        // Initialize diagnostics on page load
+        window.addEventListener('load', function() {
+            log('🔧 Runtime Diagnostics initialized', 'success');
+            log('Click "Run Full Diagnostics" to start comprehensive testing', 'info');
+        });
+    </script>
+</body>
+</html>

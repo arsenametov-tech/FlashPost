@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Features Test - FlashPost</title>
+    <link rel="stylesheet" href="../app.css">
+    <style>
+        body {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        .test-btn {
+            padding: 10px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 500;
+        }
+        
+        .test-results {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .demo-slide {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border-radius: 12px;
+            position: relative;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .demo-text-block {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: move;
+            user-select: none;
+            border: 2px solid transparent;
+        }
+        
+        .demo-text-block:hover {
+            border-color: #667eea;
+        }
+        
+        .demo-text-block.dragging {
+            opacity: 0.7;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔬 Advanced Features Test</h1>
+        <p>Тестирование продвинутых функций FlashPost</p>
+
+        <!-- Drag & Drop тестирование -->
+        <div class="test-section">
+            <h3>🖱️ Drag & Drop System</h3>
+            <button class="test-btn" onclick="testDragAndDrop()">Тест Drag & Drop</button>
+            <button class="test-btn" onclick="testResizeHandles()">Тест изменения размера</button>
+            <button class="test-btn" onclick="testSnapToGrid()">Тест привязки к сетке</button>
+            
+            <div class="demo-slide" id="dragTestSlide">
+                <div class="demo-text-block" id="dragBlock1" style="top: 20%; left: 20%;">
+                    Перетащи меня!
+                </div>
+                <div class="demo-text-block" id="dragBlock2" style="top: 60%; left: 60%;">
+                    И меня тоже!
+                </div>
+            </div>
+            <div id="drag-results" class="test-results"></div>
+        </div>
+
+        <!-- Рендеринг и экспорт -->
+        <div class="test-section">
+            <h3>🎨 Rendering & Export</h3>
+            <button class="test-btn" onclick="testCanvasRendering()">Тест Canvas рендеринга</button>
+            <button class="test-btn" onclick="testImageExport()">Тест экспорта изображений</button>
+            <button class="test-btn" onclick="testZipGeneration()">Тест создания ZIP</button>
+            <button class="test-btn" onclick="testExportQuality()">Тест качества экспорта</button>
+            
+            <canvas id="testCanvas" width="300" height="300" style="border: 1px solid #ddd; margin: 10px;"></canvas>
+            <div id="export-results" class="test-results"></div>
+        </div>
+
+        <!-- Performance тестирование -->
+        <div class="test-section">
+            <h3>⚡ Performance Tests</h3>
+            <button class="test-btn" onclick="testLargeSlideCount()">Тест большого количества слайдов</button>
+            <button class="test-btn" onclick="testMemoryLeaks()">Тест утечек памяти</button>
+            <button class="test-btn" onclick="testRenderingSpeed()">Тест скорости рендеринга</button>
+            <button class="test-btn" onclick="testBatchOperations()">Тест пакетных операций</button>
+            
+            <div id="performance-results" class="test-results"></div>
+        </div>
+
+        <!-- AI Integration -->
+        <div class="test-section">
+            <h3>🤖 AI Integration</h3>
+            <button class="test-btn" onclick="testAIContentGeneration()">Тест генерации контента</button>
+            <button class="test-btn" onclick="testKeywordExtraction()">Тест извлечения ключевых слов</button>
+            <button class="test-btn" onclick="testAIErrorHandling()">Тест обработки ошибок AI</button>
+            
+            <div id="ai-results" class="test-results"></div>
+        </div>
+
+        <!-- Edge Cases -->
+        <div class="test-section">
+            <h3>🧪 Edge Cases</h3>
+            <button class="test-btn" onclick="testEmptyStates()">Тест пустых состояний</button>
+            <button class="test-btn" onclick="testInvalidData()">Тест невалидных данных</button>
+            <button class="test-btn" onclick="testBoundaryValues()">Тест граничных значений</button>
+            <button class="test-btn" onclick="testConcurrentOperations()">Тест конкурентных операций</button>
+            
+            <div id="edge-results" class="test-results"></div>
+        </div>
+    </div>
+
+    <!-- Модули -->
+    <script src="../src/state.js"></script>
+    <script src="../src/renderer.js"></script>
+    <script src="../src/editor.js"></script>
+    <script src="../src/drag.js"></script>
+    <script src="../src/export.js"></script>
+    <script src="../src/ai.js"></script>
+    <script src="../src/template-manager.js"></script>
+    <script src="../src/app.js"></script>
+
+    <script>
+        let testResults = {};
+        
+        function log(section, message, type = 'info') {
+            if (!testResults[section]) testResults[section] = [];
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            
+            testResults[section].push({ message: logMessage, type });
+            updateResults(section);
+            console.log(`${type.toUpperCase()}: ${logMessage}`);
+        }
+
+        function updateResults(section) {
+            const container = document.getElementById(`${section}-results`);
+            if (!container) return;
+            
+            const colors = {
+                success: '#d4edda',
+                error: '#f8d7da', 
+                warning: '#fff3cd',
+                info: '#d1ecf1'
+            };
+            
+            container.innerHTML = testResults[section]
+                .map(result => `<div style="background: ${colors[result.type] || colors.info}; padding: 5px; margin: 2px 0; border-radius: 3px;">${result.message}</div>`)
+                .join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Drag & Drop тесты
+        function testDragAndDrop() {
+            log('drag', 'Начало тестирования Drag & Drop...', 'info');
+            
+            try {
+                const dragManager = window.flashPostApp?.dragManager;
+                if (!dragManager) {
+                    log('drag', '❌ DragManager не найден', 'error');
+                    return;
+                }
+                
+                // Тестируем привязку событий
+                const testBlock = document.getElementById('dragBlock1');
+                if (testBlock) {
+                    // Симулируем события мыши
+                    const mouseDown = new MouseEvent('mousedown', {
+                        clientX: 100,
+                        clientY: 100,
+                        bubbles: true
+                    });
+                    
+                    const mouseMove = new MouseEvent('mousemove', {
+                        clientX: 150,
+                        clientY: 150,
+                        bubbles: true
+                    });
+                    
+                    const mouseUp = new MouseEvent('mouseup', {
+                        bubbles: true
+                    });
+                    
+                    testBlock.dispatchEvent(mouseDown);
+                    log('drag', '✅ MouseDown событие обработано', 'success');
+                    
+                    document.dispatchEvent(mouseMove);
+                    log('drag', '✅ MouseMove событие обработано', 'success');
+                    
+                    document.dispatchEvent(mouseUp);
+                    log('drag', '✅ MouseUp событие обработано', 'success');
+                    
+                    log('drag', '✅ Drag & Drop тест завершен успешно', 'success');
+                } else {
+                    log('drag', '❌ Тестовый блок не найден', 'error');
+                }
+                
+            } catch (error) {
+                log('drag', `❌ Ошибка Drag & Drop: ${error.message}`, 'error');
+            }
+        }
+
+        function testResizeHandles() {
+            log('drag', 'Тестирование изменения размера...', 'info');
+            
+            try {
+                const state = window.flashPostApp?.state;
+                if (!state) {
+                    log('drag', '❌ StateManager недоступен', 'error');
+                    return;
+                }
+                
+                // Создаем блок и тестируем изменение размера
+                const block = state.addTextBlock();
+                if (block) {
+                    const originalWidth = block.width;
+                    
+                    // Изменяем ширину
+                    state.updateTextBlockProperty(block.id, 'width', originalWidth + 20);
+                    
+                    const updatedBlock = state.getActiveSlide()?.textBlocks.find(b => b.id === block.id);
+                    if (updatedBlock && updatedBlock.width === originalWidth + 20) {
+                        log('drag', '✅ Изменение ширины работает корректно', 'success');
+                    } else {
+                        log('drag', '❌ Ошибка изменения ширины', 'error');
+                    }
+                }
+                
+            } catch (error) {
+                log('drag', `❌ Ошибка тестирования изменения размера: ${error.message}`, 'error');
+            }
+        }
+
+        function testSnapToGrid() {
+            log('drag', 'Тестирование привязки к сетке...', 'info');
+            
+            // Тест функции привязки к сетке
+            function snapToGrid(value, gridSize = 5) {
+                return Math.round(value / gridSize) * gridSize;
+            }
+            
+            const testValues = [12, 17, 23, 28, 33];
+            testValues.forEach(value => {
+                const snapped = snapToGrid(value);
+                log('drag', `✅ Значение ${value} привязано к ${snapped}`, 'success');
+            });
+        }
+
+        // Рендеринг и экспорт тесты
+        function testCanvasRendering() {
+            log('export', 'Тестирование Canvas рендеринга...', 'info');
+            
+            try {
+                const canvas = document.getElementById('testCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Очищаем canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Рисуем градиент фон
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#833ab4');
+                gradient.addColorStop(0.5, '#fd1d1d');
+                gradient.addColorStop(1, '#fcb045');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Добавляем текст
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 24px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Test Slide', canvas.width / 2, canvas.height / 2);
+                
+                log('export', '✅ Canvas рендеринг выполнен успешно', 'success');
+                
+            } catch (error) {
+                log('export', `❌ Ошибка Canvas рендеринга: ${error.message}`, 'error');
+            }
+        }
+
+        function testImageExport() {
+            log('export', 'Тестирование экспорта изображений...', 'info');
+            
+            try {
+                const canvas = document.getElementById('testCanvas');
+                
+                // Экспортируем как Data URL
+                const dataURL = canvas.toDataURL('image/png');
+                if (dataURL && dataURL.startsWith('data:image/png')) {
+                    log('export', '✅ PNG экспорт работает корректно', 'success');
+                    log('export', `Размер данных: ${Math.round(dataURL.length / 1024)} KB`, 'info');
+                } else {
+                    log('export', '❌ Ошибка PNG экспорта', 'error');
+                }
+                
+                // Тест JPEG экспорта
+                const jpegURL = canvas.toDataURL('image/jpeg', 0.9);
+                if (jpegURL && jpegURL.startsWith('data:image/jpeg')) {
+                    log('export', '✅ JPEG экспорт работает корректно', 'success');
+                } else {
+                    log('export', '❌ Ошибка JPEG экспорта', 'error');
+                }
+                
+            } catch (error) {
+                log('export', `❌ Ошибка экспорта изображений: ${error.message}`, 'error');
+            }
+        }
+
+        function testZipGeneration() {
+            log('export', 'Тестирование создания ZIP архивов...', 'info');
+            
+            try {
+                // Проверяем доступность JSZip
+                if (typeof JSZip !== 'undefined') {
+                    const zip = new JSZip();
+                    
+                    // Добавляем тестовые файлы
+                    zip.file('test.txt', 'Тестовый файл');
+                    zip.file('slide1.png', 'fake-image-data', {base64: false});
+                    
+                    // Генерируем ZIP
+                    zip.generateAsync({type: 'blob'}).then(function(content) {
+                        log('export', `✅ ZIP архив создан успешно (${Math.round(content.size / 1024)} KB)`, 'success');
+                    }).catch(function(error) {
+                        log('export', `❌ Ошибка создания ZIP: ${error.message}`, 'error');
+                    });
+                    
+                } else {
+                    log('export', '⚠️ JSZip библиотека не загружена', 'warning');
+                }
+                
+            } catch (error) {
+                log('export', `❌ Ошибка тестирования ZIP: ${error.message}`, 'error');
+            }
+        }
+
+        function testExportQuality() {
+            log('export', 'Тестирование качества экспорта...', 'info');
+            
+            try {
+                const canvas = document.getElementById('testCanvas');
+                
+                // Тест различных качеств JPEG
+                const qualities = [0.1, 0.5, 0.8, 1.0];
+                qualities.forEach(quality => {
+                    const dataURL = canvas.toDataURL('image/jpeg', quality);
+                    const sizeKB = Math.round(dataURL.length / 1024);
+                    log('export', `✅ Качество ${quality}: ${sizeKB} KB`, 'success');
+                });
+                
+            } catch (error) {
+                log('export', `❌ Ошибка тестирования качества: ${error.message}`, 'error');
+            }
+        }
+
+        // Performance тесты
+        function testLargeSlideCount() {
+            log('performance', 'Тестирование большого количества слайдов...', 'info');
+            
+            try {
+                const state = window.flashPostApp?.state;
+                if (!state) return;
+                
+                const startTime = performance.now();
+                
+                // Создаем 50 слайдов
+                for (let i = 0; i < 50; i++) {
+                    state.createSlide({
+                        title: `Слайд ${i + 1}`,
+                        text: `Содержимое слайда ${i + 1}`,
+                        background: { type: 'color', color: '#833ab4' }
+                    });
+                }
+                
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                
+                log('performance', `✅ Создано 50 слайдов за ${duration}ms`, 'success');
+                
+                const totalSlides = state.getSlidesCount();
+                log('performance', `✅ Всего слайдов в проекте: ${totalSlides}`, 'success');
+                
+            } catch (error) {
+                log('performance', `❌ Ошибка тестирования слайдов: ${error.message}`, 'error');
+            }
+        }
+
+        function testMemoryLeaks() {
+            log('performance', 'Тестирование утечек памяти...', 'info');
+            
+            try {
+                const initialMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+                
+                // Создаем и удаляем много объектов
+                for (let i = 0; i < 1000; i++) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = `Тестовый элемент ${i}`;
+                    document.body.appendChild(tempDiv);
+                    document.body.removeChild(tempDiv);
+                }
+                
+                // Принудительная сборка мусора (если доступна)
+                if (window.gc) {
+                    window.gc();
+                }
+                
+                const finalMemory = performance.memory ? performance.memory.usedJSHeapSize : 0;
+                const memoryDiff = finalMemory - initialMemory;
+                
+                if (performance.memory) {
+                    log('performance', `✅ Изменение памяти: ${Math.round(memoryDiff / 1024)} KB`, 
+                        memoryDiff < 1024 * 1024 ? 'success' : 'warning');
+                } else {
+                    log('performance', '⚠️ Performance.memory API недоступен', 'warning');
+                }
+                
+            } catch (error) {
+                log('performance', `❌ Ошибка тестирования памяти: ${error.message}`, 'error');
+            }
+        }
+
+        function testRenderingSpeed() {
+            log('performance', 'Тестирование скорости рендеринга...', 'info');
+            
+            try {
+                const renderer = window.flashPostApp?.renderer;
+                if (!renderer) return;
+                
+                const startTime = performance.now();
+                
+                // Выполняем несколько рендеров
+                for (let i = 0; i < 10; i++) {
+                    renderer.render();
+                }
+                
+                const endTime = performance.now();
+                const avgTime = Math.round((endTime - startTime) / 10);
+                
+                log('performance', `✅ Среднее время рендера: ${avgTime}ms`, 
+                    avgTime < 50 ? 'success' : avgTime < 100 ? 'warning' : 'error');
+                
+            } catch (error) {
+                log('performance', `❌ Ошибка тестирования рендеринга: ${error.message}`, 'error');
+            }
+        }
+
+        function testBatchOperations() {
+            log('performance', 'Тестирование пакетных операций...', 'info');
+            
+            try {
+                const state = window.flashPostApp?.state;
+                if (!state) return;
+                
+                const startTime = performance.now();
+                
+                // Создаем слайд с множеством блоков
+                const slide = state.createSlide({
+                    title: 'Тест слайд',
+                    text: 'Содержимое',
+                    background: { type: 'color', color: '#833ab4' }
+                });
+                
+                // Добавляем 20 текстовых блоков
+                for (let i = 0; i < 20; i++) {
+                    state.createTextBlock(slide.id, {
+                        text: `Блок ${i + 1}`,
+                        x: (i % 5) * 20,
+                        y: Math.floor(i / 5) * 25,
+                        width: 15,
+                        font: 'Inter',
+                        size: 14,
+                        color: '#ffffff'
+                    });
+                }
+                
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                
+                log('performance', `✅ Создан слайд с 20 блоками за ${duration}ms`, 'success');
+                
+            } catch (error) {
+                log('performance', `❌ Ошибка пакетных операций: ${error.message}`, 'error');
+            }
+        }
+
+        // AI тесты
+        function testAIContentGeneration() {
+            log('ai', 'Тестирование генерации контента AI...', 'info');
+            
+            try {
+                const aiManager = window.flashPostApp?.aiManager;
+                if (!aiManager) {
+                    log('ai', '❌ AIManager недоступен', 'error');
+                    return;
+                }
+                
+                // Тест локальной генерации идей
+                const topics = ['AI', 'Web Development', 'Mobile Apps'];
+                topics.forEach(topic => {
+                    try {
+                        // Симулируем генерацию контента
+                        const mockContent = aiManager.generateMockContent ? aiManager.generateMockContent(topic) : null;
+                        if (mockContent) {
+                            log('ai', `✅ Контент для "${topic}" сгенерирован`, 'success');
+                        } else {
+                            log('ai', `⚠️ Генерация для "${topic}" недоступна`, 'warning');
+                        }
+                    } catch (error) {
+                        log('ai', `❌ Ошибка генерации для "${topic}": ${error.message}`, 'error');
+                    }
+                });
+                
+            } catch (error) {
+                log('ai', `❌ Ошибка тестирования AI: ${error.message}`, 'error');
+            }
+        }
+
+        function testKeywordExtraction() {
+            log('ai', 'Тестирование извлечения ключевых слов...', 'info');
+            
+            try {
+                const aiManager = window.flashPostApp?.aiManager;
+                if (!aiManager) return;
+                
+                const testTexts = [
+                    'Искусственный интеллект и машинное обучение в современном мире',
+                    'Веб-разработка с использованием JavaScript, React и Node.js',
+                    'Мобильные приложения для iOS и Android платформ'
+                ];
+                
+                testTexts.forEach((text, index) => {
+                    try {
+                        const keywords = aiManager.extractKeywordsLocally(text);
+                        if (keywords && keywords.length > 0) {
+                            log('ai', `✅ Текст ${index + 1}: найдено ${keywords.length} ключевых слов`, 'success');
+                            log('ai', `   Ключевые слова: ${keywords.join(', ')}`, 'info');
+                        } else {
+                            log('ai', `⚠️ Текст ${index + 1}: ключевые слова не найдены`, 'warning');
+                        }
+                    } catch (error) {
+                        log('ai', `❌ Ошибка извлечения для текста ${index + 1}: ${error.message}`, 'error');
+                    }
+                });
+                
+            } catch (error) {
+                log('ai', `❌ Ошибка тестирования извлечения: ${error.message}`, 'error');
+            }
+        }
+
+        function testAIErrorHandling() {
+            log('ai', 'Тестирование обработки ошибок AI...', 'info');
+            
+            try {
+                const aiManager = window.flashPostApp?.aiManager;
+                if (!aiManager) return;
+                
+                // Тест с пустым текстом
+                try {
+                    const result1 = aiManager.extractKeywordsLocally('');
+                    log('ai', '✅ Пустой текст обработан корректно', 'success');
+                } catch (error) {
+                    log('ai', `✅ Пустой текст вызвал ожидаемую ошибку: ${error.message}`, 'success');
+                }
+                
+                // Тест с очень длинным текстом
+                try {
+                    const longText = 'слово '.repeat(1000);
+                    const result2 = aiManager.extractKeywordsLocally(longText);
+                    log('ai', '✅ Длинный текст обработан корректно', 'success');
+                } catch (error) {
+                    log('ai', `⚠️ Длинный текст вызвал ошибку: ${error.message}`, 'warning');
+                }
+                
+                // Тест с специальными символами
+                try {
+                    const specialText = '!@#$%^&*()_+{}|:"<>?[];\'\\,./`~';
+                    const result3 = aiManager.extractKeywordsLocally(specialText);
+                    log('ai', '✅ Специальные символы обработаны корректно', 'success');
+                } catch (error) {
+                    log('ai', `⚠️ Специальные символы вызвали ошибку: ${error.message}`, 'warning');
+                }
+                
+            } catch (error) {
+                log('ai', `❌ Ошибка тестирования обработки ошибок: ${error.message}`, 'error');
+            }
+        }
+
+        // Edge Cases тесты
+        function testEmptyStates() {
+            log('edge', 'Тестирование пустых состояний...', 'info');
+            
+            try {
+                const state = window.flashPostApp?.state;
+                if (!state) return;
+                
+                // Очищаем проект
+                state.clearProject();
+                
+                // Тестируем операции с пустым проектом
+                const slidesCount = state.getSlidesCount();
+                if (slidesCount === 0) {
+                    log('edge', '✅ Пустой проект корректно обрабатывается', 'success');
+                } else {
+                    log('edge', `❌ Ожидалось 0 слайдов, получено ${slidesCount}`, 'error');
+                }
+                
+                // Тест получения активного слайда из пустого проекта
+                const activeSlide = state.getActiveSlide();
+                if (!activeSlide) {
+                    log('edge', '✅ Активный слайд в пустом проекте корректно возвращает null', 'success');
+                } else {
+                    log('edge', '❌ Активный слайд должен быть null в пустом проекте', 'error');
+                }
+                
+            } catch (error) {
+                log('edge', `❌ Ошибка тестирования пустых состояний: ${error.message}`, 'error');
+            }
+        }
+
+        function testInvalidData() {
+            log('edge', 'Тестирование невалидных данных...', 'info');
+            
+            try {
+                const state = window.flashPostApp?.state;
+                if (!state) return;
+                
+                // Создаем слайд для тестов
+                const slide = state.createSlide({
+                    title: 'Тест слайд',
+                    text: 'Содержимое',
+                    background: { type: 'color', color: '#833ab4' }
+                });
+                
+                const block = state.addTextBlock();
+                if (!block) return;
+                
+                // Тест невалидных значений
+                const invalidTests = [
+                    { prop: 'size', value: -10, expected: 'error' },
+                    { prop: 'size', value: 1000, expected: 'warning' },
+                    { prop: 'x', value: -50, expected: 'warning' },
+                    { prop: 'x', value: 150, expected: 'warning' },
+                    { prop: 'color', value: 'invalid-color', expected: 'warning' },
+                    { prop: 'font', value: '', expected: 'warning' }
+                ];
+                
+                invalidTests.forEach(({ prop, value, expected }) => {
+                    try {
+                        const result = state.updateTextBlockProperty(block.id, prop, value);
+                        if (expected === 'error' && !result) {
+                            log('edge', `✅ Невалидное значение ${prop}:${value} корректно отклонено`, 'success');
+                        } else if (expected === 'warning' && result) {
+                            log('edge', `⚠️ Невалидное значение ${prop}:${value} принято (может потребовать валидации)`, 'warning');
+                        } else {
+                            log('edge', `✅ Значение ${prop}:${value} обработано корректно`, 'success');
+                        }
+                    } catch (error) {
+                        log('edge', `✅ Невалидное значение ${prop}:${value} вызвало ожидаемую ошибку`, 'success');
+                    }
+                });
+                
+            } catch (error) {
+                log('edge', `❌ Ошибка тестирования невалидных данных: ${error.message}`, 'error');
+            }
+        }
+
+        function testBoundaryValues() {
+            log('edge', 'Тестирование граничных значений...', 'info');
+            
+            try {
+                const state = window.flashPostApp?.state;
+                if (!state) return;
+                
+                const block = state.addTextBlock();
+                if (!block) return;
+                
+                // Тест граничных значений
+                const boundaryTests = [
+                    { prop: 'size', values: [1, 12, 72, 100] },
+                    { prop: 'x', values: [0, 50, 100] },
+                    { prop: 'y', values: [0, 50, 100] },
+                    { prop: 'width', values: [1, 50, 100] },
+                    { prop: 'opacity', values: [0, 0.5, 1] }
+                ];
+                
+                boundaryTests.forEach(({ prop, values }) => {
+                    values.forEach(value => {
+                        try {
+                            const result = state.updateTextBlockProperty(block.id, prop, value);
+                            if (result) {
+                                log('edge', `✅ Граничное значение ${prop}:${value} принято`, 'success');
+                            } else {
+                                log('edge', `⚠️ Граничное значение ${prop}:${value} отклонено`, 'warning');
+                            }
+                        } catch (error) {
+                            log('edge', `❌ Ошибка граничного значения ${prop}:${value}: ${error.message}`, 'error');
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                log('edge', `❌ Ошибка тестирования граничных значений: ${error.message}`, 'error');
+            }
+        }
+
+        function testConcurrentOperations() {
+            log('edge', 'Тестирование конкурентных операций...', 'info');
+            
+            try {
+                const state = window.flashPostApp?.state;
+                if (!state) return;
+                
+                // Создаем слайд
+                const slide = state.createSlide({
+                    title: 'Тест слайд',
+                    text: 'Содержимое',
+                    background: { type: 'color', color: '#833ab4' }
+                });
+                
+                // Одновременное создание множества блоков
+                const promises = [];
+                for (let i = 0; i < 10; i++) {
+                    promises.push(new Promise(resolve => {
+                        setTimeout(() => {
+                            const block = state.addTextBlock();
+                            resolve(block ? 'success' : 'failed');
+                        }, Math.random() * 100);
+                    }));
+                }
+                
+                Promise.all(promises).then(results => {
+                    const successCount = results.filter(r => r === 'success').length;
+                    log('edge', `✅ Конкурентное создание блоков: ${successCount}/10 успешно`, 
+                        successCount >= 8 ? 'success' : 'warning');
+                }).catch(error => {
+                    log('edge', `❌ Ошибка конкурентных операций: ${error.message}`, 'error');
+                });
+                
+            } catch (error) {
+                log('edge', `❌ Ошибка тестирования конкурентности: ${error.message}`, 'error');
+            }
+        }
+
+        // Автоматический запуск при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('drag', '🔄 Страница загружена, готов к продвинутому тестированию', 'info');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

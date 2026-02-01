@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console Diagnostics - FlashPost</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .diagnostic-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 15px;
+        }
+        
+        .section h3 {
+            color: #ffff00;
+            margin-top: 0;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        
+        .error-entry {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #ff0000;
+            background: #2a1a1a;
+            font-size: 12px;
+        }
+        
+        .warning-entry {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #ffaa00;
+            background: #2a2a1a;
+            font-size: 12px;
+        }
+        
+        .info-entry {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #00aaff;
+            background: #1a1a2a;
+            font-size: 12px;
+        }
+        
+        .success-entry {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #00ff00;
+            background: #1a2a1a;
+            font-size: 12px;
+        }
+        
+        .timestamp {
+            color: #888;
+            margin-right: 10px;
+        }
+        
+        .module-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 12px;
+        }
+        
+        .module-loaded { background: #28a745; color: white; }
+        .module-error { background: #dc3545; color: white; }
+        .module-loading { background: #ffc107; color: black; }
+        .module-unknown { background: #6c757d; color: white; }
+        
+        .test-button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .test-button:hover {
+            background: #444;
+        }
+        
+        .critical-error {
+            background: #4a0000;
+            border: 2px solid #ff0000;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .stack-trace {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 11px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="diagnostic-container">
+        <h1>🔍 Console Diagnostics</h1>
+        <p>Диагностика ошибок консоли и определение проблемных модулей</p>
+        
+        <div class="section">
+            <h3>🎯 Diagnostic Controls</h3>
+            <button class="test-button" onclick="startDiagnostics()">🚀 Start Full Diagnostics</button>
+            <button class="test-button" onclick="testModuleLoading()">🔧 Test Module Loading</button>
+            <button class="test-button" onclick="clearLogs()">🧹 Clear Logs</button>
+            <button class="test-button" onclick="exportReport()">📄 Export Report</button>
+        </div>
+        
+        <div class="section">
+            <h3>📊 Module Status</h3>
+            <div id="module-status">
+                <div class="module-status module-unknown">StateManager: Unknown</div>
+                <div class="module-status module-unknown">Renderer: Unknown</div>
+                <div class="module-status module-unknown">Editor: Unknown</div>
+                <div class="module-status module-unknown">DragManager: Unknown</div>
+                <div class="module-status module-unknown">ExportManager: Unknown</div>
+                <div class="module-status module-unknown">AIManager: Unknown</div>
+                <div class="module-status module-unknown">TemplateManager: Unknown</div>
+                <div class="module-status module-unknown">FlashPostApp: Unknown</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>❌ Critical Errors</h3>
+            <div id="critical-errors">
+                No critical errors detected yet...
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>⚠️ Console Errors</h3>
+            <div id="console-errors" style="max-height: 300px; overflow-y: auto;">
+                Monitoring console errors...
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>📋 Module Loading Timeline</h3>
+            <div id="loading-timeline" style="max-height: 200px; overflow-y: auto;">
+                Timeline will appear here...
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>📈 Diagnostic Summary</h3>
+            <div id="diagnostic-summary">
+                <div>Total Errors: <span id="error-count">0</span></div>
+                <div>Total Warnings: <span id="warning-count">0</span></div>
+                <div>Modules Loaded: <span id="loaded-count">0/8</span></div>
+                <div>First Failed Module: <span id="first-failed">None</span></div>
+                <div>Critical Issues: <span id="critical-count">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные для диагностики
+        let diagnosticData = {
+            errors: [],
+            warnings: [],
+            moduleStatus: {},
+            loadingTimeline: [],
+            criticalErrors: [],
+            firstFailedModule: null,
+            startTime: Date.now()
+        };
+
+        // Перехват консольных ошибок
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        console.error = function(...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.join(' ');
+            
+            diagnosticData.errors.push({
+                timestamp,
+                message,
+                stack: new Error().stack,
+                args: args
+            });
+            
+            logToInterface('error', timestamp, message);
+            updateErrorCount();
+            
+            // Проверяем на критические ошибки
+            if (isCriticalError(message)) {
+                addCriticalError(message, new Error().stack);
+            }
+            
+            originalError.apply(console, args);
+        };
+
+        console.warn = function(...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.join(' ');
+            
+            diagnosticData.warnings.push({
+                timestamp,
+                message,
+                args: args
+            });
+            
+            logToInterface('warning', timestamp, message);
+            updateWarningCount();
+            
+            originalWarn.apply(console, args);
+        };
+
+        // Перехват необработанных ошибок
+        window.addEventListener('error', (event) => {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = event.message + ' at ' + event.filename + ':' + event.lineno + ':' + event.colno;
+            
+            diagnosticData.errors.push({
+                timestamp,
+                message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno,
+                error: event.error
+            });
+            
+            logToInterface('error', timestamp, message);
+            addCriticalError(message, event.error ? event.error.stack : 'No stack trace');
+            updateErrorCount();
+        });
+
+        // Перехват необработанных промисов
+        window.addEventListener('unhandledrejection', (event) => {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = 'Unhandled Promise Rejection: ' + event.reason;
+            
+            diagnosticData.errors.push({
+                timestamp,
+                message,
+                reason: event.reason
+            });
+            
+            logToInterface('error', timestamp, message);
+            addCriticalError(message, event.reason ? event.reason.stack : 'No stack trace');
+            updateErrorCount();
+        });
+
+        function logToInterface(type, timestamp, message) {
+            const container = document.getElementById('console-errors');
+            const entry = document.createElement('div');
+            entry.className = type + '-entry';
+            entry.innerHTML = '<span class="timestamp">[' + timestamp + ']</span>' + message;
+            
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function isCriticalError(message) {
+            const criticalPatterns = [
+                'ReferenceError',
+                'TypeError',
+                'SyntaxError',
+                'is not defined',
+                'Cannot read property',
+                'Cannot read properties',
+                'is not a function',
+                'Failed to load',
+                'Script error'
+            ];
+            
+            return criticalPatterns.some(pattern => message.includes(pattern));
+        }
+
+        function addCriticalError(message, stack) {
+            const container = document.getElementById('critical-errors');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'critical-error';
+            
+            errorDiv.innerHTML = '<strong>CRITICAL ERROR:</strong><br>' + message + '<br><div class="stack-trace">' + (stack || 'No stack trace available') + '</div>';
+            
+            container.appendChild(errorDiv);
+            
+            diagnosticData.criticalErrors.push({
+                message,
+                stack,
+                timestamp: new Date().toLocaleTimeString()
+            });
+            
+            updateCriticalCount();
+        }
+
+        function updateErrorCount() {
+            document.getElementById('error-count').textContent = diagnosticData.errors.length;
+        }
+
+        function updateWarningCount() {
+            document.getElementById('warning-count').textContent = diagnosticData.warnings.length;
+        }
+
+        function updateCriticalCount() {
+            document.getElementById('critical-count').textContent = diagnosticData.criticalErrors.length;
+        }
+
+        function updateModuleStatus(moduleName, status, error) {
+            diagnosticData.moduleStatus[moduleName] = { status, error, timestamp: Date.now() };
+            
+            const statusContainer = document.getElementById('module-status');
+            const moduleDiv = statusContainer.querySelector('[data-module="' + moduleName + '"]') || 
+                             document.createElement('div');
+            
+            moduleDiv.className = 'module-status module-' + status;
+            moduleDiv.dataset.module = moduleName;
+            moduleDiv.textContent = moduleName + ': ' + status.toUpperCase();
+            
+            if (error) {
+                moduleDiv.title = error;
+            }
+            
+            if (!moduleDiv.parentNode) {
+                statusContainer.appendChild(moduleDiv);
+            }
+            
+            // Отслеживаем первый упавший модуль
+            if (status === 'error' && !diagnosticData.firstFailedModule) {
+                diagnosticData.firstFailedModule = moduleName;
+                document.getElementById('first-failed').textContent = moduleName;
+            }
+            
+            // Обновляем счетчик загруженных модулей
+            updateLoadedCount();
+        }
+
+        function updateLoadedCount() {
+            const modules = Object.keys(diagnosticData.moduleStatus);
+            const loaded = modules.filter(m => diagnosticData.moduleStatus[m].status === 'loaded').length;
+            document.getElementById('loaded-count').textContent = loaded + '/' + modules.length;
+        }
+
+        function addToTimeline(event, details) {
+            const timestamp = Date.now() - diagnosticData.startTime;
+            const entry = {
+                timestamp,
+                event,
+                details: details || '',
+                time: new Date().toLocaleTimeString()
+            };
+            
+            diagnosticData.loadingTimeline.push(entry);
+            
+            const container = document.getElementById('loading-timeline');
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'info-entry';
+            entryDiv.innerHTML = '<span class="timestamp">[+' + timestamp + 'ms]</span>' + event + ' ' + (details || '');
+            
+            container.appendChild(entryDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function startDiagnostics() {
+            console.log('🚀 Starting comprehensive diagnostics...');
+            addToTimeline('Diagnostics Started');
+            
+            // Очищаем предыдущие результаты
+            clearLogs();
+            
+            // Тестируем загрузку модулей
+            await testModuleLoading();
+            
+            // Генерируем отчет
+            generateDiagnosticReport();
+            
+            addToTimeline('Diagnostics Completed');
+        }
+
+        async function testModuleLoading() {
+            console.log('🔧 Testing module loading...');
+            addToTimeline('Module Loading Test Started');
+            
+            const requiredModules = [
+                'StateManager',
+                'Renderer',
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager'
+            ];
+            
+            // Простая проверка модулей в текущем окне
+            requiredModules.forEach(module => {
+                try {
+                    if (typeof window[module] !== 'undefined') {
+                        updateModuleStatus(module, 'loaded');
+                        addToTimeline('Module Loaded: ' + module);
+                    } else {
+                        updateModuleStatus(module, 'error', 'Module not found');
+                        addToTimeline('Module Failed: ' + module, 'Module not found');
+                    }
+                } catch (error) {
+                    updateModuleStatus(module, 'error', error.toString());
+                    addToTimeline('Module Failed: ' + module, error.toString());
+                }
+            });
+            
+            // Проверяем FlashPostApp
+            try {
+                if (typeof window.flashPostApp !== 'undefined') {
+                    updateModuleStatus('FlashPostApp', 'loaded');
+                    addToTimeline('FlashPostApp Initialized');
+                } else {
+                    updateModuleStatus('FlashPostApp', 'error', 'App not initialized');
+                    addToTimeline('FlashPostApp Failed');
+                }
+            } catch (error) {
+                updateModuleStatus('FlashPostApp', 'error', error.toString());
+                addToTimeline('FlashPostApp Failed', error.toString());
+            }
+        }
+
+        function generateDiagnosticReport() {
+            console.log('📄 Generating diagnostic report...');
+            
+            const report = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                    totalErrors: diagnosticData.errors.length,
+                    totalWarnings: diagnosticData.warnings.length,
+                    criticalErrors: diagnosticData.criticalErrors.length,
+                    firstFailedModule: diagnosticData.firstFailedModule,
+                    modulesLoaded: Object.keys(diagnosticData.moduleStatus).filter(
+                        m => diagnosticData.moduleStatus[m].status === 'loaded'
+                    ).length
+                },
+                errors: diagnosticData.errors,
+                warnings: diagnosticData.warnings,
+                criticalErrors: diagnosticData.criticalErrors,
+                moduleStatus: diagnosticData.moduleStatus,
+                timeline: diagnosticData.loadingTimeline
+            };
+            
+            console.log('📊 Diagnostic Report:', report);
+            return report;
+        }
+
+        function exportReport() {
+            const report = generateDiagnosticReport();
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'flashpost-diagnostics-' + Date.now() + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log('📄 Diagnostic report exported');
+        }
+
+        function clearLogs() {
+            // Очищаем данные
+            diagnosticData = {
+                errors: [],
+                warnings: [],
+                moduleStatus: {},
+                loadingTimeline: [],
+                criticalErrors: [],
+                firstFailedModule: null,
+                startTime: Date.now()
+            };
+            
+            // Очищаем интерфейс
+            document.getElementById('console-errors').innerHTML = 'Monitoring console errors...';
+            document.getElementById('critical-errors').innerHTML = 'No critical errors detected yet...';
+            document.getElementById('loading-timeline').innerHTML = 'Timeline will appear here...';
+            
+            // Сбрасываем счетчики
+            document.getElementById('error-count').textContent = '0';
+            document.getElementById('warning-count').textContent = '0';
+            document.getElementById('loaded-count').textContent = '0/8';
+            document.getElementById('first-failed').textContent = 'None';
+            document.getElementById('critical-count').textContent = '0';
+            
+            console.log('🧹 Diagnostic logs cleared');
+        }
+
+        // Автоматический запуск при загрузке
+        window.addEventListener('load', () => {
+            console.log('🔧 Console Diagnostics initialized');
+            addToTimeline('Diagnostics Tool Loaded');
+        });
+    </script>
+</body>
+</html>

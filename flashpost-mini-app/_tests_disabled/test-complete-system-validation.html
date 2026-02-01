@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete System Validation</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+        }
+        .test-section h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-success { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); }
+        .btn-warning { background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%); }
+        .btn-danger { background: linear-gradient(135deg, #fd79a8 0%, #ff7675 100%); }
+        .results {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e1e5e9;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 5px 10px;
+            margin-bottom: 3px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-info { background: #e3f2fd; color: #1976d2; }
+        .log-success { background: #e8f5e8; color: #2e7d32; }
+        .log-error { background: #ffebee; color: #d32f2f; }
+        .log-warning { background: #fff3e0; color: #f57c00; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Complete System Validation</h1>
+            <p>Комплексная проверка FlashPost системы</p>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-section">
+                <h3>🏗️ Архитектура</h3>
+                <button class="btn" onclick="testModuleLoading()">Загрузка модулей</button>
+                <button class="btn" onclick="testDependencies()">Зависимости</button>
+                <button class="btn" onclick="testExports()">Экспорты</button>
+            </div>
+
+            <div class="test-section">
+                <h3>🤖 AI System</h3>
+                <button class="btn" onclick="testAIManager()">AIManager</button>
+                <button class="btn" onclick="testProMode()">PRO MODE</button>
+                <button class="btn" onclick="testFallbacks()">Fallback система</button>
+            </div>
+
+            <div class="test-section">
+                <h3>🚀 Приложение</h3>
+                <button class="btn" onclick="testAppInit()">Инициализация</button>
+                <button class="btn" onclick="testUIElements()">UI элементы</button>
+                <button class="btn" onclick="testEventHandlers()">Обработчики</button>
+            </div>
+
+            <div class="test-section">
+                <h3>🎯 Функциональность</h3>
+                <button class="btn" onclick="testGeneration()">Генерация</button>
+                <button class="btn" onclick="testTemplates()">Шаблоны</button>
+                <button class="btn" onclick="testExport()">Экспорт</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Результаты тестирования</h3>
+            <button class="btn btn-success" onclick="runAllTests()">🚀 Запустить все тесты</button>
+            <button class="btn btn-warning" onclick="runCriticalTests()">⚡ Критические тесты</button>
+            <button class="btn btn-danger" onclick="clearResults()">🧹 Очистить</button>
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+    <!-- Подключаем все модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            warnings: 0
+        };
+
+        // Тест загрузки модулей
+        function testModuleLoading() {
+            log('info', '📦 Тестирование загрузки модулей...');
+            
+            const modules = [
+                { name: 'StateManager', class: window.StateManager },
+                { name: 'Renderer', class: window.Renderer },
+                { name: 'Editor', class: window.Editor },
+                { name: 'DragManager', class: window.DragManager },
+                { name: 'ExportManager', class: window.ExportManager },
+                { name: 'AIManager', class: window.AIManager },
+                { name: 'TemplateManager', class: window.TemplateManager },
+                { name: 'FlashPostApp', class: window.FlashPostApp }
+            ];
+
+            let passed = 0;
+            modules.forEach(module => {
+                testResults.total++;
+                if (typeof module.class === 'function') {
+                    log('success', `✅ ${module.name} загружен`);
+                    testResults.passed++;
+                    passed++;
+                } else {
+                    log('error', `❌ ${module.name} НЕ ЗАГРУЖЕН`);
+                    testResults.failed++;
+                }
+            });
+
+            log('info', `📊 Модули: ${passed}/${modules.length} загружены`);
+        }
+
+        // Тест зависимостей
+        function testDependencies() {
+            log('info', '🔗 Тестирование зависимостей...');
+            
+            try {
+                const state = new StateManager();
+                testResults.total++;
+                testResults.passed++;
+                log('success', '✅ StateManager создается без зависимостей');
+
+                const renderer = new Renderer(state);
+                testResults.total++;
+                testResults.passed++;
+                log('success', '✅ Renderer принимает StateManager');
+
+                const aiManager = new AIManager(state);
+                testResults.total++;
+                testResults.passed++;
+                log('success', '✅ AIManager принимает StateManager');
+
+            } catch (error) {
+                testResults.total += 3;
+                testResults.failed += 3;
+                log('error', `❌ Ошибка зависимостей: ${error.message}`);
+            }
+        }
+
+        // Тест экспортов
+        function testExports() {
+            log('info', '📤 Тестирование экспортов...');
+            
+            const exports = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager',
+                'FlashPostApp'
+            ];
+
+            exports.forEach(exportName => {
+                testResults.total++;
+                if (window[exportName]) {
+                    log('success', `✅ ${exportName} экспортирован в window`);
+                    testResults.passed++;
+                } else {
+                    log('error', `❌ ${exportName} не экспортирован`);
+                    testResults.failed++;
+                }
+            });
+        }
+
+        // Тест AIManager
+        function testAIManager() {
+            log('info', '🤖 Тестирование AIManager...');
+            
+            try {
+                const state = new StateManager();
+                const aiManager = new AIManager(state);
+                
+                testResults.total++;
+                testResults.passed++;
+                log('success', '✅ AIManager создается успешно');
+
+                // Проверяем основные методы
+                const methods = [
+                    'isAvailable',
+                    'generateHighQualityCarousel',
+                    'generateProModeCarousel',
+                    'generateCarouselOutline',
+                    'generateCarouselContent'
+                ];
+
+                methods.forEach(method => {
+                    testResults.total++;
+                    if (typeof aiManager[method] === 'function') {
+                        log('success', `✅ Метод ${method} доступен`);
+                        testResults.passed++;
+                    } else {
+                        log('error', `❌ Метод ${method} недоступен`);
+                        testResults.failed++;
+                    }
+                });
+
+                // Проверяем доступность
+                testResults.total++;
+                const available = aiManager.isAvailable();
+                log('info', `ℹ️ AI доступность: ${available}`);
+                testResults.passed++;
+
+            } catch (error) {
+                testResults.total++;
+                testResults.failed++;
+                log('error', `❌ Ошибка AIManager: ${error.message}`);
+            }
+        }
+
+        // Тест PRO MODE
+        async function testProMode() {
+            log('info', '🎯 Тестирование PRO MODE...');
+            
+            try {
+                const state = new StateManager();
+                const aiManager = new AIManager(state);
+                
+                // Проверяем методы PRO MODE
+                const proMethods = [
+                    'generateProModeCarousel',
+                    'generateCarouselOutline', 
+                    'generateCarouselContent',
+                    'convertToProModeSlides',
+                    'parseOutlineResponse',
+                    'parseContentResponse',
+                    'validateOutlineQuality',
+                    'validateContentQuality'
+                ];
+
+                proMethods.forEach(method => {
+                    testResults.total++;
+                    if (typeof aiManager[method] === 'function') {
+                        log('success', `✅ PRO MODE метод ${method} доступен`);
+                        testResults.passed++;
+                    } else {
+                        log('error', `❌ PRO MODE метод ${method} недоступен`);
+                        testResults.failed++;
+                    }
+                });
+
+                log('info', '📊 PRO MODE методы проверены');
+
+            } catch (error) {
+                testResults.total++;
+                testResults.failed++;
+                log('error', `❌ Ошибка PRO MODE: ${error.message}`);
+            }
+        }
+
+        // Тест fallback системы
+        function testFallbacks() {
+            log('info', '🛡️ Тестирование fallback системы...');
+            
+            try {
+                const state = new StateManager();
+                const aiManager = new AIManager(state);
+                
+                // Проверяем fallback методы
+                const fallbackMethods = [
+                    'generateFallbackOutline',
+                    'generateFallbackContent',
+                    'generateHighQualityCarouselLegacy'
+                ];
+
+                fallbackMethods.forEach(method => {
+                    testResults.total++;
+                    if (typeof aiManager[method] === 'function') {
+                        log('success', `✅ Fallback метод ${method} доступен`);
+                        testResults.passed++;
+                    } else {
+                        log('warning', `⚠️ Fallback метод ${method} недоступен`);
+                        testResults.warnings++;
+                    }
+                });
+
+            } catch (error) {
+                testResults.total++;
+                testResults.failed++;
+                log('error', `❌ Ошибка fallback системы: ${error.message}`);
+            }
+        }
+
+        // Тест инициализации приложения
+        function testAppInit() {
+            log('info', '🚀 Тестирование инициализации приложения...');
+            
+            try {
+                const app = new FlashPostApp();
+                
+                testResults.total++;
+                testResults.passed++;
+                log('success', '✅ FlashPostApp создается успешно');
+
+                // Проверяем компоненты
+                const components = ['state', 'renderer', 'editor', 'aiManager', 'templateManager'];
+                components.forEach(component => {
+                    testResults.total++;
+                    if (app[component]) {
+                        log('success', `✅ Компонент ${component} инициализирован`);
+                        testResults.passed++;
+                    } else {
+                        log('error', `❌ Компонент ${component} не инициализирован`);
+                        testResults.failed++;
+                    }
+                });
+
+            } catch (error) {
+                testResults.total++;
+                testResults.failed++;
+                log('error', `❌ Ошибка инициализации приложения: ${error.message}`);
+            }
+        }
+
+        // Тест UI элементов
+        function testUIElements() {
+            log('info', '🎨 Тестирование UI элементов...');
+            
+            // Создаем временные элементы для теста
+            const elements = [
+                { id: 'app', tag: 'div' },
+                { id: 'topicInput', tag: 'input' },
+                { id: 'generateBtn', tag: 'button' }
+            ];
+
+            elements.forEach(element => {
+                testResults.total++;
+                let el = document.getElementById(element.id);
+                if (!el) {
+                    // Создаем временный элемент
+                    el = document.createElement(element.tag);
+                    el.id = element.id;
+                    document.body.appendChild(el);
+                    log('warning', `⚠️ Элемент ${element.id} создан временно`);
+                    testResults.warnings++;
+                } else {
+                    log('success', `✅ Элемент ${element.id} найден`);
+                    testResults.passed++;
+                }
+            });
+        }
+
+        // Тест обработчиков событий
+        function testEventHandlers() {
+            log('info', '⚡ Тестирование обработчиков событий...');
+            
+            try {
+                const app = new FlashPostApp();
+                
+                const handlers = ['handleAIGenerate', 'handleGenerate', 'handleManualGenerate'];
+                handlers.forEach(handler => {
+                    testResults.total++;
+                    if (typeof app[handler] === 'function') {
+                        log('success', `✅ Обработчик ${handler} доступен`);
+                        testResults.passed++;
+                    } else {
+                        log('error', `❌ Обработчик ${handler} недоступен`);
+                        testResults.failed++;
+                    }
+                });
+
+            } catch (error) {
+                testResults.total++;
+                testResults.failed++;
+                log('error', `❌ Ошибка обработчиков: ${error.message}`);
+            }
+        }
+
+        // Тест генерации
+        async function testGeneration() {
+            log('info', '🎯 Тестирование генерации...');
+            
+            try {
+                const state = new StateManager();
+                const aiManager = new AIManager(state);
+                
+                // Тестируем fallback генерацию (без реального AI)
+                testResults.total++;
+                const fallbackOutline = aiManager.generateFallbackOutline('тест');
+                if (fallbackOutline && fallbackOutline.outline) {
+                    log('success', `✅ Fallback outline: ${fallbackOutline.outline.length} слайдов`);
+                    testResults.passed++;
+                } else {
+                    log('error', '❌ Fallback outline не работает');
+                    testResults.failed++;
+                }
+
+                testResults.total++;
+                const fallbackContent = aiManager.generateFallbackContent('тест', fallbackOutline);
+                if (fallbackContent && fallbackContent.slides) {
+                    log('success', `✅ Fallback content: ${fallbackContent.slides.length} слайдов`);
+                    testResults.passed++;
+                } else {
+                    log('error', '❌ Fallback content не работает');
+                    testResults.failed++;
+                }
+
+            } catch (error) {
+                testResults.total += 2;
+                testResults.failed += 2;
+                log('error', `❌ Ошибка генерации: ${error.message}`);
+            }
+        }
+
+        // Тест шаблонов
+        function testTemplates() {
+            log('info', '🎨 Тестирование шаблонов...');
+            
+            try {
+                const state = new StateManager();
+                const templateManager = new TemplateManager(state);
+                
+                testResults.total++;
+                testResults.passed++;
+                log('success', '✅ TemplateManager создается успешно');
+
+                // Проверяем методы шаблонов
+                const templateMethods = ['saveTemplate', 'loadTemplate', 'getTemplates'];
+                templateMethods.forEach(method => {
+                    testResults.total++;
+                    if (typeof templateManager[method] === 'function') {
+                        log('success', `✅ Метод шаблонов ${method} доступен`);
+                        testResults.passed++;
+                    } else {
+                        log('warning', `⚠️ Метод шаблонов ${method} недоступен`);
+                        testResults.warnings++;
+                    }
+                });
+
+            } catch (error) {
+                testResults.total++;
+                testResults.failed++;
+                log('error', `❌ Ошибка шаблонов: ${error.message}`);
+            }
+        }
+
+        // Тест экспорта
+        function testExport() {
+            log('info', '📤 Тестирование экспорта...');
+            
+            try {
+                const state = new StateManager();
+                const exportManager = new ExportManager(state);
+                
+                testResults.total++;
+                testResults.passed++;
+                log('success', '✅ ExportManager создается успешно');
+
+                // Проверяем методы экспорта
+                const exportMethods = ['downloadCurrentSlide', 'downloadAllSlides'];
+                exportMethods.forEach(method => {
+                    testResults.total++;
+                    if (typeof exportManager[method] === 'function') {
+                        log('success', `✅ Метод экспорта ${method} доступен`);
+                        testResults.passed++;
+                    } else {
+                        log('error', `❌ Метод экспорта ${method} недоступен`);
+                        testResults.failed++;
+                    }
+                });
+
+            } catch (error) {
+                testResults.total++;
+                testResults.failed++;
+                log('error', `❌ Ошибка экспорта: ${error.message}`);
+            }
+        }
+
+        // Запуск всех тестов
+        async function runAllTests() {
+            log('info', '🚀 Запуск полного тестирования системы...');
+            testResults = { total: 0, passed: 0, failed: 0, warnings: 0 };
+            
+            testModuleLoading();
+            testDependencies();
+            testExports();
+            testAIManager();
+            await testProMode();
+            testFallbacks();
+            testAppInit();
+            testUIElements();
+            testEventHandlers();
+            await testGeneration();
+            testTemplates();
+            testExport();
+            
+            // Итоговый отчет
+            log('info', '📊 ИТОГОВЫЙ ОТЧЕТ:');
+            log('success', `✅ Пройдено: ${testResults.passed}`);
+            log('warning', `⚠️ Предупреждения: ${testResults.warnings}`);
+            log('error', `❌ Ошибки: ${testResults.failed}`);
+            log('info', `📈 Всего тестов: ${testResults.total}`);
+            
+            const successRate = ((testResults.passed / testResults.total) * 100).toFixed(1);
+            log('info', `🎯 Успешность: ${successRate}%`);
+            
+            if (testResults.failed === 0) {
+                log('success', '🎉 ВСЕ КРИТИЧЕСКИЕ ТЕСТЫ ПРОЙДЕНЫ!');
+            } else {
+                log('error', `🚨 НАЙДЕНЫ КРИТИЧЕСКИЕ ОШИБКИ: ${testResults.failed}`);
+            }
+        }
+
+        // Запуск критических тестов
+        async function runCriticalTests() {
+            log('info', '⚡ Запуск критических тестов...');
+            testResults = { total: 0, passed: 0, failed: 0, warnings: 0 };
+            
+            testModuleLoading();
+            testAIManager();
+            await testProMode();
+            testAppInit();
+            
+            const criticalPassed = testResults.passed;
+            const criticalTotal = testResults.total;
+            
+            log('info', `⚡ Критические тесты: ${criticalPassed}/${criticalTotal}`);
+            
+            if (testResults.failed === 0) {
+                log('success', '✅ Все критические тесты пройдены');
+            } else {
+                log('error', `❌ Критические ошибки: ${testResults.failed}`);
+            }
+        }
+
+        // Логирование
+        function log(type, message) {
+            const resultsDiv = document.getElementById('results');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Очистка результатов
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            testResults = { total: 0, passed: 0, failed: 0, warnings: 0 };
+            log('info', '🧹 Результаты очищены');
+        }
+
+        // Автоматический запуск при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            log('info', '🚀 Система валидации загружена');
+            log('info', 'ℹ️ Выберите тесты для запуска или нажмите "Запустить все тесты"');
+        });
+
+        // Обработка ошибок
+        window.addEventListener('error', function(event) {
+            log('error', `❌ JavaScript ошибка: ${event.error.message}`);
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            log('error', `❌ Необработанная ошибка промиса: ${event.reason}`);
+        });
+    </script>
+</body>
+</html>

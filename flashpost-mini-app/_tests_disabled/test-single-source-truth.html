@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Тест Single Source of Truth Architecture</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 10000;
+            font-size: 12px;
+            max-width: 300px;
+        }
+        .test-button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: #833ab4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .test-button:hover {
+            background: #9d4edd;
+        }
+        .test-status {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .test-success {
+            background: #28a745;
+            color: white;
+        }
+        .test-error {
+            background: #dc3545;
+            color: white;
+        }
+        .test-info {
+            background: #17a2b8;
+            color: white;
+        }
+        .architecture-status {
+            background: #6f42c1;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузочный экран -->
+    <div id="loading" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">🧪</div>
+            <h2>Тестирование Single Source of Truth</h2>
+            <div class="loading-spinner"></div>
+            <p>Проверка архитектурной целостности...</p>
+        </div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="app" style="display: none;"></div>
+
+    <!-- Панель тестирования -->
+    <div class="test-controls">
+        <h3>🧪 Тесты функций</h3>
+        
+        <div class="architecture-status">
+            <strong>🏗️ Архитектура:</strong><br>
+            Single Source of Truth ✅<br>
+            Только StateManager мутирует данные
+        </div>
+
+        <button class="test-button" onclick="testAddTextBlock()">
+            ➕ Тест: Добавление блока
+        </button>
+        
+        <button class="test-button" onclick="testEditText()">
+            ✍️ Тест: Редактирование текста
+        </button>
+        
+        <button class="test-button" onclick="testDragText()">
+            🖱 Тест: Drag & Drop
+        </button>
+        
+        <button class="test-button" onclick="testResizeWidth()">
+            📐 Тест: Изменение ширины
+        </button>
+        
+        <button class="test-button" onclick="testStateConsistency()">
+            🔍 Тест: Консистентность состояния
+        </button>
+        
+        <button class="test-button" onclick="runAllTests()">
+            🚀 Запустить все тесты
+        </button>
+        
+        <button class="test-button" onclick="resetToEditMode()">
+            🔄 Сброс в режим редактирования
+        </button>
+
+        <div id="testResults"></div>
+    </div>
+
+    <!-- Подключение модулей -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/templates.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        // Глобальные переменные для тестирования
+        let testResults = [];
+        let app = null;
+
+        // Функция логирования результатов
+        function logTest(testName, success, message) {
+            const result = {
+                test: testName,
+                success: success,
+                message: message,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            testResults.push(result);
+            
+            const resultsDiv = document.getElementById('testResults');
+            const statusClass = success ? 'test-success' : 'test-error';
+            const icon = success ? '✅' : '❌';
+            
+            resultsDiv.innerHTML += `
+                <div class="test-status ${statusClass}">
+                    ${icon} ${testName}<br>
+                    <small>${message}</small><br>
+                    <small>${result.timestamp}</small>
+                </div>
+            `;
+            
+            console.log(`${icon} ${testName}: ${message}`);
+        }
+
+        // Инициализация приложения для тестирования
+        function initTestApp() {
+            try {
+                // Создаем тестовые данные
+                app = window.flashPostApp;
+                
+                if (!app) {
+                    throw new Error('FlashPostApp не инициализировано');
+                }
+
+                // Создаем тестовый слайд
+                const testSlide = app.state.createSlide({
+                    title: 'Тестовый слайд',
+                    text: 'Тест Single Source of Truth',
+                    background: {
+                        type: 'color',
+                        color: '#833ab4'
+                    }
+                });
+
+                // Добавляем тестовый текстовый блок
+                const testBlock = app.state.createTextBlock(testSlide.id, {
+                    text: 'Тестовый блок',
+                    x: 50,
+                    y: 30,
+                    width: 60,
+                    font: 'Inter',
+                    size: 24,
+                    color: '#ffffff'
+                });
+
+                // Переходим в режим редактирования
+                app.enterEditMode();
+                
+                logTest('Инициализация', true, 'Приложение успешно инициализировано с тестовыми данными');
+                
+            } catch (error) {
+                logTest('Инициализация', false, `Ошибка: ${error.message}`);
+            }
+        }
+
+        // Тест 1: Добавление текстового блока
+        function testAddTextBlock() {
+            try {
+                const initialBlocksCount = app.state.getActiveSlide()?.textBlocks.length || 0;
+                console.log(`📊 Начальное количество блоков: ${initialBlocksCount}`);
+                
+                // Добавляем новый блок через StateManager
+                const newBlock = app.state.addTextBlock();
+                
+                if (!newBlock) {
+                    throw new Error('Блок не был создан');
+                }
+
+                const finalBlocksCount = app.state.getActiveSlide()?.textBlocks.length || 0;
+                console.log(`📊 Финальное количество блоков: ${finalBlocksCount}`);
+                
+                if (finalBlocksCount === initialBlocksCount + 1) {
+                    // Проверяем, что блок появился в DOM
+                    setTimeout(() => {
+                        const blockInDOM = document.querySelector(`[data-block-id="${newBlock.id}"]`);
+                        const allBlocks = document.querySelectorAll('[data-block-id]');
+                        
+                        console.log(`🔍 Поиск блока ${newBlock.id} в DOM...`);
+                        console.log(`🔍 Всего блоков в DOM: ${allBlocks.length}`);
+                        console.log(`🔍 Блоки в DOM:`, Array.from(allBlocks).map(el => el.dataset.blockId));
+                        
+                        if (blockInDOM) {
+                            logTest('Добавление блока', true, `Блок ${newBlock.id} успешно добавлен в состояние и DOM`);
+                        } else {
+                            logTest('Добавление блока', false, `Блок добавлен в состояние, но не появился в DOM. Всего в DOM: ${allBlocks.length}`);
+                        }
+                    }, 200);
+                } else {
+                    throw new Error(`Количество блоков не изменилось: было ${initialBlocksCount}, стало ${finalBlocksCount}`);
+                }
+                
+            } catch (error) {
+                logTest('Добавление блока', false, `Ошибка: ${error.message}`);
+            }
+        }
+
+        // Тест 2: Редактирование текста
+        function testEditText() {
+            try {
+                const activeSlide = app.state.getActiveSlide();
+                if (!activeSlide || activeSlide.textBlocks.length === 0) {
+                    throw new Error('Нет активного слайда или блоков для редактирования');
+                }
+
+                const blockId = activeSlide.textBlocks[0].id;
+                const originalText = activeSlide.textBlocks[0].text;
+                const newText = 'Измененный текст ' + Date.now();
+
+                console.log(`📝 Изменяем текст блока ${blockId}: "${originalText}" → "${newText}"`);
+
+                // Изменяем текст через StateManager
+                const success = app.state.updateTextBlockProperty(blockId, 'text', newText);
+                
+                if (!success) {
+                    throw new Error('Не удалось обновить текст в состоянии');
+                }
+
+                // Проверяем, что текст изменился в состоянии
+                const updatedSlide = app.state.getActiveSlide();
+                const updatedBlock = updatedSlide.textBlocks.find(b => b.id === blockId);
+                
+                console.log(`🔍 Текст в состоянии после обновления: "${updatedBlock.text}"`);
+                
+                if (updatedBlock.text === newText) {
+                    // Проверяем DOM через небольшую задержку
+                    setTimeout(() => {
+                        const blockInDOM = document.querySelector(`[data-block-id="${blockId}"]`);
+                        
+                        if (blockInDOM) {
+                            const domText = blockInDOM.textContent || blockInDOM.innerText;
+                            console.log(`🔍 Текст в DOM: "${domText}"`);
+                            
+                            if (domText.includes(newText) || domText === newText) {
+                                logTest('Редактирование текста', true, `Текст успешно изменен: "${originalText}" → "${newText}"`);
+                            } else {
+                                logTest('Редактирование текста', false, `Текст изменен в состоянии, но не обновился в DOM. DOM: "${domText}", Ожидалось: "${newText}"`);
+                            }
+                        } else {
+                            logTest('Редактирование текста', false, `Блок ${blockId} не найден в DOM`);
+                        }
+                    }, 200);
+                } else {
+                    throw new Error(`Текст не изменился в состоянии. Ожидалось: "${newText}", Получено: "${updatedBlock.text}"`);
+                }
+                
+            } catch (error) {
+                logTest('Редактирование текста', false, `Ошибка: ${error.message}`);
+            }
+        }
+
+        // Тест 3: Drag & Drop
+        function testDragText() {
+            try {
+                const activeSlide = app.state.getActiveSlide();
+                if (!activeSlide || activeSlide.textBlocks.length === 0) {
+                    throw new Error('Нет активного слайда или блоков для перетаскивания');
+                }
+
+                const blockId = activeSlide.textBlocks[0].id;
+                const originalX = activeSlide.textBlocks[0].x;
+                const originalY = activeSlide.textBlocks[0].y;
+                const newX = originalX + 10;
+                const newY = originalY + 10;
+
+                // Изменяем позицию через StateManager (имитируем drag)
+                const successX = app.state.updateTextBlockProperty(blockId, 'x', newX);
+                const successY = app.state.updateTextBlockProperty(blockId, 'y', newY);
+                
+                if (!successX || !successY) {
+                    throw new Error('Не удалось обновить позицию в состоянии');
+                }
+
+                // Проверяем, что позиция изменилась в состоянии
+                const updatedSlide = app.state.getActiveSlide();
+                const updatedBlock = updatedSlide.textBlocks.find(b => b.id === blockId);
+                
+                if (updatedBlock.x === newX && updatedBlock.y === newY) {
+                    // Проверяем DOM через небольшую задержку
+                    setTimeout(() => {
+                        const blockInDOM = document.querySelector(`[data-block-id="${blockId}"]`);
+                        if (blockInDOM) {
+                            const computedStyle = window.getComputedStyle(blockInDOM);
+                            const domLeft = computedStyle.left;
+                            const domTop = computedStyle.top;
+                            
+                            logTest('Drag & Drop', true, `Позиция изменена: (${originalX}%, ${originalY}%) → (${newX}%, ${newY}%). DOM: left=${domLeft}, top=${domTop}`);
+                        } else {
+                            logTest('Drag & Drop', false, 'Позиция изменена в состоянии, но блок не найден в DOM');
+                        }
+                    }, 100);
+                } else {
+                    throw new Error('Позиция не изменилась в состоянии');
+                }
+                
+            } catch (error) {
+                logTest('Drag & Drop', false, `Ошибка: ${error.message}`);
+            }
+        }
+
+        // Тест 4: Изменение ширины
+        function testResizeWidth() {
+            try {
+                const activeSlide = app.state.getActiveSlide();
+                if (!activeSlide || activeSlide.textBlocks.length === 0) {
+                    throw new Error('Нет активного слайда или блоков для изменения размера');
+                }
+
+                const blockId = activeSlide.textBlocks[0].id;
+                const originalWidth = activeSlide.textBlocks[0].width;
+                const newWidth = originalWidth + 15;
+
+                // Изменяем ширину через StateManager
+                const success = app.state.updateTextBlockProperty(blockId, 'width', newWidth);
+                
+                if (!success) {
+                    throw new Error('Не удалось обновить ширину в состоянии');
+                }
+
+                // Проверяем, что ширина изменилась в состоянии
+                const updatedSlide = app.state.getActiveSlide();
+                const updatedBlock = updatedSlide.textBlocks.find(b => b.id === blockId);
+                
+                if (updatedBlock.width === newWidth) {
+                    // Проверяем DOM через небольшую задержку
+                    setTimeout(() => {
+                        const blockInDOM = document.querySelector(`[data-block-id="${blockId}"]`);
+                        if (blockInDOM) {
+                            const computedStyle = window.getComputedStyle(blockInDOM);
+                            const domWidth = computedStyle.width;
+                            
+                            logTest('Изменение ширины', true, `Ширина изменена: ${originalWidth}% → ${newWidth}%. DOM width: ${domWidth}`);
+                        } else {
+                            logTest('Изменение ширины', false, 'Ширина изменена в состоянии, но блок не найден в DOM');
+                        }
+                    }, 100);
+                } else {
+                    throw new Error('Ширина не изменилась в состоянии');
+                }
+                
+            } catch (error) {
+                logTest('Изменение ширины', false, `Ошибка: ${error.message}`);
+            }
+        }
+
+        // Тест 5: Консистентность состояния
+        function testStateConsistency() {
+            try {
+                // Проверяем, что все методы StateManager работают корректно
+                const slidesCount = app.state.getSlidesCount();
+                const allSlides = app.state.getAllSlides();
+                const activeSlide = app.state.getActiveSlide();
+                const activeSlideIndex = app.state.getActiveSlideIndex();
+
+                let issues = [];
+
+                // Проверка 1: Количество слайдов
+                if (slidesCount !== allSlides.length) {
+                    issues.push(`Несоответствие количества слайдов: getSlidesCount()=${slidesCount}, getAllSlides().length=${allSlides.length}`);
+                }
+
+                // Проверка 2: Активный слайд
+                if (!activeSlide) {
+                    issues.push('Нет активного слайда');
+                } else {
+                    const slideById = app.state.getSlideById(activeSlide.id);
+                    if (!slideById) {
+                        issues.push('Активный слайд не найден через getSlideById()');
+                    }
+                }
+
+                // Проверка 3: Индекс активного слайда
+                if (activeSlideIndex < 0 || activeSlideIndex >= slidesCount) {
+                    issues.push(`Неверный индекс активного слайда: ${activeSlideIndex} (должен быть 0-${slidesCount-1})`);
+                }
+
+                // Проверка 4: Безопасность копий (не должны мутировать оригинал)
+                if (activeSlide) {
+                    const originalBlocksCount = activeSlide.textBlocks.length;
+                    activeSlide.textBlocks.push({ test: 'mutation' }); // Попытка мутации
+                    
+                    const freshActiveSlide = app.state.getActiveSlide();
+                    if (freshActiveSlide.textBlocks.length !== originalBlocksCount) {
+                        issues.push('Нарушена безопасность копий - внешняя мутация повлияла на состояние');
+                    }
+                }
+
+                if (issues.length === 0) {
+                    logTest('Консистентность состояния', true, `Все проверки пройдены. Слайдов: ${slidesCount}, активный: ${activeSlideIndex}`);
+                } else {
+                    logTest('Консистентность состояния', false, `Найдены проблемы: ${issues.join('; ')}`);
+                }
+                
+            } catch (error) {
+                logTest('Консистентность состояния', false, `Ошибка: ${error.message}`);
+            }
+        }
+
+        // Запуск всех тестов
+        function runAllTests() {
+            document.getElementById('testResults').innerHTML = '<div class="test-info">🚀 Запуск всех тестов...</div>';
+            
+            setTimeout(() => testAddTextBlock(), 100);
+            setTimeout(() => testEditText(), 300);
+            setTimeout(() => testDragText(), 500);
+            setTimeout(() => testResizeWidth(), 700);
+            setTimeout(() => testStateConsistency(), 900);
+            
+            setTimeout(() => {
+                const successCount = testResults.filter(r => r.success).length;
+                const totalCount = testResults.length;
+                const resultsDiv = document.getElementById('testResults');
+                
+                resultsDiv.innerHTML += `
+                    <div class="test-status ${successCount === totalCount ? 'test-success' : 'test-error'}">
+                        📊 Итого: ${successCount}/${totalCount} тестов пройдено
+                    </div>
+                `;
+            }, 1200);
+        }
+
+        // Сброс в режим редактирования
+        function resetToEditMode() {
+            if (app) {
+                app.enterEditMode();
+                logTest('Сброс режима', true, 'Переключено в режим редактирования');
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                
+                // Ждем инициализации приложения
+                setTimeout(() => {
+                    initTestApp();
+                }, 1000);
+            }, 500);
+        });
+
+        // Глобальный обработчик ошибок
+        window.addEventListener('error', (event) => {
+            logTest('Глобальная ошибка', false, event.error?.message || 'Неизвестная ошибка');
+        });
+    </script>
+</body>
+</html>

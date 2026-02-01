@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Test AI Optional Generation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; background: #0f0f14; color: #fff; font-family: Arial, sans-serif; }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .test-section { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.2); }
+        .status { padding: 15px; margin: 10px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .warning { background: #5f4a1a; border: 2px solid #ffc107; }
+        .info { background: #1a3a5f; border: 2px solid #007bff; }
+        .btn { background: linear-gradient(45deg, #833ab4, #fd1d1d); color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin: 10px; font-size: 16px; font-weight: 600; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-ai { background: linear-gradient(45deg, #667eea, #764ba2); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 8px; padding: 15px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px; overflow-y: auto; margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .test-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .test-result { font-weight: bold; margin-top: 10px; }
+        .input-group { margin: 15px 0; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .input-group input, .input-group textarea { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #2a2a2a; color: #fff; }
+        .generation-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .generation-buttons .btn { flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Test AI Optional Generation</h1>
+        <p>Тестирование ручной и AI генерации как опций</p>
+        
+        <div id="overallStatus" class="status info">🔄 Готов к тестированию...</div>
+        
+        <div class="test-section">
+            <h2>🚀 Быстрые действия</h2>
+            <button class="btn" onclick="testBothGenerations()">🔍 Тест обеих генераций</button>
+            <button class="btn" onclick="openMainApp()">📱 Открыть основное приложение</button>
+            <button class="btn" onclick="testAIAvailability()">🤖 Проверить доступность AI</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Тест генерации</h2>
+            
+            <div class="input-group">
+                <label for="testTopic">Тема для тестирования:</label>
+                <input type="text" id="testTopic" value="Здоровое питание" placeholder="Введите тему...">
+            </div>
+            
+            <div class="generation-buttons">
+                <button class="btn" id="testManualBtn" onclick="testManualGeneration()">🎯 Тест ручной генерации</button>
+                <button class="btn btn-ai" id="testAIBtn" onclick="testAIGeneration()">🤖 Тест AI генерации</button>
+            </div>
+            
+            <div id="generationResults" class="test-result"></div>
+        </div>
+
+        <div class="grid">
+            <div class="test-item">
+                <h3>🎯 Ручная генерация</h3>
+                <div id="manualStatus">Не тестировано</div>
+                <div id="manualResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🤖 AI генерация</h3>
+                <div id="aiStatus">Не тестировано</div>
+                <div id="aiResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🔄 Fallback система</h3>
+                <div id="fallbackStatus">Не тестировано</div>
+                <div id="fallbackResults" class="test-result"></div>
+            </div>
+            
+            <div class="test-item">
+                <h3>🎨 UI интеграция</h3>
+                <div id="uiStatus">Не тестировано</div>
+                <div id="uiResults" class="test-result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Лог тестирования</h2>
+            <div id="testLog" class="log">Лог будет здесь...</div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули приложения -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let logElement;
+        let testApp;
+        
+        function log(message, type = 'info') {
+            if (!logElement) logElement = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logElement.innerHTML += `<div style="color: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : type === 'warning' ? '#ffd43b' : '#74c0fc'}">[${timestamp}] ${icon} ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.className = `status ${type}`;
+            }
+        }
+
+        function updateTestResult(elementId, message, success) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = success ? `✅ ${message}` : `❌ ${message}`;
+                element.style.color = success ? '#51cf66' : '#ff6b6b';
+            }
+        }
+
+        async function initTestApp() {
+            try {
+                log('🚀 Инициализация тестового приложения...', 'info');
+                
+                // Проверяем доступность классов
+                if (typeof FlashPostApp === 'undefined') {
+                    throw new Error('FlashPostApp не найден');
+                }
+                
+                // Создаем экземпляр приложения
+                testApp = new FlashPostApp();
+                
+                // Ждем инициализации
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                log('✅ Тестовое приложение инициализировано', 'success');
+                return true;
+                
+            } catch (error) {
+                log(`❌ Ошибка инициализации: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testAIAvailability() {
+            log('🤖 Проверка доступности AI...', 'info');
+            
+            try {
+                if (!testApp) {
+                    await initTestApp();
+                }
+                
+                const aiAvailable = testApp.aiManager && testApp.aiManager.isAvailable();
+                
+                if (aiAvailable) {
+                    log('✅ AI доступен', 'success');
+                    updateTestResult('aiResults', 'AI модуль доступен', true);
+                    document.getElementById('testAIBtn').disabled = false;
+                } else {
+                    log('⚠️ AI недоступен (это нормально)', 'warning');
+                    updateTestResult('aiResults', 'AI недоступен, будет использован fallback', true);
+                    document.getElementById('testAIBtn').disabled = true;
+                }
+                
+                return aiAvailable;
+                
+            } catch (error) {
+                log(`❌ Ошибка проверки AI: ${error.message}`, 'error');
+                updateTestResult('aiResults', 'Ошибка проверки AI', false);
+                return false;
+            }
+        }
+
+        async function testManualGeneration() {
+            log('🎯 Тестирование ручной генерации...', 'info');
+            updateStatus('manualStatus', '🔄 Тестируем...', 'info');
+            
+            try {
+                if (!testApp) {
+                    await initTestApp();
+                }
+                
+                const topic = document.getElementById('testTopic').value.trim();
+                if (!topic) {
+                    throw new Error('Введите тему для тестирования');
+                }
+                
+                // Тестируем метод ручной генерации
+                const slides = testApp.generateManualSlides(topic);
+                
+                if (slides && slides.length > 0) {
+                    log(`✅ Ручная генерация: создано ${slides.length} слайдов`, 'success');
+                    updateStatus('manualStatus', '✅ Ручная генерация работает', 'success');
+                    updateTestResult('manualResults', `${slides.length} слайдов создано`, true);
+                    
+                    // Проверяем структуру слайдов
+                    const firstSlide = slides[0];
+                    if (firstSlide.title && firstSlide.textBlocks) {
+                        log('✅ Структура слайдов корректна', 'success');
+                    } else {
+                        log('⚠️ Проблемы со структурой слайдов', 'warning');
+                    }
+                    
+                    return true;
+                } else {
+                    throw new Error('Не удалось создать слайды');
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка ручной генерации: ${error.message}`, 'error');
+                updateStatus('manualStatus', '❌ Ошибка ручной генерации', 'error');
+                updateTestResult('manualResults', 'Ручная генерация не работает', false);
+                return false;
+            }
+        }
+
+        async function testAIGeneration() {
+            log('🤖 Тестирование AI генерации...', 'info');
+            updateStatus('aiStatus', '🔄 Тестируем...', 'info');
+            
+            try {
+                if (!testApp) {
+                    await initTestApp();
+                }
+                
+                const topic = document.getElementById('testTopic').value.trim();
+                if (!topic) {
+                    throw new Error('Введите тему для тестирования');
+                }
+                
+                // Проверяем доступность AI
+                const aiAvailable = testApp.aiManager && testApp.aiManager.isAvailable();
+                
+                if (!aiAvailable) {
+                    log('ℹ️ AI недоступен, тестируем fallback на ручную генерацию', 'info');
+                    
+                    // Тестируем fallback логику
+                    const manualResult = await testManualGeneration();
+                    
+                    if (manualResult) {
+                        log('✅ Fallback на ручную генерацию работает', 'success');
+                        updateStatus('aiStatus', '✅ Fallback работает', 'success');
+                        updateTestResult('aiResults', 'Fallback на ручную генерацию', true);
+                        updateTestResult('fallbackResults', 'Fallback система работает', true);
+                    } else {
+                        throw new Error('Fallback не работает');
+                    }
+                    
+                    return true;
+                }
+                
+                // Если AI доступен, тестируем его
+                try {
+                    const aiResult = await testApp.aiManager.generateCarousel(topic);
+                    
+                    if (aiResult && aiResult.slides && aiResult.slides.length > 0) {
+                        log(`✅ AI генерация: создано ${aiResult.slides.length} слайдов`, 'success');
+                        updateStatus('aiStatus', '✅ AI генерация работает', 'success');
+                        updateTestResult('aiResults', `AI: ${aiResult.slides.length} слайдов`, true);
+                        
+                        if (aiResult.autoKeywords && aiResult.autoKeywords.length > 0) {
+                            log(`✅ AI ключевые слова: ${aiResult.autoKeywords.length} слов`, 'success');
+                        }
+                        
+                        return true;
+                    } else {
+                        throw new Error('AI не вернул слайды');
+                    }
+                    
+                } catch (aiError) {
+                    log(`⚠️ AI ошибка, тестируем fallback: ${aiError.message}`, 'warning');
+                    
+                    // Тестируем fallback
+                    const fallbackResult = await testManualGeneration();
+                    
+                    if (fallbackResult) {
+                        log('✅ Fallback после AI ошибки работает', 'success');
+                        updateStatus('aiStatus', '✅ Fallback после AI ошибки', 'success');
+                        updateTestResult('fallbackResults', 'Fallback после AI ошибки работает', true);
+                        return true;
+                    } else {
+                        throw new Error('Fallback после AI ошибки не работает');
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка AI генерации: ${error.message}`, 'error');
+                updateStatus('aiStatus', '❌ Ошибка AI генерации', 'error');
+                updateTestResult('aiResults', 'AI генерация не работает', false);
+                return false;
+            }
+        }
+
+        async function testBothGenerations() {
+            log('🔍 Запуск полного теста генераций...', 'info');
+            updateStatus('overallStatus', '🔄 Тестирование...', 'info');
+            
+            const results = {
+                manual: await testManualGeneration(),
+                ai: await testAIGeneration(),
+                aiAvailability: await testAIAvailability()
+            };
+            
+            // Тестируем UI интеграцию
+            await testUIIntegration();
+            
+            const allPassed = results.manual && results.ai;
+            
+            if (allPassed) {
+                log('✅ Все тесты пройдены успешно!', 'success');
+                updateStatus('overallStatus', '✅ Все тесты пройдены', 'success');
+            } else {
+                log('⚠️ Некоторые тесты не прошли', 'warning');
+                updateStatus('overallStatus', '⚠️ Есть проблемы', 'warning');
+            }
+            
+            return results;
+        }
+
+        async function testUIIntegration() {
+            log('🎨 Тестирование UI интеграции...', 'info');
+            updateStatus('uiStatus', '🔄 Тестируем...', 'info');
+            
+            try {
+                if (!testApp) {
+                    await initTestApp();
+                }
+                
+                // Тестируем рендеринг стартового экрана
+                testApp.state.setMode('start');
+                testApp.renderer.render();
+                
+                // Проверяем наличие кнопок
+                setTimeout(() => {
+                    const manualBtn = document.getElementById('generateBtn');
+                    const aiBtn = document.getElementById('generateAIBtn');
+                    
+                    let uiChecks = 0;
+                    let totalChecks = 3;
+                    
+                    if (manualBtn) {
+                        log('✅ Кнопка ручной генерации найдена', 'success');
+                        uiChecks++;
+                    } else {
+                        log('❌ Кнопка ручной генерации не найдена', 'error');
+                    }
+                    
+                    if (aiBtn) {
+                        log('✅ Кнопка AI генерации найдена', 'success');
+                        uiChecks++;
+                    } else {
+                        log('❌ Кнопка AI генерации не найдена', 'error');
+                    }
+                    
+                    // Проверяем состояние AI кнопки
+                    if (aiBtn) {
+                        const aiAvailable = testApp.aiManager && testApp.aiManager.isAvailable();
+                        if (!aiAvailable && aiBtn.disabled) {
+                            log('✅ AI кнопка корректно отключена', 'success');
+                            uiChecks++;
+                        } else if (aiAvailable && !aiBtn.disabled) {
+                            log('✅ AI кнопка корректно включена', 'success');
+                            uiChecks++;
+                        } else {
+                            log('⚠️ Состояние AI кнопки некорректно', 'warning');
+                        }
+                    }
+                    
+                    const uiSuccess = uiChecks >= 2;
+                    updateStatus('uiStatus', uiSuccess ? '✅ UI интеграция работает' : '❌ Проблемы с UI', uiSuccess ? 'success' : 'error');
+                    updateTestResult('uiResults', `${uiChecks}/${totalChecks} UI проверок`, uiSuccess);
+                    
+                }, 1000);
+                
+            } catch (error) {
+                log(`❌ Ошибка UI интеграции: ${error.message}`, 'error');
+                updateStatus('uiStatus', '❌ Ошибка UI интеграции', 'error');
+                updateTestResult('uiResults', 'UI интеграция не работает', false);
+            }
+        }
+
+        function openMainApp() {
+            log('📱 Открытие основного приложения...', 'info');
+            window.open('/index.html', '_blank');
+        }
+
+        // Автозапуск тестов
+        window.addEventListener('load', () => {
+            log('🧪 AI Optional Test загружен', 'info');
+            setTimeout(() => {
+                testBothGenerations();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

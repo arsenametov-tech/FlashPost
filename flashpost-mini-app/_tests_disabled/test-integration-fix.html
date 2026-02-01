@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Fix Test - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+        
+        .log-container {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Integration Fix Test</h1>
+        <p>Тестирование интеграции простой и модульной систем</p>
+        
+        <div>
+            <button class="test-button" onclick="testModuleLoading()">
+                🔧 Test Module Loading
+            </button>
+            <button class="test-button" onclick="testAppInitialization()">
+                🚀 Test App Initialization
+            </button>
+            <button class="test-button" onclick="testIntegration()">
+                🔗 Test Integration
+            </button>
+            <button class="test-button" onclick="openMainApp()">
+                📱 Open Main App
+            </button>
+        </div>
+        
+        <div id="testResults">
+            <p>Нажмите кнопки выше для запуска тестов...</p>
+        </div>
+        
+        <div class="log-container" id="testLog">
+            <div>🔄 Test system initialized...</div>
+        </div>
+    </div>
+
+    <!-- Загружаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('testLog');
+            const entry = document.createElement('div');
+            entry.style.color = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function testModuleLoading() {
+            log('🔧 Testing module loading...', 'info');
+            
+            const requiredClasses = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager',
+                'FlashPostApp'
+            ];
+            
+            let loadedModules = 0;
+            let missingModules = [];
+            
+            requiredClasses.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    loadedModules++;
+                    log(`✅ ${className} loaded`, 'success');
+                } else {
+                    missingModules.push(className);
+                    log(`❌ ${className} missing`, 'error');
+                }
+            });
+            
+            if (missingModules.length === 0) {
+                log('✅ All modules loaded successfully', 'success');
+                updateResults('Module Loading', 'PASSED');
+            } else {
+                log(`❌ Missing modules: ${missingModules.join(', ')}`, 'error');
+                updateResults('Module Loading', 'FAILED');
+            }
+        }
+
+        function testAppInitialization() {
+            log('🚀 Testing app initialization...', 'info');
+            
+            try {
+                const app = new FlashPostApp();
+                
+                if (app && app.state && app.renderer && app.editor) {
+                    log('✅ App instance created successfully', 'success');
+                    
+                    if (app.state.getMode() === 'start') {
+                        log('✅ Initial state is correct', 'success');
+                        updateResults('App Initialization', 'PASSED');
+                    } else {
+                        log(`❌ Wrong initial state: ${app.state.getMode()}`, 'error');
+                        updateResults('App Initialization', 'FAILED');
+                    }
+                } else {
+                    log('❌ App instance creation failed', 'error');
+                    updateResults('App Initialization', 'FAILED');
+                }
+                
+            } catch (error) {
+                log(`❌ App initialization error: ${error.message}`, 'error');
+                updateResults('App Initialization', 'FAILED');
+            }
+        }
+
+        function testIntegration() {
+            log('🔗 Testing integration...', 'info');
+            
+            try {
+                // Проверяем что модули доступны глобально
+                if (typeof window.FlashPostApp !== 'undefined') {
+                    log('✅ FlashPostApp available globally', 'success');
+                } else {
+                    log('❌ FlashPostApp not available globally', 'error');
+                    updateResults('Integration', 'FAILED');
+                    return;
+                }
+                
+                // Проверяем инициализацию
+                const app = new FlashPostApp();
+                window.testApp = app;
+                
+                if (app.state && app.renderer && app.editor) {
+                    log('✅ All components initialized', 'success');
+                    
+                    // Проверяем методы
+                    if (typeof app.handleManualGenerate === 'function') {
+                        log('✅ Generation methods available', 'success');
+                        updateResults('Integration', 'PASSED');
+                    } else {
+                        log('❌ Generation methods missing', 'error');
+                        updateResults('Integration', 'FAILED');
+                    }
+                } else {
+                    log('❌ Component initialization failed', 'error');
+                    updateResults('Integration', 'FAILED');
+                }
+                
+            } catch (error) {
+                log(`❌ Integration error: ${error.message}`, 'error');
+                updateResults('Integration', 'FAILED');
+            }
+        }
+
+        function openMainApp() {
+            log('📱 Opening main application...', 'info');
+            window.open('index.html', '_blank');
+        }
+
+        function updateResults(testName, status) {
+            const resultsEl = document.getElementById('testResults');
+            const statusClass = status === 'PASSED' ? 'status-success' : 'status-error';
+            
+            resultsEl.innerHTML += `
+                <div class="status ${statusClass}">
+                    <strong>${testName}:</strong> ${status}
+                </div>
+            `;
+        }
+
+        // Автоматический тест при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🚀 Starting automatic tests...', 'info');
+                testModuleLoading();
+                setTimeout(() => testAppInitialization(), 500);
+                setTimeout(() => testIntegration(), 1000);
+            }, 100);
+        });
+    </script>
+</body>
+</html>

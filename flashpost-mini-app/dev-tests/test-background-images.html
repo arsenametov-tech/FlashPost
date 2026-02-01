@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Background Images - FlashPost</title>
+    <link rel="stylesheet" href="../app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        .slide-preview {
+            width: 100%;
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+        }
+        
+        .slide-text-block {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .test-log {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🖼️ Background Image System Test</h1>
+            <p>Тестирование системы фоновых изображений с загрузкой, позиционированием и яркостью</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Test Requirements</h2>
+            <ul>
+                <li>✅ Upload image functionality</li>
+                <li>✅ X/Y position controls (0-100%)</li>
+                <li>✅ Brightness control (0-200%)</li>
+                <li>✅ Apply to all slides checkbox</li>
+                <li>✅ Remove background button</li>
+                <li>✅ Real-time preview</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Interactive Test</h2>
+            <div class="test-grid">
+                <!-- Slide Preview -->
+                <div>
+                    <h3>Slide Preview</h3>
+                    <div class="slide-preview" id="testSlide">
+                        <div class="slide-text-block" style="top: 20%; left: 10%; font-size: 24px;">
+                            Sample Title Text
+                        </div>
+                        <div class="slide-text-block" style="bottom: 20%; right: 10%; font-size: 16px;">
+                            Sample description text with more content
+                        </div>
+                    </div>
+                    <div class="status-indicator status-info" id="slideStatus">
+                        Color Background
+                    </div>
+                </div>
+
+                <!-- Background Controls -->
+                <div>
+                    <h3>Background Controls</h3>
+                    <div class="controls-panel">
+                        <!-- Background Group (from renderer.js) -->
+                        <div class="property-group background-group">
+                            <h4 class="group-title">Фон слайда</h4>
+                            
+                            <div class="property-controls background-controls">
+                                <!-- Upload Container -->
+                                <div class="upload-container">
+                                    <label class="upload-label">Фоновое изображение:</label>
+                                    <input type="file" id="backgroundImageUpload" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-upload" onclick="document.getElementById('backgroundImageUpload').click()">
+                                        📁 Выбрать изображение
+                                    </button>
+                                    <button type="button" class="btn btn-remove" id="removeBackgroundBtn" style="display: none;">
+                                        🗑️ Удалить
+                                    </button>
+                                </div>
+
+                                <!-- Preview -->
+                                <div class="background-preview-container" id="backgroundPreview">
+                                    <div class="preview-placeholder">Изображение не выбрано</div>
+                                </div>
+
+                                <!-- Position X -->
+                                <div class="range-container">
+                                    <label>
+                                        Позиция X:
+                                        <span class="range-value" id="backgroundXValue">50%</span>
+                                    </label>
+                                    <input type="range" id="backgroundXRange" class="property-control" min="0" max="100" value="50">
+                                </div>
+
+                                <!-- Position Y -->
+                                <div class="range-container">
+                                    <label>
+                                        Позиция Y:
+                                        <span class="range-value" id="backgroundYValue">50%</span>
+                                    </label>
+                                    <input type="range" id="backgroundYRange" class="property-control" min="0" max="100" value="50">
+                                </div>
+
+                                <!-- Brightness -->
+                                <div class="range-container">
+                                    <label>
+                                        Яркость:
+                                        <span class="range-value" id="backgroundBrightnessValue">100%</span>
+                                    </label>
+                                    <input type="range" id="backgroundBrightnessRange" class="property-control" min="0" max="200" value="100">
+                                </div>
+
+                                <!-- Apply to All -->
+                                <div class="apply-to-all-container">
+                                    <input type="checkbox" id="applyBackgroundToAll">
+                                    <label for="applyBackgroundToAll" class="apply-to-all-label">
+                                        Применить ко всем слайдам
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div id="testResults">
+                <p>Загрузите изображение и протестируйте контролы...</p>
+            </div>
+            
+            <div class="test-log" id="testLog">
+                <div class="log-entry log-info">🔄 Initializing background image test...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test state
+        let currentBackground = {
+            type: 'color',
+            color: 'linear-gradient(45deg, #833ab4, #fd1d1d)',
+            image: null,
+            x: 50,
+            y: 50,
+            brightness: 100
+        };
+
+        let applyToAllSlides = false;
+
+        // Logging function
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('testLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Update slide background
+        function updateSlideBackground() {
+            const slideEl = document.getElementById('testSlide');
+            const statusEl = document.getElementById('slideStatus');
+            
+            if (currentBackground.type === 'image' && currentBackground.image) {
+                slideEl.style.backgroundImage = `url(${currentBackground.image})`;
+                slideEl.style.backgroundSize = 'cover';
+                slideEl.style.backgroundRepeat = 'no-repeat';
+                slideEl.style.backgroundPosition = `${currentBackground.x}% ${currentBackground.y}%`;
+                slideEl.style.filter = `brightness(${currentBackground.brightness}%)`;
+                
+                statusEl.textContent = `Image Background (${currentBackground.x}%, ${currentBackground.y}%, ${currentBackground.brightness}%)`;
+                statusEl.className = 'status-indicator status-success';
+            } else {
+                slideEl.style.backgroundImage = 'none';
+                slideEl.style.background = currentBackground.color;
+                slideEl.style.filter = 'none';
+                
+                statusEl.textContent = 'Color Background';
+                statusEl.className = 'status-indicator status-info';
+            }
+        }
+
+        // Update background preview
+        function updateBackgroundPreview(imageData) {
+            const previewEl = document.getElementById('backgroundPreview');
+            
+            if (imageData) {
+                previewEl.innerHTML = `<img src="${imageData}" alt="Background preview" class="background-preview-image">`;
+            } else {
+                previewEl.innerHTML = '<div class="preview-placeholder">Изображение не выбрано</div>';
+            }
+        }
+
+        // Update range value display
+        function updateRangeValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        // Initialize event handlers
+        function initializeEventHandlers() {
+            // File upload
+            const uploadInput = document.getElementById('backgroundImageUpload');
+            uploadInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    log(`📁 Uploading image: ${file.name} (${(file.size / 1024).toFixed(1)}KB)`, 'info');
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        currentBackground.type = 'image';
+                        currentBackground.image = e.target.result;
+                        
+                        updateSlideBackground();
+                        updateBackgroundPreview(currentBackground.image);
+                        
+                        // Show remove button
+                        document.getElementById('removeBackgroundBtn').style.display = 'inline-block';
+                        
+                        log('✅ Image uploaded successfully', 'success');
+                        updateTestResults();
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    log('❌ Invalid file type. Please select an image.', 'error');
+                }
+            });
+
+            // Remove background
+            document.getElementById('removeBackgroundBtn').addEventListener('click', () => {
+                currentBackground.type = 'color';
+                currentBackground.image = null;
+                
+                updateSlideBackground();
+                updateBackgroundPreview(null);
+                
+                // Hide remove button
+                document.getElementById('removeBackgroundBtn').style.display = 'none';
+                
+                log('🗑️ Background image removed', 'info');
+                updateTestResults();
+            });
+
+            // Position X
+            document.getElementById('backgroundXRange').addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                currentBackground.x = value;
+                updateRangeValue('backgroundXValue', value + '%');
+                updateSlideBackground();
+                
+                log(`📐 X position: ${value}%`, 'info');
+            });
+
+            // Position Y
+            document.getElementById('backgroundYRange').addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                currentBackground.y = value;
+                updateRangeValue('backgroundYValue', value + '%');
+                updateSlideBackground();
+                
+                log(`📐 Y position: ${value}%`, 'info');
+            });
+
+            // Brightness
+            document.getElementById('backgroundBrightnessRange').addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                currentBackground.brightness = value;
+                updateRangeValue('backgroundBrightnessValue', value + '%');
+                updateSlideBackground();
+                
+                log(`💡 Brightness: ${value}%`, 'info');
+            });
+
+            // Apply to all slides
+            document.getElementById('applyBackgroundToAll').addEventListener('change', (e) => {
+                applyToAllSlides = e.target.checked;
+                log(`🔄 Apply to all slides: ${applyToAllSlides ? 'ON' : 'OFF'}`, 'info');
+            });
+
+            log('✅ Event handlers initialized', 'success');
+        }
+
+        // Update test results
+        function updateTestResults() {
+            const resultsEl = document.getElementById('testResults');
+            
+            const hasImage = currentBackground.type === 'image' && currentBackground.image;
+            const positionX = currentBackground.x;
+            const positionY = currentBackground.y;
+            const brightness = currentBackground.brightness;
+            
+            resultsEl.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="test-result-item">
+                        <strong>📁 Image Upload:</strong><br>
+                        <span class="${hasImage ? 'status-success' : 'status-info'}">${hasImage ? 'Image Loaded' : 'No Image'}</span>
+                    </div>
+                    <div class="test-result-item">
+                        <strong>📐 Position X:</strong><br>
+                        <span class="status-info">${positionX}%</span>
+                    </div>
+                    <div class="test-result-item">
+                        <strong>📐 Position Y:</strong><br>
+                        <span class="status-info">${positionY}%</span>
+                    </div>
+                    <div class="test-result-item">
+                        <strong>💡 Brightness:</strong><br>
+                        <span class="status-info">${brightness}%</span>
+                    </div>
+                    <div class="test-result-item">
+                        <strong>🔄 Apply to All:</strong><br>
+                        <span class="status-info">${applyToAllSlides ? 'Enabled' : 'Disabled'}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize test
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Background image test initialized', 'success');
+            initializeEventHandlers();
+            updateSlideBackground();
+            updateTestResults();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Editor Features Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #6a2c91;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .property-test {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .hook-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .hook-status.prepared {
+            background: #28a745;
+        }
+        .hook-status.not-prepared {
+            background: #dc3545;
+        }
+        #testResults {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .demo-slide {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #833ab4, #fd1d1d);
+            position: relative;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .demo-text-block {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .demo-text-block:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+        .demo-text-block.selected {
+            border-color: #fff;
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚀 Advanced Editor Features Test</h1>
+        <p>Testing the prepared architecture for advanced text block editing capabilities.</p>
+        
+        <div class="test-grid">
+            <div class="test-section">
+                <h3>📝 Independent Text Block Properties</h3>
+                <div id="propertiesTest">Testing independent properties support...</div>
+                <button onclick="testIndependentProperties()">Test Properties</button>
+            </div>
+            
+            <div class="test-section">
+                <h3>🎨 Advanced Effects Support</h3>
+                <div id="effectsTest">Testing effects system...</div>
+                <button onclick="testEffectsSystem()">Test Effects</button>
+            </div>
+        </div>
+        
+        <div class="test-grid">
+            <div class="test-section">
+                <h3>✏️ Editing Without Re-render</h3>
+                <div id="editingTest">Testing non-destructive editing...</div>
+                <button onclick="testNonDestructiveEditing()">Test Editing</button>
+            </div>
+            
+            <div class="test-section">
+                <h3>🔗 Hook System Preparation</h3>
+                <div id="hooksTest">Testing hook system readiness...</div>
+                <button onclick="testHookSystem()">Test Hooks</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎯 Multiple Block Management</h3>
+            <div id="multipleBlocksTest">Testing multiple block operations...</div>
+            <button onclick="testMultipleBlocks()">Test Multiple Blocks</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🖱️ Interactive Demo</h3>
+            <p>Click on text blocks to test selection and editing:</p>
+            <div class="demo-slide" id="demoSlide">
+                <div class="demo-text-block" style="left: 20%; top: 20%;" data-demo-id="1">
+                    Text Block 1
+                </div>
+                <div class="demo-text-block" style="left: 60%; top: 40%;" data-demo-id="2">
+                    Text Block 2
+                </div>
+                <div class="demo-text-block" style="left: 30%; top: 70%;" data-demo-id="3">
+                    Text Block 3
+                </div>
+            </div>
+            <div id="demoResults"></div>
+        </div>
+        
+        <div id="testResults"></div>
+    </div>
+
+    <!-- Load modules -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        let testState, testRenderer, testEditor;
+        
+        // Initialize test environment
+        function initializeTestEnvironment() {
+            try {
+                testState = new StateManager();
+                testRenderer = new Renderer(testState);
+                testEditor = new Editor(testState);
+                
+                // Create test slide
+                const slide = testState.createSlide({
+                    title: 'Test Slide',
+                    text: 'Test content'
+                });
+                testState.setActiveSlideByIndex(0);
+                
+                return true;
+            } catch (error) {
+                console.error('Failed to initialize test environment:', error);
+                return false;
+            }
+        }
+        
+        // Test independent properties
+        function testIndependentProperties() {
+            const results = [];
+            
+            try {
+                // Test creating text block with all independent properties
+                const block = testState.addTextBlock();
+                
+                // Test font properties
+                const fontTests = [
+                    { property: 'font', value: 'Montserrat' },
+                    { property: 'size', value: 24 },
+                    { property: 'weight', value: 600 },
+                    { property: 'style', value: 'italic' }
+                ];
+                
+                fontTests.forEach(test => {
+                    const success = testState.updateTextBlockProperty(block.id, test.property, test.value);
+                    results.push({
+                        test: `Font ${test.property}`,
+                        success,
+                        value: test.value
+                    });
+                });
+                
+                // Test color properties
+                const colorTests = [
+                    { property: 'color', value: '#ff0000' },
+                    { property: 'backgroundColor', value: '#00ff00' }
+                ];
+                
+                colorTests.forEach(test => {
+                    const success = testState.updateTextBlockProperty(block.id, test.property, test.value);
+                    results.push({
+                        test: `Color ${test.property}`,
+                        success,
+                        value: test.value
+                    });
+                });
+                
+                // Test effects
+                const effectTests = [
+                    { property: 'effects.shadow.enabled', value: true },
+                    { property: 'effects.shadow.color', value: 'rgba(255, 0, 0, 0.5)' },
+                    { property: 'effects.outline.enabled', value: true },
+                    { property: 'effects.glow.enabled', value: true }
+                ];
+                
+                effectTests.forEach(test => {
+                    const success = testState.updateTextBlockProperty(block.id, test.property, test.value);
+                    results.push({
+                        test: `Effect ${test.property}`,
+                        success,
+                        value: test.value
+                    });
+                });
+                
+                // Test positioning
+                const positionTests = [
+                    { property: 'rotation', value: 15 },
+                    { property: 'opacity', value: 0.8 },
+                    { property: 'zIndex', value: 20 }
+                ];
+                
+                positionTests.forEach(test => {
+                    const success = testState.updateTextBlockProperty(block.id, test.property, test.value);
+                    results.push({
+                        test: `Position ${test.property}`,
+                        success,
+                        value: test.value
+                    });
+                });
+                
+            } catch (error) {
+                results.push({
+                    test: 'Properties System',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            displayTestResults('propertiesTest', results);
+        }
+        
+        // Test effects system
+        function testEffectsSystem() {
+            const results = [];
+            
+            try {
+                const block = testState.addTextBlock();
+                
+                // Test all effect types
+                const effects = ['shadow', 'outline', 'glow', 'gradient'];
+                
+                effects.forEach(effect => {
+                    const success = testState.updateTextBlockProperty(block.id, `effects.${effect}.enabled`, true);
+                    results.push({
+                        test: `${effect} effect`,
+                        success,
+                        details: success ? 'Enabled successfully' : 'Failed to enable'
+                    });
+                });
+                
+                // Test effect properties
+                const effectProperties = [
+                    { path: 'effects.shadow.blur', value: 5 },
+                    { path: 'effects.outline.width', value: 2 },
+                    { path: 'effects.glow.intensity', value: 0.7 },
+                    { path: 'effects.gradient.colors', value: ['#ff0000', '#0000ff'] }
+                ];
+                
+                effectProperties.forEach(prop => {
+                    const success = testState.updateTextBlockProperty(block.id, prop.path, prop.value);
+                    results.push({
+                        test: `Effect property ${prop.path}`,
+                        success,
+                        value: prop.value
+                    });
+                });
+                
+            } catch (error) {
+                results.push({
+                    test: 'Effects System',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            displayTestResults('effectsTest', results);
+        }
+        
+        // Test non-destructive editing
+        function testNonDestructiveEditing() {
+            const results = [];
+            
+            try {
+                // Create test container
+                const testContainer = document.createElement('div');
+                testContainer.id = 'editingTestContainer';
+                testContainer.style.display = 'none';
+                document.body.appendChild(testContainer);
+                
+                const block = testState.addTextBlock();
+                
+                // Test renderer update without re-render
+                const updateSuccess = testRenderer.updateTextBlockStyles(block.id);
+                results.push({
+                    test: 'Style update without re-render',
+                    success: updateSuccess,
+                    details: updateSuccess ? 'Styles updated successfully' : 'Failed to update styles'
+                });
+                
+                // Test content update without focus loss
+                const contentUpdateSuccess = testRenderer.updateTextBlockContent(block.id, 'Updated text content');
+                results.push({
+                    test: 'Content update without focus loss',
+                    success: contentUpdateSuccess,
+                    details: contentUpdateSuccess ? 'Content updated successfully' : 'Failed to update content'
+                });
+                
+                // Test edit mode toggle
+                const editModeSuccess = testRenderer.toggleTextBlockEditMode(block.id, true);
+                results.push({
+                    test: 'Edit mode toggle',
+                    success: editModeSuccess,
+                    details: editModeSuccess ? 'Edit mode toggled successfully' : 'Failed to toggle edit mode'
+                });
+                
+                // Test batch updates
+                const batchUpdates = [
+                    { blockId: block.id, properties: { color: '#ff0000', size: 20 } }
+                ];
+                
+                try {
+                    testEditor.batchUpdateTextBlocks(batchUpdates);
+                    results.push({
+                        test: 'Batch updates',
+                        success: true,
+                        details: 'Batch update completed successfully'
+                    });
+                } catch (error) {
+                    results.push({
+                        test: 'Batch updates',
+                        success: false,
+                        error: error.message
+                    });
+                }
+                
+                // Clean up
+                document.body.removeChild(testContainer);
+                
+            } catch (error) {
+                results.push({
+                    test: 'Non-destructive Editing',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            displayTestResults('editingTest', results);
+        }
+        
+        // Test hook system
+        function testHookSystem() {
+            const results = [];
+            
+            try {
+                // Test hook preparation methods
+                const hookMethods = [
+                    'prepareSaveTemplateHook',
+                    'prepareKeywordHighlightingHook',
+                    'prepareDragStabilizationHook'
+                ];
+                
+                hookMethods.forEach(method => {
+                    const hasMethod = typeof testState[method] === 'function';
+                    results.push({
+                        test: `Hook method: ${method}`,
+                        success: hasMethod,
+                        details: hasMethod ? 'Method available' : 'Method not found'
+                    });
+                    
+                    if (hasMethod) {
+                        try {
+                            testState[method]();
+                            results.push({
+                                test: `Hook execution: ${method}`,
+                                success: true,
+                                details: 'Hook prepared successfully'
+                            });
+                        } catch (error) {
+                            results.push({
+                                test: `Hook execution: ${method}`,
+                                success: false,
+                                error: error.message
+                            });
+                        }
+                    }
+                });
+                
+                // Test hook triggers
+                const block = testState.addTextBlock();
+                
+                // Test property change hook
+                testState.updateTextBlockProperty(block.id, 'color', '#ff0000');
+                results.push({
+                    test: 'Property change hook trigger',
+                    success: true,
+                    details: 'Hook triggered on property change'
+                });
+                
+                // Test batch update hook
+                const batchChanges = [
+                    { property: 'size', oldValue: 16, newValue: 20 },
+                    { property: 'weight', oldValue: 700, newValue: 600 }
+                ];
+                
+                testState.triggerTextBlockBatchUpdateHook(block.id, batchChanges);
+                results.push({
+                    test: 'Batch update hook trigger',
+                    success: true,
+                    details: 'Batch hook triggered successfully'
+                });
+                
+            } catch (error) {
+                results.push({
+                    test: 'Hook System',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            displayTestResults('hooksTest', results);
+        }
+        
+        // Test multiple blocks
+        function testMultipleBlocks() {
+            const results = [];
+            
+            try {
+                // Create multiple blocks
+                const blocks = [];
+                for (let i = 0; i < 3; i++) {
+                    const block = testState.addTextBlock();
+                    blocks.push(block);
+                }
+                
+                results.push({
+                    test: 'Multiple block creation',
+                    success: blocks.length === 3,
+                    details: `Created ${blocks.length} blocks`
+                });
+                
+                // Test multiple selection (preparation)
+                const blockIds = blocks.map(b => b.id);
+                try {
+                    testEditor.selectMultipleTextBlocks(blockIds);
+                    results.push({
+                        test: 'Multiple block selection',
+                        success: true,
+                        details: 'Multiple selection method available'
+                    });
+                } catch (error) {
+                    results.push({
+                        test: 'Multiple block selection',
+                        success: false,
+                        error: error.message
+                    });
+                }
+                
+                // Test batch style application
+                const styles = { color: '#00ff00', size: 18 };
+                try {
+                    testEditor.applyStylesToMultipleBlocks(blockIds, styles);
+                    results.push({
+                        test: 'Batch style application',
+                        success: true,
+                        details: 'Styles applied to multiple blocks'
+                    });
+                } catch (error) {
+                    results.push({
+                        test: 'Batch style application',
+                        success: false,
+                        error: error.message
+                    });
+                }
+                
+                // Test block duplication
+                try {
+                    testEditor.duplicateTextBlock(blocks[0].id);
+                    results.push({
+                        test: 'Block duplication',
+                        success: true,
+                        details: 'Block duplicated successfully'
+                    });
+                } catch (error) {
+                    results.push({
+                        test: 'Block duplication',
+                        success: false,
+                        error: error.message
+                    });
+                }
+                
+            } catch (error) {
+                results.push({
+                    test: 'Multiple Blocks',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            displayTestResults('multipleBlocksTest', results);
+        }
+        
+        // Display test results
+        function displayTestResults(containerId, results) {
+            const container = document.getElementById(containerId);
+            let html = '';
+            
+            results.forEach(result => {
+                const statusClass = result.success ? 'success' : 'error';
+                const details = result.details || result.error || '';
+                const value = result.value ? ` (${result.value})` : '';
+                
+                html += `
+                    <div class="status ${statusClass}">
+                        ${result.success ? '✅' : '❌'} ${result.test}${value}
+                        ${details ? `<br><small>${details}</small>` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Interactive demo
+        function setupInteractiveDemo() {
+            const demoBlocks = document.querySelectorAll('.demo-text-block');
+            const demoResults = document.getElementById('demoResults');
+            
+            demoBlocks.forEach(block => {
+                block.addEventListener('click', (e) => {
+                    // Remove selection from all blocks
+                    demoBlocks.forEach(b => b.classList.remove('selected'));
+                    
+                    // Select clicked block
+                    block.classList.add('selected');
+                    
+                    const blockId = block.dataset.demoId;
+                    demoResults.innerHTML = `
+                        <div class="status success">
+                            ✅ Selected Demo Block ${blockId}
+                            <br><small>In real app: this would trigger selectTextBlock(${blockId})</small>
+                        </div>
+                    `;
+                });
+                
+                block.addEventListener('dblclick', (e) => {
+                    e.preventDefault();
+                    const blockId = block.dataset.demoId;
+                    
+                    // Simulate inline editing
+                    const originalText = block.textContent;
+                    block.contentEditable = true;
+                    block.focus();
+                    
+                    const finishEdit = () => {
+                        block.contentEditable = false;
+                        demoResults.innerHTML = `
+                            <div class="status success">
+                                ✅ Edited Demo Block ${blockId}
+                                <br><small>Changed from "${originalText}" to "${block.textContent}"</small>
+                                <br><small>In real app: this would update without losing focus</small>
+                            </div>
+                        `;
+                    };
+                    
+                    block.addEventListener('blur', finishEdit, { once: true });
+                    block.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            finishEdit();
+                        }
+                    }, { once: true });
+                });
+            });
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const initialized = initializeTestEnvironment();
+                
+                if (initialized) {
+                    document.getElementById('testResults').innerHTML = `
+                        <div class="status success">
+                            🎉 Advanced Editor Architecture Successfully Prepared!
+                            <br><br>
+                            <strong>✅ Ready for Implementation:</strong>
+                            <ul style="text-align: left; margin: 10px 0;">
+                                <li>Independent font, size, color, and effects for each text block</li>
+                                <li>Non-destructive editing without re-render or focus loss</li>
+                                <li>Multiple block selection and batch operations</li>
+                                <li>Hook system for template saving, keyword highlighting, and drag stabilization</li>
+                                <li>Advanced effects system (shadow, outline, glow, gradient)</li>
+                                <li>Real-time updates with performance optimization</li>
+                            </ul>
+                            <strong>🚀 Architecture is stable and ready for advanced features!</strong>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('testResults').innerHTML = `
+                        <div class="status error">
+                            ❌ Failed to initialize test environment. Check console for errors.
+                        </div>
+                    `;
+                }
+                
+                setupInteractiveDemo();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

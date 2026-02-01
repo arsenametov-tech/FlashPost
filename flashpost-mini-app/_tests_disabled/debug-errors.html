@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 Диагностика ошибок</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .error-log {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .error { color: #ff6b6b; }
+        .warning { color: #feca57; }
+        .info { color: #48dbfb; }
+        .success { color: #1dd1a1; }
+        button {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Диагностика ошибок FlashPost</h1>
+    
+    <button onclick="testModuleLoading()">Тест загрузки модулей</button>
+    <button onclick="testAppInitialization()">Тест инициализации приложения</button>
+    <button onclick="testBasicFunctions()">Тест базовых функций</button>
+    <button onclick="clearLog()">Очистить лог</button>
+    
+    <div id="errorLog" class="error-log"></div>
+
+    <script>
+        let errorLog = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            errorLog.push({ message: logEntry, type });
+            
+            const logDiv = document.getElementById('errorLog');
+            logDiv.innerHTML += `<div class="${type}">${logEntry}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+
+        function clearLog() {
+            errorLog = [];
+            document.getElementById('errorLog').innerHTML = '';
+        }
+
+        // Перехватываем все ошибки
+        window.addEventListener('error', (event) => {
+            log(`ГЛОБАЛЬНАЯ ОШИБКА: ${event.error?.message || event.message}`, 'error');
+            log(`Файл: ${event.filename}:${event.lineno}:${event.colno}`, 'error');
+            if (event.error?.stack) {
+                log(`Stack: ${event.error.stack}`, 'error');
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            log(`НЕОБРАБОТАННОЕ ОТКЛОНЕНИЕ: ${event.reason}`, 'error');
+        });
+
+        function testModuleLoading() {
+            log('=== ТЕСТ ЗАГРУЗКИ МОДУЛЕЙ ===', 'info');
+            
+            const modules = [
+                'StateManager',
+                'Renderer', 
+                'Editor',
+                'DragManager',
+                'ExportManager',
+                'AIManager',
+                'TemplateManager',
+                'FlashPostApp'
+            ];
+
+            modules.forEach(module => {
+                try {
+                    if (typeof window[module] !== 'undefined') {
+                        log(`✅ ${module} загружен`, 'success');
+                    } else {
+                        log(`❌ ${module} НЕ загружен`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ Ошибка проверки ${module}: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        function testAppInitialization() {
+            log('=== ТЕСТ ИНИЦИАЛИЗАЦИИ ПРИЛОЖЕНИЯ ===', 'info');
+            
+            try {
+                if (typeof window.flashPostApp !== 'undefined') {
+                    log('✅ window.flashPostApp существует', 'success');
+                    
+                    const app = window.flashPostApp;
+                    
+                    // Проверяем основные свойства
+                    if (app.state) {
+                        log('✅ app.state существует', 'success');
+                        
+                        // Проверяем методы StateManager
+                        const stateMethods = [
+                            'createSlide',
+                            'addTextBlock', 
+                            'updateTextBlockProperty',
+                            'getActiveSlide',
+                            'getAllSlides',
+                            'getSlidesCount'
+                        ];
+                        
+                        stateMethods.forEach(method => {
+                            if (typeof app.state[method] === 'function') {
+                                log(`✅ app.state.${method}() доступен`, 'success');
+                            } else {
+                                log(`❌ app.state.${method}() НЕ доступен`, 'error');
+                            }
+                        });
+                        
+                    } else {
+                        log('❌ app.state НЕ существует', 'error');
+                    }
+                    
+                    if (app.renderer) {
+                        log('✅ app.renderer существует', 'success');
+                    } else {
+                        log('❌ app.renderer НЕ существует', 'error');
+                    }
+                    
+                } else {
+                    log('❌ window.flashPostApp НЕ существует', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Ошибка инициализации: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        function testBasicFunctions() {
+            log('=== ТЕСТ БАЗОВЫХ ФУНКЦИЙ ===', 'info');
+            
+            try {
+                const app = window.flashPostApp;
+                
+                if (!app) {
+                    log('❌ Приложение не инициализировано', 'error');
+                    return;
+                }
+                
+                // Тест создания слайда
+                try {
+                    const slide = app.state.createSlide({
+                        title: 'Тестовый слайд',
+                        text: 'Тест'
+                    });
+                    
+                    if (slide) {
+                        log(`✅ Слайд создан: ${slide.id}`, 'success');
+                        
+                        // Тест добавления блока
+                        try {
+                            const block = app.state.addTextBlock();
+                            
+                            if (block) {
+                                log(`✅ Блок создан: ${block.id}`, 'success');
+                                
+                                // Тест обновления свойства
+                                try {
+                                    const success = app.state.updateTextBlockProperty(block.id, 'text', 'Тестовый текст');
+                                    
+                                    if (success) {
+                                        log('✅ Свойство блока обновлено', 'success');
+                                    } else {
+                                        log('❌ Не удалось обновить свойство блока', 'error');
+                                    }
+                                } catch (error) {
+                                    log(`❌ Ошибка обновления свойства: ${error.message}`, 'error');
+                                }
+                                
+                            } else {
+                                log('❌ Блок НЕ создан', 'error');
+                            }
+                        } catch (error) {
+                            log(`❌ Ошибка создания блока: ${error.message}`, 'error');
+                        }
+                        
+                    } else {
+                        log('❌ Слайд НЕ создан', 'error');
+                    }
+                } catch (error) {
+                    log(`❌ Ошибка создания слайда: ${error.message}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Критическая ошибка: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Автоматический запуск диагностики
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Начало диагностики', 'info');
+            
+            setTimeout(() => {
+                testModuleLoading();
+            }, 1000);
+            
+            setTimeout(() => {
+                testAppInitialization();
+            }, 2000);
+        });
+    </script>
+
+    <!-- Подключение модулей для диагностики -->
+    <script src="src/state.js" onerror="log('Ошибка загрузки state.js', 'error')"></script>
+    <script src="src/renderer.js" onerror="log('Ошибка загрузки renderer.js', 'error')"></script>
+    <script src="src/editor.js" onerror="log('Ошибка загрузки editor.js', 'error')"></script>
+    <script src="src/drag.js" onerror="log('Ошибка загрузки drag.js', 'error')"></script>
+    <script src="src/export.js" onerror="log('Ошибка загрузки export.js', 'error')"></script>
+    <script src="src/ai.js" onerror="log('Ошибка загрузки ai.js', 'error')"></script>
+    <script src="src/templates.js" onerror="log('Ошибка загрузки templates.js', 'error')"></script>
+    <script src="src/app.js" onerror="log('Ошибка загрузки app.js', 'error')"></script>
+</body>
+</html>

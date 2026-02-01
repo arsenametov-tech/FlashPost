@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Test High-Quality AI Generation</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .test-section h2 {
+            color: #fcb045;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .topic-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .topic-input:focus {
+            outline: none;
+            border-color: #833ab4;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .topic-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .test-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-area {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 200px;
+        }
+        
+        .slide-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            color: white;
+            position: relative;
+        }
+        
+        .slide-number {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .slide-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fcb045;
+        }
+        
+        .slide-text {
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-line;
+        }
+        
+        .slide-keywords {
+            margin-top: 10px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .keyword {
+            background: rgba(252, 176, 69, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fcb045;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .quality-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fcb045;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 High-Quality AI Generation Test</h1>
+            <p>Тестирование высококачественной генерации AI каруселей</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Генерация карусели</h2>
+            
+            <div class="input-group">
+                <label class="input-label">Тема для генерации:</label>
+                <input type="text" class="topic-input" id="topicInput" 
+                       placeholder="Например: Как заработать первый миллион в 25 лет" 
+                       value="Продуктивность без выгорания">
+            </div>
+            
+            <button class="test-button" id="generateBtn" onclick="testHighQualityGeneration()">
+                🚀 Генерировать высококачественную карусель
+            </button>
+            
+            <button class="test-button" onclick="testStandardGeneration()">
+                📝 Генерировать стандартную карусель
+            </button>
+            
+            <button class="test-button" onclick="testMultipleTopics()">
+                🔄 Тест множественных тем
+            </button>
+        </div>
+
+        <div class="results-area" id="resultsArea">
+            <div class="status status-info">
+                Введите тему и нажмите кнопку генерации для начала тестирования
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули -->
+    <script src="flashpost-mini-app/src/state.js"></script>
+    <script src="flashpost-mini-app/src/ai.js"></script>
+
+    <script>
+        // Инициализация
+        let stateManager, aiManager;
+        
+        function initializeManagers() {
+            try {
+                stateManager = new StateManager();
+                aiManager = new AIManager(stateManager);
+                
+                console.log('✅ Менеджеры инициализированы');
+                return true;
+            } catch (error) {
+                console.error('❌ Ошибка инициализации:', error);
+                showStatus('Ошибка инициализации: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        // Показать статус
+        function showStatus(message, type = 'info') {
+            const resultsArea = document.getElementById('resultsArea');
+            resultsArea.innerHTML = `
+                <div class="status status-${type}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        // Показать загрузку
+        function showLoading(message) {
+            const resultsArea = document.getElementById('resultsArea');
+            resultsArea.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>${message}</div>
+                </div>
+            `;
+        }
+
+        // Отображение результатов
+        function displayResults(result) {
+            const resultsArea = document.getElementById('resultsArea');
+            
+            if (!result.success) {
+                showStatus('Ошибка генерации: ' + (result.error || 'Неизвестная ошибка'), 'error');
+                return;
+            }
+
+            let html = `
+                <div class="status status-success">
+                    ✅ Карусель успешно создана! Слайдов: ${result.slidesCount}
+                    ${result.quality ? ` | Качество: ${result.quality}` : ''}
+                </div>
+            `;
+
+            // Метрики качества
+            if (result.analysis) {
+                html += `
+                    <div class="quality-metrics">
+                        <div class="metric">
+                            <div class="metric-value">${result.slidesCount}</div>
+                            <div class="metric-label">Слайдов создано</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${result.quality || 'standard'}</div>
+                            <div class="metric-label">Уровень качества</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${result.analysis.recommendedSlides || 'N/A'}</div>
+                            <div class="metric-label">Рекомендовано слайдов</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Отображение слайдов
+            const slides = stateManager.getAllSlides();
+            slides.forEach((slide, index) => {
+                const slideColors = [
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                    'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                    'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
+                    'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+                    'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)'
+                ];
+
+                html += `
+                    <div class="slide-preview" style="background: ${slideColors[index % slideColors.length]}">
+                        <div class="slide-number">${index + 1}/${slides.length}</div>
+                        <div class="slide-title">${slide.title || `Слайд ${index + 1}`}</div>
+                        <div class="slide-text">${slide.text || 'Нет текста'}</div>
+                        ${slide.autoKeywords && slide.autoKeywords.length > 0 ? `
+                            <div class="slide-keywords">
+                                Ключевые слова: ${slide.autoKeywords.map(kw => `<span class="keyword">${kw}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            resultsArea.innerHTML = html;
+        }
+
+        // Тест высококачественной генерации
+        async function testHighQualityGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            
+            if (!topic) {
+                showStatus('Введите тему для генерации', 'error');
+                return;
+            }
+
+            if (!initializeManagers()) return;
+
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = true;
+            
+            showLoading('Генерация высококачественной карусели...');
+
+            try {
+                const result = await aiManager.generateAISlides(topic);
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('❌ Ошибка тестирования:', error);
+                showStatus('Ошибка: ' + error.message, 'error');
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+
+        // Тест стандартной генерации
+        async function testStandardGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            
+            if (!topic) {
+                showStatus('Введите тему для генерации', 'error');
+                return;
+            }
+
+            if (!initializeManagers()) return;
+            
+            showLoading('Генерация стандартной карусели...');
+
+            try {
+                const result = await aiManager.generateCarousel(topic);
+                
+                displayResults({
+                    success: true,
+                    slidesCount: result.slides.length,
+                    topic: topic,
+                    quality: 'standard'
+                });
+                
+            } catch (error) {
+                console.error('❌ Ошибка тестирования:', error);
+                showStatus('Ошибка: ' + error.message, 'error');
+            }
+        }
+
+        // Тест множественных тем
+        async function testMultipleTopics() {
+            const topics = [
+                'Инвестиции для начинающих',
+                'Здоровое питание без диет',
+                'Тайм-менеджмент для фрилансеров',
+                'Пассивный доход в интернете'
+            ];
+
+            if (!initializeManagers()) return;
+
+            showLoading('Тестирование множественных тем...');
+
+            let results = [];
+            
+            for (const topic of topics) {
+                try {
+                    console.log(`🧪 Тестируем тему: ${topic}`);
+                    const result = await aiManager.generateAISlides(topic);
+                    results.push({
+                        topic: topic,
+                        success: true,
+                        slidesCount: result.slidesCount,
+                        quality: result.quality
+                    });
+                } catch (error) {
+                    results.push({
+                        topic: topic,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            }
+
+            // Отображаем сводные результаты
+            let html = '<h3>📊 Результаты тестирования множественных тем:</h3>';
+            
+            results.forEach((result, index) => {
+                const statusClass = result.success ? 'success' : 'error';
+                html += `
+                    <div class="status status-${statusClass}">
+                        <strong>${result.topic}</strong><br>
+                        ${result.success ? 
+                            `✅ Успешно: ${result.slidesCount} слайдов (${result.quality})` : 
+                            `❌ Ошибка: ${result.error}`
+                        }
+                    </div>
+                `;
+            });
+
+            const successCount = results.filter(r => r.success).length;
+            html += `
+                <div class="status status-info">
+                    📈 Итого: ${successCount}/${results.length} тем успешно обработано
+                </div>
+            `;
+
+            document.getElementById('resultsArea').innerHTML = html;
+        }
+
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            showStatus('🚀 Готов к тестированию высококачественной AI генерации', 'info');
+        });
+    </script>
+</body>
+</html>

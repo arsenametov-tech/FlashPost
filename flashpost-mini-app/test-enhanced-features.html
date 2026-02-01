@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Тест улучшенных функций</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-section h2 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .test-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            margin: 10px 0;
+        }
+        
+        .test-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .test-results {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success { background: #4CAF50; }
+        .status-warning { background: #FF9800; }
+        .status-error { background: #F44336; }
+        
+        .performance-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚀 FlashPost - Тест улучшенных функций</h1>
+        
+        <!-- Тест AI системы -->
+        <div class="test-section">
+            <h2>🤖 Улучшенная AI система</h2>
+            <p>Тестирование новых функций AI генерации с лимитами и индикацией загрузки</p>
+            
+            <input type="text" class="test-input" id="ai-topic" placeholder="Введите тему для генерации...">
+            
+            <div>
+                <button class="test-button" onclick="testAIGeneration()">Тест AI генерации</button>
+                <button class="test-button" onclick="testAILimits()">Проверить лимиты AI</button>
+                <button class="test-button" onclick="testLoadingIndicator()">Тест индикатора загрузки</button>
+            </div>
+            
+            <div class="test-results" id="ai-results">
+                Результаты AI тестов появятся здесь...
+            </div>
+        </div>
+        
+        <!-- Тест системы экспорта -->
+        <div class="test-section">
+            <h2>📤 Улучшенная система экспорта</h2>
+            <p>Тестирование экспорта в разных форматах и качестве</p>
+            
+            <div>
+                <select class="test-input" id="export-format" style="width: auto; margin-right: 10px;">
+                    <option value="PNG">PNG</option>
+                    <option value="JPEG">JPEG</option>
+                    <option value="PDF">PDF (PRO)</option>
+                </select>
+                
+                <select class="test-input" id="export-quality" style="width: auto;">
+                    <option value="720p">720p (FREE)</option>
+                    <option value="1080p">1080p (PRO)</option>
+                    <option value="4K">4K (PRO)</option>
+                </select>
+            </div>
+            
+            <div>
+                <button class="test-button" onclick="testExportLimits()">Проверить лимиты экспорта</button>
+                <button class="test-button" onclick="testExportProgress()">Тест прогресса экспорта</button>
+                <button class="test-button" onclick="testUpgradeModal()">Показать модал апгрейда</button>
+            </div>
+            
+            <div class="test-results" id="export-results">
+                Результаты экспорта появятся здесь...
+            </div>
+        </div>
+        
+        <!-- Тест производительности -->
+        <div class="test-section">
+            <h2>⚡ Система производительности</h2>
+            <p>Мониторинг производительности и оптимизации</p>
+            
+            <div>
+                <button class="test-button" onclick="testDebouncing()">Тест debouncing</button>
+                <button class="test-button" onclick="testDOMOptimization()">Тест DOM оптимизации</button>
+                <button class="test-button" onclick="testAPISupport()">Проверить поддержку API</button>
+                <button class="test-button" onclick="testMemoryUsage()">Проверить память</button>
+            </div>
+            
+            <div class="performance-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="memory-usage">-</div>
+                    <div class="stat-label">Память (MB)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="fps-counter">-</div>
+                    <div class="stat-label">FPS</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="api-support">-</div>
+                    <div class="stat-label">API поддержка</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="debounce-count">0</div>
+                    <div class="stat-label">Debounce вызовы</div>
+                </div>
+            </div>
+            
+            <div class="test-results" id="performance-results">
+                Результаты производительности появятся здесь...
+            </div>
+        </div>
+        
+        <!-- Общий статус -->
+        <div class="test-section">
+            <h2>📊 Общий статус системы</h2>
+            <div id="system-status">
+                <div><span class="status-indicator status-warning"></span>Загрузка модулей...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загрузка модулей FlashPost -->
+    <script src="src/dom-update-queue.js"></script>
+    <script src="src/event-manager.js"></script>
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/performance-manager.js"></script>
+
+    <script>
+        // Глобальные переменные для тестирования
+        let testApp = null;
+        let debounceTestCount = 0;
+        
+        // Инициализация тестового окружения
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Создаем минимальное тестовое приложение
+                console.log('🔧 Инициализация тестового окружения...');
+                
+                const state = new StateManager();
+                console.log('✅ StateManager создан');
+                
+                const aiManager = new AIManager(state);
+                console.log('✅ AIManager создан');
+                
+                const exportManager = new ExportManager(state);
+                console.log('✅ ExportManager создан');
+                
+                const performanceManager = new PerformanceManager();
+                console.log('✅ PerformanceManager создан');
+                
+                testApp = {
+                    state,
+                    aiManager,
+                    exportManager,
+                    performanceManager
+                };
+                
+                updateSystemStatus('success', 'Все модули загружены успешно');
+                
+                // Запускаем мониторинг производительности
+                startPerformanceMonitoring();
+                
+            } catch (error) {
+                console.error('❌ Ошибка инициализации тестов:', error);
+                updateSystemStatus('error', 'Ошибка загрузки модулей: ' + error.message);
+                
+                // Создаем заглушки для тестирования
+                testApp = {
+                    state: null,
+                    aiManager: null,
+                    exportManager: null,
+                    performanceManager: null
+                };
+            }
+        });
+        
+        // ===== AI ТЕСТЫ =====
+        
+        async function testAIGeneration() {
+            const topic = document.getElementById('ai-topic').value || 'Тестовая тема';
+            const results = document.getElementById('ai-results');
+            
+            results.innerHTML = 'Тестирование AI генерации...';
+            
+            try {
+                if (!testApp || !testApp.aiManager) {
+                    throw new Error('AIManager не инициализирован');
+                }
+                
+                const startTime = performance.now();
+                
+                // Тестируем новую систему AI
+                const result = await testApp.aiManager.generateHighQualityCarousel(topic);
+                
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                results.innerHTML = `
+                    ✅ AI генерация успешна<br>
+                    📊 Время: ${duration}ms<br>
+                    📝 Слайдов: ${result.slides ? result.slides.length : 'N/A'}<br>
+                    🎯 Тема: ${topic}<br>
+                    🤖 Генератор: ${result.generatedBy || 'Unknown'}
+                `;
+                
+            } catch (error) {
+                results.innerHTML = `❌ Ошибка AI генерации: ${error.message}`;
+            }
+        }
+        
+        function testAILimits() {
+            const results = document.getElementById('ai-results');
+            
+            try {
+                if (!testApp || !testApp.aiManager) {
+                    throw new Error('AIManager не инициализирован');
+                }
+                
+                const canUseAI = testApp.aiManager.checkAIUsageLimits();
+                const userPlan = testApp.state ? testApp.state.getUserPlan() : 'FREE';
+                
+                // Получаем текущее использование
+                const today = new Date().toDateString();
+                const usageKey = `ai_usage_${today}`;
+                const todayUsage = parseInt(localStorage.getItem(usageKey) || '0');
+                
+                results.innerHTML = `
+                    📊 Статус лимитов AI:<br>
+                    👤 План: ${userPlan}<br>
+                    📈 Использовано сегодня: ${todayUsage}/3<br>
+                    ✅ Можно использовать: ${canUseAI ? 'Да' : 'Нет'}<br>
+                    📅 Дата: ${today}
+                `;
+                
+            } catch (error) {
+                results.innerHTML = `❌ Ошибка проверки лимитов: ${error.message}`;
+            }
+        }
+        
+        function testLoadingIndicator() {
+            try {
+                if (!testApp || !testApp.aiManager) {
+                    throw new Error('AIManager не инициализирован');
+                }
+                
+                // Показываем индикатор
+                testApp.aiManager.showLoadingIndicator('Тестирование индикатора...');
+                
+                // Скрываем через 3 секунды
+                setTimeout(() => {
+                    testApp.aiManager.hideLoadingIndicator();
+                    
+                    const results = document.getElementById('ai-results');
+                    results.innerHTML = '✅ Индикатор загрузки протестирован';
+                }, 3000);
+                
+            } catch (error) {
+                const results = document.getElementById('ai-results');
+                results.innerHTML = `❌ Ошибка теста индикатора: ${error.message}`;
+            }
+        }
+        
+        // ===== ЭКСПОРТ ТЕСТЫ =====
+        
+        function testExportLimits() {
+            const format = document.getElementById('export-format').value;
+            const quality = document.getElementById('export-quality').value;
+            const results = document.getElementById('export-results');
+            
+            try {
+                if (!testApp || !testApp.exportManager) {
+                    throw new Error('ExportManager не инициализирован');
+                }
+                
+                const canExport = testApp.exportManager.checkExportLimits(format, quality);
+                const userPlan = testApp.state ? testApp.state.getUserPlan() : 'FREE';
+                
+                results.innerHTML = `
+                    📊 Статус лимитов экспорта:<br>
+                    👤 План: ${userPlan}<br>
+                    📄 Формат: ${format}<br>
+                    🎯 Качество: ${quality}<br>
+                    ✅ Можно экспортировать: ${canExport ? 'Да' : 'Нет (нужен PRO)'}
+                `;
+                
+            } catch (error) {
+                results.innerHTML = `❌ Ошибка проверки лимитов экспорта: ${error.message}`;
+            }
+        }
+        
+        function testExportProgress() {
+            const results = document.getElementById('export-results');
+            
+            try {
+                if (!testApp || !testApp.exportManager) {
+                    throw new Error('ExportManager не инициализирован');
+                }
+                
+                results.innerHTML = 'Тестирование прогресса экспорта...';
+                
+                // Симулируем прогресс экспорта
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    testApp.exportManager.showExportProgress(progress);
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            testApp.exportManager.hideExportProgress();
+                            results.innerHTML = '✅ Прогресс экспорта протестирован';
+                        }, 1000);
+                    }
+                }, 200);
+                
+            } catch (error) {
+                results.innerHTML = `❌ Ошибка теста прогресса: ${error.message}`;
+            }
+        }
+        
+        function testUpgradeModal() {
+            const results = document.getElementById('export-results');
+            
+            try {
+                if (!testApp || !testApp.exportManager) {
+                    throw new Error('ExportManager не инициализирован');
+                }
+                
+                testApp.exportManager.showUpgradeModal();
+                results.innerHTML = '✅ Модал апгрейда показан';
+                
+            } catch (error) {
+                results.innerHTML = `❌ Ошибка показа модала: ${error.message}`;
+            }
+        }
+        
+        // ===== ПРОИЗВОДИТЕЛЬНОСТЬ ТЕСТЫ =====
+        
+        function testDebouncing() {
+            const results = document.getElementById('performance-results');
+            debounceTestCount = 0;
+            
+            results.innerHTML = 'Тестирование debouncing...';
+            
+            // Быстро вызываем функцию много раз
+            for (let i = 0; i < 10; i++) {
+                testApp.performanceManager.debounce('test-key', () => {
+                    debounceTestCount++;
+                    document.getElementById('debounce-count').textContent = debounceTestCount;
+                }, 500);
+            }
+            
+            setTimeout(() => {
+                results.innerHTML = `✅ Debouncing протестирован. Вызовов: ${debounceTestCount} (должно быть 1)`;
+            }, 600);
+        }
+        
+        function testDOMOptimization() {
+            const results = document.getElementById('performance-results');
+            results.innerHTML = 'Тестирование DOM оптимизации...';
+            
+            // Создаем тестовый элемент
+            const testElement = document.createElement('div');
+            testElement.style.position = 'absolute';
+            testElement.style.top = '-1000px';
+            document.body.appendChild(testElement);
+            
+            const startTime = performance.now();
+            
+            // Тестируем батчинг DOM операций
+            testApp.performanceManager.batchDOMUpdates(() => {
+                testApp.performanceManager.updateStylesOptimized(testElement, {
+                    width: '100px',
+                    height: '100px',
+                    background: 'red'
+                });
+                
+                testApp.performanceManager.updateClassesOptimized(testElement, ['test-class'], []);
+            });
+            
+            setTimeout(() => {
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                results.innerHTML = `✅ DOM оптимизация протестирована за ${duration}ms`;
+                
+                // Очищаем тестовый элемент
+                document.body.removeChild(testElement);
+            }, 100);
+        }
+        
+        function testAPISupport() {
+            const results = document.getElementById('performance-results');
+            
+            const apis = [
+                'requestAnimationFrame',
+                'IntersectionObserver',
+                'ResizeObserver',
+                'localStorage',
+                'canvas',
+                'webgl'
+            ];
+            
+            let supportedCount = 0;
+            const supportResults = [];
+            
+            apis.forEach(api => {
+                const supported = testApp.performanceManager.checkAPISupport(api);
+                if (supported) supportedCount++;
+                supportResults.push(`${api}: ${supported ? '✅' : '❌'}`);
+            });
+            
+            document.getElementById('api-support').textContent = `${supportedCount}/${apis.length}`;
+            
+            results.innerHTML = `
+                📊 Поддержка API:<br>
+                ${supportResults.join('<br>')}
+            `;
+        }
+        
+        function testMemoryUsage() {
+            const results = document.getElementById('performance-results');
+            
+            if ('memory' in performance) {
+                const memory = performance.memory;
+                const usedMB = Math.round(memory.usedJSHeapSize / 1048576);
+                const limitMB = Math.round(memory.jsHeapSizeLimit / 1048576);
+                const usagePercent = (usedMB / limitMB) * 100;
+                
+                document.getElementById('memory-usage').textContent = usedMB;
+                
+                results.innerHTML = `
+                    📊 Использование памяти:<br>
+                    💾 Использовано: ${usedMB} MB<br>
+                    🎯 Лимит: ${limitMB} MB<br>
+                    📈 Процент: ${usagePercent.toFixed(1)}%<br>
+                    ${usagePercent > 80 ? '⚠️ Высокое использование!' : '✅ Нормальное использование'}
+                `;
+            } else {
+                results.innerHTML = '❌ API памяти недоступно в этом браузере';
+            }
+        }
+        
+        // ===== МОНИТОРИНГ =====
+        
+        function startPerformanceMonitoring() {
+            // Мониторинг FPS
+            let frameCount = 0;
+            let lastTime = performance.now();
+            
+            function measureFPS(currentTime) {
+                frameCount++;
+                
+                if (currentTime - lastTime >= 1000) {
+                    const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                    document.getElementById('fps-counter').textContent = fps;
+                    
+                    frameCount = 0;
+                    lastTime = currentTime;
+                }
+                
+                requestAnimationFrame(measureFPS);
+            }
+            
+            requestAnimationFrame(measureFPS);
+            
+            // Периодическое обновление статистики
+            setInterval(() => {
+                if (testApp && testApp.performanceManager) {
+                    testApp.performanceManager.checkMemoryUsage();
+                }
+            }, 5000);
+        }
+        
+        function updateSystemStatus(status, message) {
+            const statusEl = document.getElementById('system-status');
+            const statusClass = `status-${status}`;
+            
+            statusEl.innerHTML = `
+                <div><span class="status-indicator ${statusClass}"></span>${message}</div>
+            `;
+        }
+    </script>
+</body>
+</html>

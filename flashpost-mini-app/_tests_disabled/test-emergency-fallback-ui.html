@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost Emergency Fallback UI Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .test-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(131, 58, 180, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .status-ok {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+        
+        .status-error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+        }
+        
+        .status-warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid #ff9800;
+            color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚨 FlashPost Emergency Fallback UI Test</h1>
+        <p>Этот тест демонстрирует работу Emergency Fallback UI системы FlashPost.</p>
+        
+        <div class="test-section">
+            <h2>📋 Test Scenarios</h2>
+            <p>Выберите сценарий для тестирования Emergency Fallback UI:</p>
+            
+            <button class="btn btn-danger" onclick="testRenderFailure()">
+                🚨 Simulate Render Failure
+            </button>
+            
+            <button class="btn btn-warning" onclick="testMissingModules()">
+                📦 Simulate Missing Modules
+            </button>
+            
+            <button class="btn btn-warning" onclick="testMissingDOM()">
+                🔍 Simulate Missing DOM
+            </button>
+            
+            <button class="btn btn-success" onclick="testDirectEmergencyUI()">
+                ✅ Show Emergency UI Directly
+            </button>
+            
+            <button class="btn" onclick="resetTest()">
+                🔄 Reset Test
+            </button>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 Test Status</h2>
+            <div id="testStatus">
+                <div class="status status-ok">✅ Test environment ready</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 Emergency UI Features</h2>
+            <p>Emergency Fallback UI должен показать:</p>
+            <ul>
+                <li>✅ Подтверждение что JavaScript работает</li>
+                <li>✅ Подтверждение что DOM доступен</li>
+                <li>🔄 Кнопка "Reload UI" для перезапуска интерфейса</li>
+                <li>🔧 Кнопка "Reset State" для сброса состояния</li>
+                <li>🚀 Кнопка "Force Reload" для полной перезагрузки</li>
+                <li>📊 Системная информация и статус модулей</li>
+                <li>⏰ Timestamp создания Emergency UI</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Подключаем модули FlashPost для тестирования -->
+    <script>
+        // Mock FlashPost modules для тестирования
+        
+        // Mock StateManager
+        class StateManager {
+            constructor() {
+                this.mode = 'start';
+            }
+            
+            getMode() {
+                return this.mode;
+            }
+            
+            getSlidesCount() {
+                return 0;
+            }
+        }
+        
+        // Mock Renderer
+        class Renderer {
+            constructor(state) {
+                this.state = state;
+            }
+            
+            render() {
+                throw new Error('Simulated render failure');
+            }
+        }
+        
+        // Mock Editor
+        class Editor {
+            constructor(state, renderer) {
+                this.state = state;
+                this.renderer = renderer;
+            }
+        }
+        
+        // Expose classes globally
+        window.StateManager = StateManager;
+        window.Renderer = Renderer;
+        window.Editor = Editor;
+        
+        // Mock FlashPostApp with Emergency Fallback UI
+        class FlashPostApp {
+            constructor() {
+                this.state = new StateManager();
+                this.renderer = new Renderer(this.state);
+                this.editor = new Editor(this.state, this.renderer);
+            }
+            
+            async init() {
+                console.log('🚀 FlashPostApp initialized for testing');
+            }
+            
+            checkModulesAvailable() {
+                return window.testModulesAvailable !== false;
+            }
+            
+            async initializeDefaultState() {
+                console.log('🔧 Default state initialized');
+            }
+            
+            bindUIEvents() {
+                console.log('🔗 UI events bound');
+            }
+            
+            async renderApp() {
+                console.log('🎨 renderApp() called');
+                
+                try {
+                    const app = document.getElementById('app');
+                    
+                    if (!app && window.testMissingDOM) {
+                        console.error('❌ #app element not found - activating emergency fallback');
+                        this.renderEmergencyFallbackUI();
+                        return;
+                    }
+                    
+                    const modulesAvailable = this.checkModulesAvailable();
+                    if (!modulesAvailable) {
+                        console.log('⚠️ Modules unavailable, activating emergency fallback UI');
+                        this.renderEmergencyFallbackUI();
+                        return;
+                    }
+                    
+                    if (window.testRenderFailure) {
+                        throw new Error('Simulated render failure for testing');
+                    }
+                    
+                    this.renderer.render();
+                    this.bindUIEvents();
+                    
+                    console.log('✅ App rendered successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Render error:', error);
+                    console.log('🚨 EMERGENCY: Main render failed, activating emergency fallback UI');
+                    this.renderEmergencyFallbackUI();
+                }
+            }
+            
+            // EMERGENCY FALLBACK UI - доказывает что JS жив и DOM доступен
+            renderEmergencyFallbackUI() {
+                console.log('🚨 EMERGENCY FALLBACK: Rendering emergency UI - JS is alive!');
+                
+                // Принудительно очищаем и создаем контейнер
+                document.body.innerHTML = '';
+                document.body.style.cssText = `
+                    margin: 0;
+                    padding: 0;
+                    min-height: 100vh;
+                    background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    color: white;
+                    display: flex !important;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                // Создаем emergency UI
+                const emergencyContainer = document.createElement('div');
+                emergencyContainer.style.cssText = `
+                    background: rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(20px);
+                    border-radius: 20px;
+                    padding: 40px;
+                    max-width: 600px;
+                    width: 90%;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    text-align: center;
+                `;
+                
+                emergencyContainer.innerHTML = `
+                    <div style="margin-bottom: 30px;">
+                        <h1 style="
+                            font-size: 32px;
+                            font-weight: 800;
+                            background: linear-gradient(45deg, #4CAF50 0%, #8BC34A 50%, #CDDC39 100%);
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                            margin-bottom: 10px;
+                        ">✅ FlashPost Emergency UI</h1>
+                        <p style="
+                            font-size: 18px;
+                            color: rgba(255, 255, 255, 0.9);
+                            font-weight: 600;
+                            margin-bottom: 10px;
+                        ">JavaScript is alive and DOM is accessible!</p>
+                        <p style="
+                            font-size: 14px;
+                            color: rgba(255, 255, 255, 0.7);
+                            margin-bottom: 0;
+                        ">Main UI failed to render, but core system is functional</p>
+                    </div>
+                    
+                    <div style="
+                        background: rgba(0, 0, 0, 0.2);
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin-bottom: 30px;
+                        text-align: left;
+                    ">
+                        <h3 style="
+                            color: #4CAF50;
+                            margin-bottom: 15px;
+                            font-size: 16px;
+                        ">🔍 System Status</h3>
+                        <div id="systemStatus" style="
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            line-height: 1.6;
+                            color: rgba(255, 255, 255, 0.8);
+                        "></div>
+                    </div>
+                    
+                    <div style="
+                        display: flex;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                        margin-bottom: 20px;
+                    ">
+                        <button id="reloadUIBtn" style="
+                            background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
+                            color: white;
+                            border: none;
+                            padding: 15px 25px;
+                            border-radius: 12px;
+                            font-size: 16px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+                        ">🔄 Reload UI</button>
+                        
+                        <button id="resetStateBtn" style="
+                            background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
+                            color: white;
+                            border: none;
+                            padding: 15px 25px;
+                            border-radius: 12px;
+                            font-size: 16px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+                        ">🔧 Reset State</button>
+                        
+                        <button id="forceReloadBtn" style="
+                            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+                            color: white;
+                            border: none;
+                            padding: 15px 25px;
+                            border-radius: 12px;
+                            font-size: 16px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                        ">🚀 Force Reload</button>
+                        
+                        <button onclick="location.reload()" style="
+                            background: linear-gradient(135deg, #9C27B0 0%, #673AB7 100%);
+                            color: white;
+                            border: none;
+                            padding: 15px 25px;
+                            border-radius: 12px;
+                            font-size: 16px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+                        ">🔙 Back to Test</button>
+                    </div>
+                    
+                    <div style="
+                        background: rgba(255, 193, 7, 0.1);
+                        border: 1px solid rgba(255, 193, 7, 0.3);
+                        border-radius: 8px;
+                        padding: 15px;
+                        margin-bottom: 20px;
+                    ">
+                        <p style="
+                            margin: 0;
+                            font-size: 14px;
+                            color: #FFC107;
+                            font-weight: 600;
+                        ">⚠️ Emergency Mode Active</p>
+                        <p style="
+                            margin: 5px 0 0 0;
+                            font-size: 12px;
+                            color: rgba(255, 255, 255, 0.8);
+                        ">The main FlashPost UI failed to initialize, but the emergency system is working.</p>
+                    </div>
+                    
+                    <div style="
+                        font-size: 12px;
+                        color: rgba(255, 255, 255, 0.5);
+                        border-top: 1px solid rgba(255, 255, 255, 0.1);
+                        padding-top: 15px;
+                    ">
+                        <p style="margin: 0;">🔒 Emergency Fallback UI v1.0</p>
+                        <p style="margin: 5px 0 0 0;">Timestamp: <span id="timestamp"></span></p>
+                    </div>
+                `;
+                
+                document.body.appendChild(emergencyContainer);
+                
+                // Обновляем системную информацию
+                this.updateEmergencySystemStatus();
+                
+                // Устанавливаем timestamp
+                document.getElementById('timestamp').textContent = new Date().toLocaleString();
+                
+                // Привязываем события кнопок
+                this.bindEmergencyUIEvents();
+                
+                console.log('✅ EMERGENCY FALLBACK: Emergency UI rendered successfully');
+            }
+            
+            // Обновление системного статуса в emergency UI
+            updateEmergencySystemStatus() {
+                const statusElement = document.getElementById('systemStatus');
+                if (!statusElement) return;
+                
+                const status = [];
+                
+                // Проверяем основные компоненты
+                status.push(`✅ JavaScript: Active`);
+                status.push(`✅ DOM: Accessible`);
+                status.push(`✅ Window: ${window.innerWidth}x${window.innerHeight}`);
+                status.push(`${window.PREVIEW_MODE ? '✅' : '❌'} Preview Mode: ${window.PREVIEW_MODE ? 'Active' : 'Inactive'}`);
+                status.push(`${window.Telegram?.WebApp ? '✅' : '⚠️'} Telegram WebApp: ${window.Telegram?.WebApp ? 'Available' : 'Mock'}`);
+                
+                // Проверяем модули
+                const modules = ['StateManager', 'Renderer', 'Editor', 'FlashPostApp'];
+                modules.forEach(module => {
+                    const available = typeof window[module] !== 'undefined';
+                    status.push(`${available ? '✅' : '❌'} ${module}: ${available ? 'Loaded' : 'Missing'}`);
+                });
+                
+                // Проверяем экземпляр приложения
+                status.push(`${window.flashPostApp ? '✅' : '❌'} App Instance: ${window.flashPostApp ? 'Created' : 'Missing'}`);
+                
+                // Проверяем localStorage
+                try {
+                    localStorage.setItem('test', 'test');
+                    localStorage.removeItem('test');
+                    status.push(`✅ LocalStorage: Available`);
+                } catch (e) {
+                    status.push(`❌ LocalStorage: Blocked`);
+                }
+                
+                statusElement.innerHTML = status.join('<br>');
+            }
+            
+            // Привязка событий для emergency UI
+            bindEmergencyUIEvents() {
+                // Кнопка Reload UI
+                const reloadUIBtn = document.getElementById('reloadUIBtn');
+                if (reloadUIBtn) {
+                    reloadUIBtn.addEventListener('click', () => {
+                        console.log('🔄 EMERGENCY: Attempting UI reload...');
+                        reloadUIBtn.textContent = '🔄 Reloading...';
+                        reloadUIBtn.disabled = true;
+                        
+                        setTimeout(() => {
+                            alert('✅ UI Reload button works! In real app, this would restart the UI.');
+                            reloadUIBtn.textContent = '🔄 Reload UI';
+                            reloadUIBtn.disabled = false;
+                        }, 1000);
+                    });
+                }
+                
+                // Кнопка Reset State
+                const resetStateBtn = document.getElementById('resetStateBtn');
+                if (resetStateBtn) {
+                    resetStateBtn.addEventListener('click', () => {
+                        console.log('🔧 EMERGENCY: Resetting application state...');
+                        resetStateBtn.textContent = '🔧 Resetting...';
+                        resetStateBtn.disabled = true;
+                        
+                        setTimeout(() => {
+                            // Обновляем статус
+                            this.updateEmergencySystemStatus();
+                            
+                            resetStateBtn.textContent = '✅ State Reset';
+                            setTimeout(() => {
+                                resetStateBtn.textContent = '🔧 Reset State';
+                                resetStateBtn.disabled = false;
+                            }, 1000);
+                            
+                            alert('✅ State Reset button works! Application state would be cleared.');
+                        }, 1000);
+                    });
+                }
+                
+                // Кнопка Force Reload
+                const forceReloadBtn = document.getElementById('forceReloadBtn');
+                if (forceReloadBtn) {
+                    forceReloadBtn.addEventListener('click', () => {
+                        console.log('🚀 EMERGENCY: Force reloading page...');
+                        forceReloadBtn.textContent = '🚀 Reloading...';
+                        forceReloadBtn.disabled = true;
+                        
+                        setTimeout(() => {
+                            location.reload(true);
+                        }, 500);
+                    });
+                }
+                
+                // Добавляем hover эффекты
+                [reloadUIBtn, resetStateBtn, forceReloadBtn].forEach(btn => {
+                    if (btn) {
+                        btn.addEventListener('mouseenter', () => {
+                            if (!btn.disabled) {
+                                btn.style.transform = 'translateY(-2px)';
+                                btn.style.boxShadow = btn.style.boxShadow.replace('0.3', '0.5');
+                            }
+                        });
+                        
+                        btn.addEventListener('mouseleave', () => {
+                            if (!btn.disabled) {
+                                btn.style.transform = 'translateY(0)';
+                                btn.style.boxShadow = btn.style.boxShadow.replace('0.5', '0.3');
+                            }
+                        });
+                    }
+                });
+            }
+        }
+        
+        window.FlashPostApp = FlashPostApp;
+        
+        // Test functions
+        function addStatus(message, type = 'ok') {
+            const statusDiv = document.getElementById('testStatus');
+            const statusElement = document.createElement('div');
+            statusElement.className = `status status-${type}`;
+            statusElement.textContent = message;
+            statusDiv.appendChild(statusElement);
+        }
+        
+        function testRenderFailure() {
+            addStatus('🚨 Testing render failure scenario...', 'warning');
+            window.testRenderFailure = true;
+            window.testModulesAvailable = true;
+            window.testMissingDOM = false;
+            
+            setTimeout(() => {
+                const app = new FlashPostApp();
+                app.renderApp();
+            }, 500);
+        }
+        
+        function testMissingModules() {
+            addStatus('📦 Testing missing modules scenario...', 'warning');
+            window.testRenderFailure = false;
+            window.testModulesAvailable = false;
+            window.testMissingDOM = false;
+            
+            setTimeout(() => {
+                const app = new FlashPostApp();
+                app.renderApp();
+            }, 500);
+        }
+        
+        function testMissingDOM() {
+            addStatus('🔍 Testing missing DOM scenario...', 'warning');
+            window.testRenderFailure = false;
+            window.testModulesAvailable = true;
+            window.testMissingDOM = true;
+            
+            setTimeout(() => {
+                const app = new FlashPostApp();
+                app.renderApp();
+            }, 500);
+        }
+        
+        function testDirectEmergencyUI() {
+            addStatus('✅ Showing Emergency UI directly...', 'ok');
+            
+            setTimeout(() => {
+                const app = new FlashPostApp();
+                app.renderEmergencyFallbackUI();
+            }, 500);
+        }
+        
+        function resetTest() {
+            location.reload();
+        }
+        
+        // Set PREVIEW_MODE for testing
+        window.PREVIEW_MODE = true;
+        
+        console.log('🧪 Emergency Fallback UI Test loaded');
+    </script>
+</body>
+</html>

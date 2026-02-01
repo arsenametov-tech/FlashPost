@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Test AI Slide Generation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%); 
+            color: #fff; 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .title { font-size: 32px; color: #ff6b35; margin-bottom: 10px; }
+        .subtitle { color: #888; }
+        .test-card { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border: 1px solid rgba(255,107,53,0.3); 
+        }
+        .btn { 
+            background: linear-gradient(45deg, #ff6b35, #f7931e); 
+            color: #000; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin: 10px; 
+            font-weight: bold; 
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .input { 
+            width: 100%; 
+            background: rgba(255,255,255,0.1); 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 8px; 
+            padding: 12px; 
+            color: white; 
+            margin: 10px 0; 
+        }
+        .log { 
+            background: #000; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            padding: 15px; 
+            font-family: monospace; 
+            font-size: 12px; 
+            max-height: 400px; 
+            overflow-y: auto; 
+            margin: 10px 0; 
+        }
+        .slide-preview { 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-left: 4px solid #ff6b35; 
+        }
+        .slide-title { color: #ff6b35; font-weight: bold; margin-bottom: 8px; }
+        .slide-text { line-height: 1.4; white-space: pre-line; }
+        .status { padding: 10px; border-radius: 8px; margin: 10px 0; font-weight: bold; }
+        .success { background: rgba(0,255,136,0.2); border: 2px solid #00ff88; }
+        .error { background: rgba(255,68,68,0.2); border: 2px solid #ff4444; }
+        .info { background: rgba(0,136,255,0.2); border: 2px solid #0088ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🤖 AI Slide Generation Test</h1>
+            <p class="subtitle">Testing AI slide generation without UI modifications</p>
+        </div>
+        
+        <div class="test-card">
+            <h2>🎯 AI Generation Test</h2>
+            <input type="text" id="topicInput" class="input" placeholder="Введите тему для генерации (например: 'Продуктивность')" value="Продуктивность">
+            <button class="btn" onclick="testAIGeneration()">🚀 Generate AI Slides</button>
+            <button class="btn" onclick="testKeywordExtraction()">🔍 Test Keywords Only</button>
+            <button class="btn" onclick="clearResults()">🧹 Clear Results</button>
+        </div>
+
+        <div class="test-card">
+            <h2>📊 Generation Results</h2>
+            <div id="status" class="status info">Ready to generate slides...</div>
+            <div id="slidesContainer"></div>
+        </div>
+
+        <div class="test-card">
+            <h2>📋 Console Log</h2>
+            <div id="consoleLog" class="log">AI Slide Generation Test ready...<br></div>
+        </div>
+    </div>
+
+    <!-- Load modules -->
+    <script src="src/state.js"></script>
+    <script src="src/ai.js"></script>
+
+    <script>
+        // Initialize managers
+        let stateManager, aiManager;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icons = { error: '❌', success: '✅', warning: '⚠️', info: 'ℹ️' };
+            const colors = { error: '#ff4444', success: '#00ff88', warning: '#ffc107', info: '#0088ff' };
+            
+            const logElement = document.getElementById('consoleLog');
+            if (logElement) {
+                logElement.innerHTML += `<span style="color: ${colors[type]}">[${timestamp}] ${icons[type]} ${message}</span><br>`;
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+            
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = `status ${type}`;
+            }
+        }
+
+        function displaySlides(slides) {
+            const container = document.getElementById('slidesContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            slides.forEach((slide, index) => {
+                const slideEl = document.createElement('div');
+                slideEl.className = 'slide-preview';
+                
+                // Отображаем ключевые слова
+                const keywordsHtml = slide.autoKeywords && slide.autoKeywords.length > 0 
+                    ? `<div style="margin-top: 10px; padding: 8px; background: rgba(74, 144, 226, 0.2); border-radius: 6px;">
+                         <strong>🔍 Ключевые слова (${slide.autoKeywords.length}):</strong> 
+                         <span style="color: #4A90E2;">${slide.autoKeywords.join(', ')}</span>
+                       </div>`
+                    : '<div style="margin-top: 10px; color: #888;">Ключевые слова не найдены</div>';
+                
+                slideEl.innerHTML = `
+                    <div class="slide-title">${index + 1}. ${slide.title}</div>
+                    <div class="slide-text">${slide.text}</div>
+                    ${keywordsHtml}
+                `;
+                container.appendChild(slideEl);
+            });
+        }
+
+        async function testKeywordExtraction() {
+            const sampleTexts = [
+                "95% людей в сфере продуктивности совершают одну критическую ошибку. Эта ошибка стоит им месяцы потраченного времени и тысячи рублей. Сегодня я покажу, как её избежать и получить результат в 3 раза быстрее.",
+                "Большинство новичков в бизнесе начинают изучение хаотично. Они читают статьи, смотрят видео, но не видят прогресса. Причина: отсутствие системного подхода и четкого плана.",
+                "Правильный подход к изучению даёт огромные преимущества: экономия времени в 5 раз, быстрое достижение первых результатов, уверенность в своих действиях."
+            ];
+
+            updateStatus('Testing keyword extraction...', 'info');
+            log('Testing keyword extraction for sample texts', 'info');
+
+            try {
+                for (let i = 0; i < sampleTexts.length; i++) {
+                    const text = sampleTexts[i];
+                    log(`Testing text ${i + 1}: "${text.substring(0, 50)}..."`, 'info');
+                    
+                    const keywords = await aiManager.extractSlideKeywords(text);
+                    log(`Extracted ${keywords.length} keywords: ${keywords.join(', ')}`, 'success');
+                }
+                
+                updateStatus('✅ Keyword extraction test completed!', 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ Keyword test failed: ${error.message}`, 'error');
+                log(`Keyword extraction test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAIGeneration() {
+            const topic = document.getElementById('topicInput').value.trim();
+            
+            if (!topic) {
+                updateStatus('Please enter a topic', 'error');
+                log('No topic provided', 'error');
+                return;
+            }
+
+            try {
+                updateStatus('Initializing AI generation...', 'info');
+                log('Starting AI slide generation test', 'info');
+                log(`Topic: ${topic}`, 'info');
+
+                // Test AI generation
+                updateStatus('Generating structured content...', 'info');
+                log('Calling aiManager.generateAISlides()', 'info');
+                
+                const result = await aiManager.generateAISlides(topic);
+                
+                log('AI generation result:', 'info');
+                log(JSON.stringify(result, null, 2), 'info');
+                
+                if (result && result.success) {
+                    updateStatus(`✅ Generated ${result.slidesCount} slides successfully!`, 'success');
+                    log(`AI generation successful: ${result.slidesCount} slides created`, 'success');
+                    
+                    // Get slides from state manager
+                    const slides = stateManager.getAllSlides();
+                    log(`Retrieved ${slides.length} slides from StateManager`, 'success');
+                    
+                    // Display slides
+                    displaySlides(slides);
+                    
+                    // Log slide details with keywords
+                    slides.forEach((slide, index) => {
+                        const keywordCount = slide.autoKeywords ? slide.autoKeywords.length : 0;
+                        const keywords = slide.autoKeywords ? slide.autoKeywords.join(', ') : 'none';
+                        log(`Slide ${index + 1}: ${slide.title} (${slide.text.length} chars, ${keywordCount} keywords: ${keywords})`, 'info');
+                    });
+                    
+                } else {
+                    throw new Error('AI generation returned unsuccessful result or invalid format');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Generation failed: ${error.message}`, 'error');
+                log(`AI generation failed: ${error.message}`, 'error');
+                log(`Full error:`, 'error');
+                log(error.stack || error.toString(), 'error');
+                console.error('Full error object:', error);
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('slidesContainer').innerHTML = '';
+            document.getElementById('consoleLog').innerHTML = 'Console cleared...<br>';
+            updateStatus('Ready to generate slides...', 'info');
+            
+            // Clear state manager
+            if (stateManager) {
+                stateManager.clearProject();
+                log('Project cleared', 'info');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            try {
+                // Initialize StateManager
+                stateManager = new StateManager();
+                log('StateManager initialized', 'success');
+                
+                // Initialize AIManager with StateManager
+                aiManager = new AIManager(stateManager);
+                log('AIManager initialized', 'success');
+                
+                // Set up callbacks
+                stateManager.setSlideChangeCallback((data) => {
+                    log(`Slide change callback: ${data.action}`, 'info');
+                });
+                
+                log('AI Slide Generation Test ready', 'success');
+                updateStatus('Ready to generate slides...', 'info');
+                
+            } catch (error) {
+                log(`Initialization error: ${error.message}`, 'error');
+                updateStatus('Initialization failed', 'error');
+                console.error('Initialization error:', error);
+            }
+        });
+
+        // Listen for slide generation events
+        document.addEventListener('slidesGenerated', (event) => {
+            log(`Slides generated event received: ${event.detail.slides.length} slides`, 'success');
+        });
+    </script>
+</body>
+</html>

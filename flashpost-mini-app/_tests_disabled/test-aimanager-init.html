@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIManager Initialization Test</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 2em;
+        }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .results {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e1e5e9;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 5px 10px;
+            margin-bottom: 3px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log-info { background: #e3f2fd; color: #1976d2; }
+        .log-success { background: #e8f5e8; color: #2e7d32; }
+        .log-error { background: #ffebee; color: #d32f2f; }
+        .log-warning { background: #fff3e0; color: #f57c00; }
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .status-success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        .status-error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 AIManager Initialization Test</h1>
+            <p>Диагностика проблем с инициализацией AIManager</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🚀 Тесты инициализации</h2>
+            
+            <button class="btn" onclick="testModuleLoading()">📦 Тест загрузки модулей</button>
+            <button class="btn" onclick="testStateManager()">🗃️ Тест StateManager</button>
+            <button class="btn" onclick="testAIManager()">🤖 Тест AIManager</button>
+            <button class="btn" onclick="testFullApp()">🚀 Тест полного приложения</button>
+            <button class="btn" onclick="clearResults()">🧹 Очистить</button>
+
+            <div id="status"></div>
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <!-- Подключаем модули в правильном порядке -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        // Тест загрузки модулей
+        function testModuleLoading() {
+            log('info', '📦 Начинаем тест загрузки модулей...');
+            
+            const modules = [
+                { name: 'StateManager', class: window.StateManager },
+                { name: 'Renderer', class: window.Renderer },
+                { name: 'Editor', class: window.Editor },
+                { name: 'DragManager', class: window.DragManager },
+                { name: 'ExportManager', class: window.ExportManager },
+                { name: 'AIManager', class: window.AIManager },
+                { name: 'TemplateManager', class: window.TemplateManager },
+                { name: 'FlashPostApp', class: window.FlashPostApp }
+            ];
+
+            let allLoaded = true;
+
+            modules.forEach(module => {
+                if (typeof module.class === 'function') {
+                    log('success', `✅ ${module.name} загружен`);
+                } else {
+                    log('error', `❌ ${module.name} НЕ ЗАГРУЖЕН`);
+                    allLoaded = false;
+                }
+            });
+
+            if (allLoaded) {
+                updateStatus('success', '✅ Все модули загружены успешно');
+            } else {
+                updateStatus('error', '❌ Некоторые модули не загружены');
+            }
+        }
+
+        // Тест StateManager
+        function testStateManager() {
+            log('info', '🗃️ Начинаем тест StateManager...');
+            
+            try {
+                const stateManager = new StateManager();
+                log('success', '✅ StateManager создан успешно');
+                
+                // Проверяем основные методы
+                if (typeof stateManager.getProject === 'function') {
+                    log('success', '✅ Метод getProject доступен');
+                } else {
+                    log('error', '❌ Метод getProject недоступен');
+                }
+
+                if (typeof stateManager.createSlide === 'function') {
+                    log('success', '✅ Метод createSlide доступен');
+                } else {
+                    log('error', '❌ Метод createSlide недоступен');
+                }
+
+                updateStatus('success', '✅ StateManager работает корректно');
+                
+            } catch (error) {
+                log('error', `❌ Ошибка создания StateManager: ${error.message}`);
+                updateStatus('error', `❌ StateManager не работает: ${error.message}`);
+                console.error('StateManager error:', error);
+            }
+        }
+
+        // Тест AIManager
+        function testAIManager() {
+            log('info', '🤖 Начинаем тест AIManager...');
+            
+            try {
+                // Сначала создаем StateManager
+                const stateManager = new StateManager();
+                log('success', '✅ StateManager для AIManager создан');
+                
+                // Создаем AIManager
+                const aiManager = new AIManager(stateManager);
+                log('success', '✅ AIManager создан успешно');
+                
+                // Проверяем основные свойства
+                if (aiManager.state) {
+                    log('success', '✅ Свойство state установлено');
+                } else {
+                    log('error', '❌ Свойство state не установлено');
+                }
+
+                if (typeof aiManager.isAvailable === 'function') {
+                    log('success', '✅ Метод isAvailable доступен');
+                    
+                    const available = aiManager.isAvailable();
+                    log('info', `ℹ️ AI доступность: ${available}`);
+                } else {
+                    log('error', '❌ Метод isAvailable недоступен');
+                }
+
+                if (typeof aiManager.generateHighQualityCarousel === 'function') {
+                    log('success', '✅ Метод generateHighQualityCarousel доступен');
+                } else {
+                    log('error', '❌ Метод generateHighQualityCarousel недоступен');
+                }
+
+                if (typeof aiManager.generateProModeCarousel === 'function') {
+                    log('success', '✅ Метод generateProModeCarousel доступен');
+                } else {
+                    log('error', '❌ Метод generateProModeCarousel недоступен');
+                }
+
+                updateStatus('success', '✅ AIManager работает корректно');
+                
+            } catch (error) {
+                log('error', `❌ Ошибка создания AIManager: ${error.message}`);
+                updateStatus('error', `❌ AIManager не работает: ${error.message}`);
+                console.error('AIManager error:', error);
+            }
+        }
+
+        // Тест полного приложения
+        function testFullApp() {
+            log('info', '🚀 Начинаем тест полного приложения...');
+            
+            try {
+                // Создаем приложение
+                const app = new FlashPostApp();
+                log('success', '✅ FlashPostApp создан успешно');
+                
+                // Проверяем, что aiManager инициализирован
+                if (app.aiManager) {
+                    log('success', '✅ app.aiManager инициализирован');
+                    
+                    if (typeof app.aiManager.isAvailable === 'function') {
+                        const available = app.aiManager.isAvailable();
+                        log('info', `ℹ️ AI доступность в приложении: ${available}`);
+                    }
+                    
+                    if (typeof app.handleAIGenerate === 'function') {
+                        log('success', '✅ Метод handleAIGenerate доступен');
+                    } else {
+                        log('error', '❌ Метод handleAIGenerate недоступен');
+                    }
+                    
+                } else {
+                    log('error', '❌ app.aiManager НЕ ИНИЦИАЛИЗИРОВАН');
+                }
+
+                // Проверяем глобальные переменные
+                if (window.aiManager) {
+                    log('success', '✅ window.aiManager установлен');
+                } else {
+                    log('warning', '⚠️ window.aiManager не установлен');
+                }
+
+                updateStatus('success', '✅ Полное приложение работает корректно');
+                
+            } catch (error) {
+                log('error', `❌ Ошибка создания приложения: ${error.message}`);
+                updateStatus('error', `❌ Приложение не работает: ${error.message}`);
+                console.error('App error:', error);
+            }
+        }
+
+        // Обновление статуса
+        function updateStatus(type, message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status status-${type}`;
+            statusDiv.textContent = message;
+        }
+
+        // Логирование
+        function log(type, message) {
+            const resultsDiv = document.getElementById('results');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // Очистка результатов
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+            log('info', '🧹 Результаты очищены');
+        }
+
+        // Автоматический тест при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            log('info', '🚀 Страница загружена, начинаем автоматическую диагностику...');
+            
+            setTimeout(() => {
+                testModuleLoading();
+            }, 500);
+        });
+
+        // Обработка ошибок
+        window.addEventListener('error', function(event) {
+            log('error', `❌ JavaScript ошибка: ${event.error.message}`);
+            console.error('JavaScript ошибка:', event.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            log('error', `❌ Необработанная ошибка промиса: ${event.reason}`);
+            console.error('Необработанная ошибка промиса:', event.reason);
+        });
+    </script>
+</body>
+</html>

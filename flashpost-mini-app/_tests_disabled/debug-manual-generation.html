@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Manual Generation</title>
+    <style>
+        html, body { margin: 0; padding: 0; height: 100%; background: #0f0f14; color: #fff; font-family: Arial; }
+        .container { padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .section { background: rgba(255, 255, 255, 0.1); padding: 20px; margin: 15px 0; border-radius: 10px; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .error { background: #5f1a1a; border: 2px solid #dc3545; }
+        .success { background: #1a5f1a; border: 2px solid #28a745; }
+        .log { background: #2a2a2a; border: 1px solid #444; border-radius: 5px; padding: 10px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; margin: 10px 0; }
+        .input { width: 100%; padding: 10px; margin: 10px 0; background: rgba(255,255,255,0.1); border: 1px solid #444; border-radius: 5px; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Debug Manual Generation</h1>
+        
+        <div class="section">
+            <h3>🔍 Диагностика ошибок</h3>
+            <button class="btn" onclick="checkModules()">Проверить модули</button>
+            <button class="btn" onclick="testStateManager()">Тест StateManager</button>
+            <button class="btn" onclick="testGenerateMethod()">Тест generateManualSlides</button>
+            <button class="btn" onclick="testFullGeneration()">Полный тест генерации</button>
+            <div id="diagnosticLog" class="log"></div>
+        </div>
+
+        <div class="section">
+            <h3>📝 Ручной тест генерации</h3>
+            <input type="text" id="testTopic" class="input" placeholder="Введите тему" value="Как начать инвестировать">
+            <button class="btn" onclick="manualTest()">Тест с темой</button>
+            <div id="manualLog" class="log"></div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Результаты</h3>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <!-- Перехват ошибок -->
+    <script>
+        // Глобальный перехват ошибок
+        window.addEventListener('error', (e) => {
+            logError(`❌ JavaScript Error: ${e.message} в ${e.filename}:${e.lineno}`);
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+            logError(`❌ Unhandled Promise Rejection: ${e.reason}`);
+        });
+
+        function logDiagnostic(message) {
+            const log = document.getElementById('diagnosticLog');
+            log.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        function logManual(message) {
+            const log = document.getElementById('manualLog');
+            log.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        function logError(message) {
+            logDiagnostic(message);
+            logManual(message);
+        }
+
+        function checkModules() {
+            logDiagnostic('🔍 Проверка загрузки модулей...');
+            
+            const requiredClasses = [
+                'StateManager', 'Renderer', 'Editor', 
+                'DragManager', 'ExportManager', 'AIManager', 
+                'TemplateManager', 'FlashPostApp'
+            ];
+            
+            let loadedClasses = [];
+            let missingClasses = [];
+            
+            requiredClasses.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    loadedClasses.push(className);
+                    logDiagnostic(`✅ ${className}: загружен`);
+                } else {
+                    missingClasses.push(className);
+                    logDiagnostic(`❌ ${className}: НЕ найден`);
+                }
+            });
+            
+            if (missingClasses.length === 0) {
+                logDiagnostic('✅ Все модули загружены успешно');
+            } else {
+                logDiagnostic(`❌ Отсутствуют модули: ${missingClasses.join(', ')}`);
+            }
+        }
+
+        function testStateManager() {
+            logDiagnostic('🧪 Тестирование StateManager...');
+            
+            try {
+                const state = new StateManager();
+                logDiagnostic('✅ StateManager создан');
+                
+                // Тест методов
+                state.clearProject();
+                logDiagnostic('✅ clearProject() работает');
+                
+                const slideCount = state.getSlidesCount();
+                logDiagnostic(`✅ getSlidesCount(): ${slideCount}`);
+                
+                state.setMode('start');
+                logDiagnostic('✅ setMode() работает');
+                
+                const mode = state.getMode();
+                logDiagnostic(`✅ getMode(): ${mode}`);
+                
+            } catch (error) {
+                logDiagnostic(`❌ Ошибка StateManager: ${error.message}`);
+            }
+        }
+
+        function testGenerateMethod() {
+            logDiagnostic('🧪 Тестирование generateManualSlides...');
+            
+            try {
+                const app = new FlashPostApp();
+                logDiagnostic('✅ FlashPostApp создан');
+                
+                if (typeof app.generateManualSlides === 'function') {
+                    logDiagnostic('✅ Метод generateManualSlides найден');
+                    
+                    const testTopic = 'Тестовая тема';
+                    const slides = app.generateManualSlides(testTopic);
+                    
+                    logDiagnostic(`✅ Сгенерировано ${slides.length} слайдов`);
+                    
+                    // Проверяем структуру первого слайда
+                    if (slides.length > 0) {
+                        const firstSlide = slides[0];
+                        logDiagnostic(`✅ Первый слайд: ${firstSlide.title}`);
+                        logDiagnostic(`✅ Подзаголовок: ${firstSlide.subtitle}`);
+                        logDiagnostic(`✅ Текстовых блоков: ${firstSlide.textBlocks.length}`);
+                        logDiagnostic(`✅ Цвет фона: ${firstSlide.background.color}`);
+                    }
+                    
+                } else {
+                    logDiagnostic('❌ Метод generateManualSlides НЕ найден');
+                }
+                
+            } catch (error) {
+                logDiagnostic(`❌ Ошибка тестирования метода: ${error.message}`);
+                logDiagnostic(`❌ Stack: ${error.stack}`);
+            }
+        }
+
+        function testFullGeneration() {
+            logDiagnostic('🧪 Полный тест генерации...');
+            
+            try {
+                const app = new FlashPostApp();
+                logDiagnostic('✅ FlashPostApp инициализирован');
+                
+                // Симулируем DOM элементы
+                const mockInput = document.createElement('input');
+                mockInput.id = 'topicInput';
+                mockInput.value = 'Тестовая тема для полного теста';
+                document.body.appendChild(mockInput);
+                
+                logDiagnostic('✅ Mock DOM элементы созданы');
+                
+                // Тестируем handleGenerate
+                if (typeof app.handleGenerate === 'function') {
+                    logDiagnostic('✅ Метод handleGenerate найден');
+                    
+                    // Вызываем генерацию
+                    app.handleGenerate();
+                    logDiagnostic('✅ handleGenerate() вызван без ошибок');
+                    
+                } else {
+                    logDiagnostic('❌ Метод handleGenerate НЕ найден');
+                }
+                
+                // Убираем mock элементы
+                document.body.removeChild(mockInput);
+                
+            } catch (error) {
+                logDiagnostic(`❌ Ошибка полного теста: ${error.message}`);
+                logDiagnostic(`❌ Stack: ${error.stack}`);
+            }
+        }
+
+        function manualTest() {
+            const topic = document.getElementById('testTopic').value.trim();
+            
+            if (!topic) {
+                logManual('❌ Введите тему для теста');
+                return;
+            }
+            
+            logManual(`🚀 Начинаем ручной тест с темой: "${topic}"`);
+            
+            try {
+                // Создаем приложение
+                const app = new FlashPostApp();
+                logManual('✅ Приложение создано');
+                
+                // Создаем mock input
+                let mockInput = document.getElementById('topicInput');
+                if (!mockInput) {
+                    mockInput = document.createElement('textarea');
+                    mockInput.id = 'topicInput';
+                    document.body.appendChild(mockInput);
+                }
+                mockInput.value = topic;
+                
+                logManual('✅ Mock input создан');
+                
+                // Вызываем генерацию
+                app.handleGenerate();
+                logManual('✅ Генерация запущена');
+                
+                // Проверяем результат через некоторое время
+                setTimeout(() => {
+                    const slideCount = app.state.getSlidesCount();
+                    logManual(`📊 Результат: ${slideCount} слайдов в проекте`);
+                    
+                    if (slideCount > 0) {
+                        logManual('✅ Генерация прошла успешно!');
+                        
+                        // Показываем результаты
+                        const results = document.getElementById('results');
+                        results.innerHTML = `
+                            <h4>✅ Успешная генерация!</h4>
+                            <p><strong>Тема:</strong> ${topic}</p>
+                            <p><strong>Слайдов создано:</strong> ${slideCount}</p>
+                            <p><strong>Режим:</strong> ${app.state.getMode()}</p>
+                        `;
+                    } else {
+                        logManual('❌ Слайды не созданы');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                logManual(`❌ Ошибка ручного теста: ${error.message}`);
+                logManual(`❌ Stack: ${error.stack}`);
+            }
+        }
+
+        // Автозапуск диагностики
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                logDiagnostic('🚀 Автодиагностика запущена');
+                checkModules();
+            }, 1000);
+        });
+    </script>
+
+    <!-- Модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Простой тест навигации</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        :root {
+            --tg-bg: #ffffff;
+            --tg-text: #000000;
+            --primary: #833ab4;
+        }
+        
+        .test-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .test-btn {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .test-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .status {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-panel">
+        <h3>🧪 Тест навигации</h3>
+        <button class="test-btn" onclick="testCarousel()">1. Показать карусель</button>
+        <button class="test-btn" onclick="testEditor()">2. Открыть редактор</button>
+        <button class="test-btn" onclick="testSaveExit()">3. Готово (из редактора)</button>
+        <div class="status" id="status">Готов к тестированию</div>
+    </div>
+
+    <div id="app">
+        <div style="padding: 40px; text-align: center;">
+            <h2>Загрузка...</h2>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация
+        const app = new FlashPostApp();
+        
+        // Тестовые данные
+        app.slides = [
+            {
+                title: "Hook",
+                text: "🔥 Первый слайд\n\nТестируем навигацию между состояниями."
+            },
+            {
+                title: "Problem", 
+                text: "❌ Второй слайд\n\nПроверяем переход из редактора в просмотр."
+            },
+            {
+                title: "Solution",
+                text: "✅ Третий слайд\n\nПроверяем сохранение состояния."
+            }
+        ];
+        
+        app.initializeSlideStyles();
+        
+        // Добавляем Instagram для тестирования
+        const instagramInput = document.createElement('input');
+        instagramInput.id = 'instagramInput';
+        instagramInput.value = '@test_account';
+        instagramInput.style.display = 'none';
+        document.body.appendChild(instagramInput);
+        
+        function updateStatus(message, type = '') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+        
+        function testCarousel() {
+            try {
+                console.log('🧪 Тестируем showCarousel()');
+                app.showCarousel();
+                updateStatus('✅ Карусель показана', 'success');
+                
+                // Проверяем, что элементы созданы
+                setTimeout(() => {
+                    const carouselSection = document.getElementById('carouselSection');
+                    if (carouselSection) {
+                        updateStatus('✅ Карусель успешно отрендерена', 'success');
+                    } else {
+                        updateStatus('❌ Карусель не найдена в DOM', 'error');
+                    }
+                }, 200);
+                
+            } catch (error) {
+                console.error('❌ Ошибка в showCarousel():', error);
+                updateStatus(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        function testEditor() {
+            try {
+                console.log('🧪 Тестируем openEditor()');
+                app.openEditor();
+                updateStatus('✅ Редактор открыт', 'success');
+                
+                // Проверяем, что элементы созданы
+                setTimeout(() => {
+                    const editorSection = document.getElementById('editorSection');
+                    if (editorSection) {
+                        updateStatus('✅ Редактор успешно отрендерен', 'success');
+                    } else {
+                        updateStatus('❌ Редактор не найден в DOM', 'error');
+                    }
+                }, 200);
+                
+            } catch (error) {
+                console.error('❌ Ошибка в openEditor():', error);
+                updateStatus(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        function testSaveExit() {
+            try {
+                console.log('🧪 Тестируем saveAndExit()');
+                app.saveAndExit();
+                updateStatus('✅ Сохранение и выход выполнены', 'success');
+                
+                // Проверяем, что вернулись к карусели
+                setTimeout(() => {
+                    const carouselSection = document.getElementById('carouselSection');
+                    const editorSection = document.getElementById('editorSection');
+                    
+                    if (carouselSection && !editorSection) {
+                        updateStatus('✅ Успешно вернулись к карусели', 'success');
+                    } else if (editorSection) {
+                        updateStatus('❌ Остались в редакторе', 'error');
+                    } else {
+                        updateStatus('❌ Неизвестное состояние', 'error');
+                    }
+                }, 200);
+                
+            } catch (error) {
+                console.error('❌ Ошибка в saveAndExit():', error);
+                updateStatus(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+        
+        // Перехватываем ошибки
+        window.addEventListener('error', (e) => {
+            console.error('🚨 Глобальная ошибка:', e);
+            updateStatus(`🚨 Глобальная ошибка: ${e.message}`, 'error');
+        });
+        
+        // Автоматически показываем карусель через секунду
+        setTimeout(() => {
+            console.log('🚀 Автоматически показываем карусель...');
+            testCarousel();
+        }, 1000);
+        
+        console.log('✅ Простой тест навигации готов');
+    </script>
+</body>
+</html>

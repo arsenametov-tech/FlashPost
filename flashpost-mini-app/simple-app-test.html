@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple App Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #111;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        #app {
+            background: #111;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .test-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #833ab4;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+        
+        .info {
+            background: rgba(0, 170, 255, 0.2);
+            color: #00aaff;
+            border: 1px solid #00aaff;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="test-box">
+            <h1>🚀 APP WORKS</h1>
+            <p>Простейший тест приложения</p>
+            
+            <div class="status success">
+                ✅ HTML загружен
+            </div>
+            
+            <div class="status success">
+                ✅ CSS применен
+            </div>
+            
+            <div class="status success" id="jsStatus">
+                ⏳ Проверяем JavaScript...
+            </div>
+            
+            <div class="status info" id="backgroundStatus">
+                🎨 Проверяем фоны...
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Простейший JavaScript тест
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('✅ JavaScript работает');
+            
+            // Обновляем статус JS
+            const jsStatus = document.getElementById('jsStatus');
+            jsStatus.textContent = '✅ JavaScript работает';
+            jsStatus.className = 'status success';
+            
+            // Проверяем фоны
+            const body = document.body;
+            const app = document.getElementById('app');
+            
+            const bodyBg = window.getComputedStyle(body).backgroundColor;
+            const appBg = window.getComputedStyle(app).backgroundColor;
+            
+            console.log('Body background:', bodyBg);
+            console.log('App background:', appBg);
+            
+            const backgroundStatus = document.getElementById('backgroundStatus');
+            
+            const isBodyDark = bodyBg === 'rgb(17, 17, 17)' || bodyBg.includes('17, 17, 17');
+            const isAppDark = appBg === 'rgb(17, 17, 17)' || appBg.includes('17, 17, 17');
+            
+            if (isBodyDark && isAppDark) {
+                backgroundStatus.textContent = '✅ Фоны темные (правильно)';
+                backgroundStatus.className = 'status success';
+            } else {
+                backgroundStatus.textContent = '❌ Фоны светлые (проблема!)';
+                backgroundStatus.className = 'status error';
+                backgroundStatus.style.background = 'rgba(255, 0, 0, 0.2)';
+                backgroundStatus.style.color = '#ff0000';
+                backgroundStatus.style.border = '1px solid #ff0000';
+            }
+            
+            // Добавляем информацию о computed styles
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'status info';
+            infoDiv.innerHTML = `
+                <strong>Computed Styles:</strong><br>
+                Body: ${bodyBg}<br>
+                App: ${appBg}
+            `;
+            document.querySelector('.test-box').appendChild(infoDiv);
+        });
+        
+        // Проверяем ошибки
+        window.addEventListener('error', (event) => {
+            console.error('❌ JavaScript Error:', event.message);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'status';
+            errorDiv.style.background = 'rgba(255, 0, 0, 0.2)';
+            errorDiv.style.color = '#ff0000';
+            errorDiv.style.border = '1px solid #ff0000';
+            errorDiv.textContent = `❌ Error: ${event.message}`;
+            document.querySelector('.test-box').appendChild(errorDiv);
+        });
+    </script>
+</body>
+</html>

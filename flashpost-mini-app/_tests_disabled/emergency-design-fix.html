@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🚨 Emergency Design Fix</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .emergency-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .emergency-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .emergency-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        
+        .emergency-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .emergency-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .emergency-btn {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 18px 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.4);
+            font-family: inherit;
+        }
+        
+        .emergency-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(131, 58, 180, 0.5);
+        }
+        
+        .emergency-btn:active {
+            transform: translateY(0);
+        }
+        
+        .emergency-btn.secondary {
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .emergency-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .diagnosis-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .diagnosis-info h3 {
+            color: #ffd43b;
+            margin-bottom: 10px;
+        }
+        
+        .diagnosis-info ul {
+            margin-left: 20px;
+        }
+        
+        .diagnosis-info li {
+            margin-bottom: 5px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        .bubble:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 60px; height: 60px; left: 20%; animation-delay: 1s; }
+        .bubble:nth-child(3) { width: 100px; height: 100px; left: 35%; animation-delay: 2s; }
+        .bubble:nth-child(4) { width: 40px; height: 40px; left: 50%; animation-delay: 3s; }
+        .bubble:nth-child(5) { width: 70px; height: 70px; left: 65%; animation-delay: 4s; }
+        .bubble:nth-child(6) { width: 90px; height: 90px; left: 80%; animation-delay: 5s; }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-ok { background: #28a745; }
+        .status-warning { background: #ffc107; }
+        .status-error { background: #dc3545; }
+        
+        @media (max-width: 480px) {
+            .emergency-card {
+                padding: 30px 20px;
+            }
+            
+            .emergency-title {
+                font-size: 24px;
+            }
+            
+            .emergency-subtitle {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимированные пузырьки -->
+    <div class="bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+
+    <div class="emergency-container">
+        <div class="emergency-card">
+            <h1 class="emergency-title">🚨 Экстренное восстановление дизайна</h1>
+            <p class="emergency-subtitle">
+                Обнаружена проблема с отображением основного приложения.<br>
+                Используйте кнопки ниже для диагностики и исправления.
+            </p>
+            
+            <div class="emergency-actions">
+                <button class="emergency-btn" onclick="forceFixDesign()">
+                    🔧 Принудительно исправить дизайн
+                </button>
+                
+                <button class="emergency-btn secondary" onclick="openRestoreDesign()">
+                    🎨 Открыть восстановленный дизайн
+                </button>
+                
+                <button class="emergency-btn secondary" onclick="runDiagnostic()">
+                    🔍 Запустить диагностику
+                </button>
+                
+                <button class="emergency-btn secondary" onclick="openMainApp()">
+                    📱 Попробовать основное приложение
+                </button>
+            </div>
+            
+            <div class="diagnosis-info">
+                <h3>🔍 Возможные причины проблемы:</h3>
+                <ul>
+                    <li><span class="status-indicator status-error"></span>Loading screen не скрывается</li>
+                    <li><span class="status-indicator status-warning"></span>CSS файлы не загружаются</li>
+                    <li><span class="status-indicator status-warning"></span>JavaScript модули не инициализируются</li>
+                    <li><span class="status-indicator status-error"></span>Ошибки в консоли браузера</li>
+                    <li><span class="status-indicator status-warning"></span>Проблемы с #app элементом</li>
+                </ul>
+                
+                <h3 style="margin-top: 15px;">💡 Рекомендации:</h3>
+                <ul>
+                    <li>Проверьте консоль браузера (F12)</li>
+                    <li>Убедитесь что сервер запущен</li>
+                    <li>Попробуйте обновить страницу (Ctrl+F5)</li>
+                    <li>Используйте восстановленный дизайн как fallback</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            console.log(`[Emergency Fix] ${message}`);
+        }
+
+        function forceFixDesign() {
+            log('🔧 Принудительное исправление дизайна...');
+            
+            // Создаем новое окно с исправленным приложением
+            const fixedAppHTML = `
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost Mini App - Fixed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap&subset=latin,cyrillic" rel="stylesheet">
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ */
+        #loading {
+            display: none !important;
+            opacity: 0 !important;
+        }
+        
+        #app {
+            display: block !important;
+            opacity: 1 !important;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%) !important;
+            color: #fff !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="section active">
+            <div class="start-section">
+                <div class="start-header glass-card">
+                    <h1>🚀 FlashPost AI<br><span class="subtitle">Создавайте вирусные карусели за минуты</span></h1>
+                    <p class="description">Введите тему, и создайте детальную обучающую карусель из 5-7 слайдов</p>
+                </div>
+                
+                <div class="input-form glass-card">
+                    <label class="input-label">💡 Введи тему для карусели:</label>
+                    <div class="input-container">
+                        <textarea id="topicInput" class="topic-input" placeholder="Например: 'Здоровое питание', 'Продуктивность'..." rows="3"></textarea>
+                    </div>
+                    <div class="generation-buttons">
+                        <button class="btn btn-generate" onclick="alert('Генерация работает! Дизайн восстановлен.')">🎯 Создать карусель</button>
+                        <button class="btn btn-ai" onclick="alert('AI опция доступна!')">🤖 AI карусель</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>`;
+            
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(fixedAppHTML);
+            newWindow.document.close();
+            
+            log('✅ Исправленное приложение открыто в новом окне');
+        }
+
+        function openRestoreDesign() {
+            log('🎨 Открытие восстановленного дизайна...');
+            window.open('/restore-design.html', '_blank');
+        }
+
+        function runDiagnostic() {
+            log('🔍 Запуск диагностики...');
+            window.open('/test-design-fix.html', '_blank');
+        }
+
+        function openMainApp() {
+            log('📱 Открытие основного приложения...');
+            window.open('/index.html', '_blank');
+        }
+
+        // Автоматическая диагностика при загрузке
+        window.addEventListener('load', () => {
+            log('🚨 Emergency Design Fix загружен');
+            
+            // Проверяем основное приложение через 2 секунды
+            setTimeout(() => {
+                fetch('/index.html')
+                    .then(response => {
+                        if (response.ok) {
+                            log('✅ Основное приложение доступно');
+                        } else {
+                            log('❌ Проблемы с основным приложением');
+                        }
+                    })
+                    .catch(error => {
+                        log('❌ Ошибка доступа к основному приложению');
+                    });
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

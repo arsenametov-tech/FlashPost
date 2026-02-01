@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Generation Pipeline Test - FlashPost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .app-frame {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .app-frame iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+        
+        .pipeline-step {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .step-status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        
+        .step-status.success { background: #28a745; }
+        .step-status.error { background: #dc3545; }
+        .step-status.testing { background: #ffc107; }
+        .step-status.running { background: #17a2b8; animation: pulse 1s infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #833ab4, #fd1d1d, #fcb045);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .topic-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .slides-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .slide-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 150px;
+        }
+        
+        .slide-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        
+        .slide-text {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🤖 AI Generation Pipeline Test</h1>
+        <p>Тестирование полного цикла генерации карусели: от ввода темы до создания слайдов</p>
+        
+        <div class="test-section">
+            <h3>🎯 Test Controls</h3>
+            <input type="text" class="topic-input" id="testTopic" placeholder="Введите тему для тестирования (например: 'Как зарабатывать на криптовалютах')" value="Продуктивность для предпринимателей">
+            <div>
+                <button onclick="testFullPipeline()">🚀 Test Full Pipeline</button>
+                <button onclick="testWithMockAI()">🤖 Test with Mock AI</button>
+                <button onclick="loadMainApp()">📱 Load Main App</button>
+                <button onclick="clearLog()">🧹 Clear Log</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 Pipeline Progress</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="pipeline-progress"></div>
+            </div>
+            <div id="pipeline-steps">
+                <div class="pipeline-step">
+                    <div class="step-status" id="step1-status"></div>
+                    <span>1. User Input Validation</span>
+                    <span id="step1-result">Waiting...</span>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-status" id="step2-status"></div>
+                    <span>2. AI Request (Gemini)</span>
+                    <span id="step2-result">Waiting...</span>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-status" id="step3-status"></div>
+                    <span>3. Response Parsing</span>
+                    <span id="step3-result">Waiting...</span>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-status" id="step4-status"></div>
+                    <span>4. Slide Validation</span>
+                    <span id="step4-result">Waiting...</span>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-status" id="step5-status"></div>
+                    <span>5. Project Creation</span>
+                    <span id="step5-result">Waiting...</span>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-status" id="step6-status"></div>
+                    <span>6. Render & Display</span>
+                    <span id="step6-result">Waiting...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 Generated Slides Preview</h3>
+            <div id="slides-preview" class="slides-preview">
+                No slides generated yet...
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📋 Test Log</h3>
+            <div class="log" id="test-log">
+                Test logs will appear here...
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📱 Main Application</h3>
+            <div class="app-frame" id="app-frame" style="display: none;">
+                <iframe id="main-app-iframe" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let appFrame = null;
+        let currentStep = 0;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            testResults.push({ timestamp, message, type });
+            
+            const logContainer = document.getElementById('test-log');
+            const logDiv = document.createElement('div');
+            logDiv.style.color = type === 'error' ? '#dc3545' : 
+                               type === 'success' ? '#28a745' : 
+                               type === 'warning' ? '#ffc107' : '#17a2b8';
+            logDiv.textContent = logEntry;
+            
+            logContainer.appendChild(logDiv);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            console.log(`[AI-PIPELINE-TEST] ${message}`);
+        }
+        
+        function updateStepStatus(stepNumber, status, message) {
+            const statusEl = document.getElementById(`step${stepNumber}-status`);
+            const resultEl = document.getElementById(`step${stepNumber}-result`);
+            
+            if (statusEl) {
+                statusEl.className = `step-status ${status}`;
+            }
+            
+            if (resultEl) {
+                resultEl.textContent = message;
+            }
+        }
+        
+        function updateProgress(percentage) {
+            const progressFill = document.getElementById('pipeline-progress');
+            if (progressFill) {
+                progressFill.style.width = `${percentage}%`;
+            }
+        }
+        
+        function resetPipeline() {
+            for (let i = 1; i <= 6; i++) {
+                updateStepStatus(i, '', 'Waiting...');
+            }
+            updateProgress(0);
+            document.getElementById('slides-preview').innerHTML = 'No slides generated yet...';
+        }
+        
+        async function testFullPipeline() {
+            log('🚀 Начинаем тестирование полного цикла генерации...', 'info');
+            resetPipeline();
+            
+            const topic = document.getElementById('testTopic').value.trim();
+            if (!topic) {
+                log('❌ Введите тему для тестирования', 'error');
+                return;
+            }
+            
+            try {
+                // Загружаем приложение если не загружено
+                if (!appFrame) {
+                    await loadMainAppForTesting();
+                }
+                
+                // Шаг 1: Валидация ввода
+                updateStepStatus(1, 'running', 'Validating...');
+                updateProgress(10);
+                log(`1️⃣ Валидируем тему: "${topic}"`, 'info');
+                
+                if (topic.length < 5) {
+                    throw new Error('Тема слишком короткая');
+                }
+                
+                updateStepStatus(1, 'success', 'Valid topic');
+                log('✅ Тема валидна', 'success');
+                
+                // Шаг 2: AI запрос
+                updateStepStatus(2, 'running', 'Calling AI...');
+                updateProgress(30);
+                log('2️⃣ Отправляем запрос к AI...', 'info');
+                
+                const app = appFrame.flashPostApp;
+                if (!app) {
+                    throw new Error('App not available');
+                }
+                
+                // Подписываемся на события прогресса
+                appFrame.document.addEventListener('aiGenerationProgress', (e) => {
+                    log(`🔄 AI Progress: ${e.detail.message} (${e.detail.percentage}%)`, 'info');
+                    updateProgress(20 + (e.detail.percentage * 0.4)); // 20-60% диапазон
+                });
+                
+                // Вызываем генерацию
+                const slidesData = await app.aiManager.generateSlides(topic);
+                
+                updateStepStatus(2, 'success', `${slidesData.length} slides`);
+                log(`✅ AI вернул ${slidesData.length} слайдов`, 'success');
+                
+                // Шаг 3: Парсинг ответа
+                updateStepStatus(3, 'running', 'Parsing...');
+                updateProgress(65);
+                log('3️⃣ Парсим ответ AI...', 'info');
+                
+                if (!Array.isArray(slidesData)) {
+                    throw new Error('AI response is not an array');
+                }
+                
+                updateStepStatus(3, 'success', 'Parsed successfully');
+                log('✅ Ответ успешно распарсен', 'success');
+                
+                // Шаг 4: Валидация слайдов
+                updateStepStatus(4, 'running', 'Validating...');
+                updateProgress(75);
+                log('4️⃣ Валидируем структуру слайдов...', 'info');
+                
+                const validSlides = slidesData.filter(slide => 
+                    slide && slide.text && slide.text.trim().length > 0
+                );
+                
+                if (validSlides.length === 0) {
+                    throw new Error('No valid slides found');
+                }
+                
+                updateStepStatus(4, 'success', `${validSlides.length} valid`);
+                log(`✅ ${validSlides.length} слайдов прошли валидацию`, 'success');
+                
+                // Шаг 5: Создание проекта
+                updateStepStatus(5, 'running', 'Creating...');
+                updateProgress(85);
+                log('5️⃣ Создаем проект с слайдами...', 'info');
+                
+                // Имитируем создание проекта
+                app.state.clearProject();
+                
+                validSlides.forEach((slideData, index) => {
+                    const slide = app.state.createSlide({
+                        title: slideData.title || `Слайд ${index + 1}`,
+                        text: slideData.text,
+                        background: {
+                            type: 'color',
+                            color: '#833ab4'
+                        }
+                    });
+                    
+                    app.state.createTextBlock(slide.id, {
+                        text: slideData.text,
+                        x: 50,
+                        y: 50,
+                        width: 80
+                    });
+                });
+                
+                updateStepStatus(5, 'success', 'Project created');
+                log('✅ Проект создан с слайдами', 'success');
+                
+                // Шаг 6: Рендер и отображение
+                updateStepStatus(6, 'running', 'Rendering...');
+                updateProgress(95);
+                log('6️⃣ Рендерим и отображаем карусель...', 'info');
+                
+                // Переходим к превью
+                await app.enterPreviewMode();
+                
+                updateStepStatus(6, 'success', 'Rendered');
+                updateProgress(100);
+                log('✅ Карусель отображена', 'success');
+                
+                // Показываем превью слайдов
+                displaySlidesPreview(validSlides);
+                
+                log('🎉 Полный цикл генерации завершен успешно!', 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка в цикле генерации: ${error.message}`, 'error');
+                
+                // Отмечаем текущий шаг как ошибочный
+                if (currentStep > 0) {
+                    updateStepStatus(currentStep, 'error', error.message);
+                }
+            }
+        }
+        
+        async function testWithMockAI() {
+            log('🤖 Тестируем с мок-данными AI...', 'info');
+            resetPipeline();
+            
+            const topic = document.getElementById('testTopic').value.trim() || 'Тестовая тема';
+            
+            // Мок-данные слайдов
+            const mockSlides = [
+                {
+                    title: 'Hook',
+                    text: 'Знаете ли вы, что 90% предпринимателей тратят время впустую? Я потерял 2 года своей жизни на неэффективные методы работы. Сегодня покажу систему, которая увеличит вашу продуктивность в 3 раза.'
+                },
+                {
+                    title: 'Problem',
+                    text: 'Большинство предпринимателей работают 12+ часов в день, но результаты минимальны. Постоянные переключения между задачами снижают эффективность на 40%. Отсутствие системы приводит к выгоранию.'
+                },
+                {
+                    title: 'Solution',
+                    text: 'Метод "Глубокой фокусировки" - работа блоками по 90 минут с полным погружением в одну задачу. Никаких уведомлений, звонков, соцсетей. Только вы и приоритетная задача.'
+                },
+                {
+                    title: 'Steps',
+                    text: '1. Определите 3 главные задачи на день\n2. Заблокируйте 90-минутные окна\n3. Отключите все уведомления\n4. Работайте только над одной задачей\n5. Делайте 15-минутные перерывы'
+                },
+                {
+                    title: 'Results',
+                    text: 'За первый месяц: увеличение продуктивности на 200%. Сокращение рабочего дня с 12 до 8 часов. Больше времени на семью и отдых. Снижение стресса и повышение качества работы.'
+                },
+                {
+                    title: 'CTA',
+                    text: 'Начните прямо сегодня! Выберите одну важную задачу и работайте над ней 90 минут без перерыва. Поделитесь результатом в комментариях!'
+                }
+            ];
+            
+            try {
+                // Имитируем все шаги
+                for (let i = 1; i <= 6; i++) {
+                    updateStepStatus(i, 'running', 'Processing...');
+                    updateProgress(i * 16);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    updateStepStatus(i, 'success', 'Completed');
+                    log(`✅ Шаг ${i} завершен (мок-данные)`, 'success');
+                }
+                
+                updateProgress(100);
+                displaySlidesPreview(mockSlides);
+                log('🎉 Тестирование с мок-данными завершено!', 'success');
+                
+            } catch (error) {
+                log(`❌ Ошибка мок-тестирования: ${error.message}`, 'error');
+            }
+        }
+        
+        function displaySlidesPreview(slides) {
+            const previewContainer = document.getElementById('slides-preview');
+            
+            if (!slides || slides.length === 0) {
+                previewContainer.innerHTML = 'No slides to display';
+                return;
+            }
+            
+            const slidesHTML = slides.map((slide, index) => `
+                <div class="slide-card">
+                    <div class="slide-title">${index + 1}. ${slide.title || 'Untitled'}</div>
+                    <div class="slide-text">${slide.text ? slide.text.substring(0, 150) + '...' : 'No content'}</div>
+                </div>
+            `).join('');
+            
+            previewContainer.innerHTML = slidesHTML;
+            log(`📋 Отображено ${slides.length} слайдов в превью`, 'info');
+        }
+        
+        async function loadMainAppForTesting() {
+            log('📱 Загружаем основное приложение для тестирования...', 'info');
+            
+            const appFrameContainer = document.getElementById('app-frame');
+            const iframe = document.getElementById('main-app-iframe');
+            
+            appFrameContainer.style.display = 'block';
+            
+            return new Promise((resolve, reject) => {
+                iframe.onload = () => {
+                    appFrame = iframe.contentWindow;
+                    log('✅ Приложение загружено в iframe', 'success');
+                    
+                    // Ждем инициализации
+                    setTimeout(() => {
+                        if (appFrame.flashPostApp) {
+                            log('✅ FlashPostApp доступен для тестирования', 'success');
+                            resolve();
+                        } else {
+                            log('⚠️ FlashPostApp не найден, но продолжаем', 'warning');
+                            resolve();
+                        }
+                    }, 2000);
+                };
+                
+                iframe.onerror = () => {
+                    log('❌ Ошибка загрузки приложения', 'error');
+                    reject(new Error('Failed to load app'));
+                };
+                
+                iframe.src = '/index.html';
+            });
+        }
+        
+        function loadMainApp() {
+            loadMainAppForTesting();
+        }
+        
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = 'Test logs cleared...';
+            testResults = [];
+        }
+        
+        // Автоматический запуск при загрузке
+        window.addEventListener('load', () => {
+            log('🔧 AI Generation Pipeline Test готов к запуску', 'info');
+        });
+    </script>
+</body>
+</html>

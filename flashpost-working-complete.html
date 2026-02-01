@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Complete Working Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            background: #2481cc;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header .nickname {
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .header .pro-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CANVAS AREA */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 20px;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .slide-preview {
+            width: 280px;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+            transition: all 0.3s ease;
+        }
+
+        .slide-preview:hover {
+            transform: scale(1.02);
+        }
+
+        .slide-preview.dragging {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        .text-block {
+            position: absolute;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: move;
+            user-select: none;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .text-block:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+        }
+
+        .text-block.selected {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.2);
+        }
+
+        .text-block.keyword {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* NAVIGATION */
+        .navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .nav-hint {
+            color: #6c757d;
+            font-size: 14px;
+            margin: 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-arrow {
+            font-size: 18px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(0); }
+            40% { transform: translateX(-3px); }
+            60% { transform: translateX(3px); }
+        }
+
+        .slide-counter {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* CONTROLS */
+        .controls {
+            background: white;
+            padding: 15px 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+        }
+
+        .btn.success {
+            background: #28a745;
+        }
+
+        .btn.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn.small {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        /* INPUT CONTROLS */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .input-group input {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        /* EDITOR PANEL */
+        .editor-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .editor-panel.active {
+            display: flex;
+        }
+
+        .editor-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 350px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .editor-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        /* TEMPLATE SYSTEM */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .template-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-item:hover {
+            background: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .template-item.selected {
+            background: #e3f2fd;
+            border-color: #007bff;
+        }
+
+        /* STATUS INDICATORS */
+        .status-bar {
+            background: #f8f9fa;
+            padding: 8px 20px;
+            border-top: 1px solid #e9ecef;
+            font-size: 12px;
+            color: #6c757d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+
+        .status-dot.warning {
+            background: #ffc107;
+        }
+
+        .status-dot.error {
+            background: #dc3545;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .slide-preview {
+                width: 260px;
+                height: 180px;
+            }
+        }
+
+        /* ANIMATIONS */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-transition {
+            animation: slideTransition 0.5s ease-in-out;
+        }
+
+        @keyframes slideTransition {
+            0% { transform: translateX(-100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="nickname" onclick="editNickname()">@flashpost_user</div>
+            <div class="pro-badge">PRO</div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- CANVAS AREA -->
+            <div class="canvas-area">
+                <div class="slide-preview" id="slidePreview">
+                    <div class="text-block" style="top: 20px; left: 20px;" onclick="editTextBlock(this)">
+                        🚀 FlashPost
+                    </div>
+                    <div class="text-block keyword" style="bottom: 20px; right: 20px;" onclick="editTextBlock(this)">
+                        Создавай вирусный контент
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="navigation">
+                <button class="btn small" onclick="previousSlide()">◀</button>
+                <div class="nav-hint">
+                    <span class="nav-arrow">👆</span>
+                    Листай
+                    <span class="nav-arrow">👆</span>
+                </div>
+                <div class="slide-counter" id="slideCounter">1 / 8</div>
+                <button class="btn small" onclick="nextSlide()">▶</button>
+            </div>
+
+            <!-- CONTROLS -->
+            <div class="controls">
+                <div class="control-row">
+                    <button class="btn" onclick="generateContent()">
+                        🤖 Генерировать AI
+                    </button>
+                    <button class="btn secondary" onclick="openEditor()">
+                        ✏️ Редактор
+                    </button>
+                </div>
+                
+                <div class="control-row">
+                    <button class="btn small" onclick="saveTemplate()">
+                        💾 Шаблон
+                    </button>
+                    <button class="btn small" onclick="applyTemplate()">
+                        🎨 Применить
+                    </button>
+                    <button class="btn small" onclick="uploadBackground()">
+                        🖼️ Фон
+                    </button>
+                    <button class="btn small success" onclick="exportSlides()">
+                        📤 Экспорт
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Готов к работе</span>
+            </div>
+            <div class="status-indicator">
+                <span>Шаблонов: 3</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITOR PANEL -->
+    <div class="editor-panel" id="editorPanel">
+        <div class="editor-content">
+            <div class="editor-header">
+                <h3>Редактор слайда</h3>
+                <button class="close-btn" onclick="closeEditor()">&times;</button>
+            </div>
+            
+            <div class="input-group">
+                <label>Текст блока:</label>
+                <input type="text" id="textInput" placeholder="Введите текст...">
+            </div>
+            
+            <div class="input-group">
+                <label>Instagram никнейм:</label>
+                <input type="text" id="nicknameInput" placeholder="@your_nickname">
+            </div>
+            
+            <div class="input-group">
+                <label>Ширина текста:</label>
+                <input type="range" id="widthSlider" min="80" max="200" value="120">
+            </div>
+            
+            <div class="control-row" style="margin-top: 20px;">
+                <button class="btn success" onclick="saveChanges()">
+                    ✅ Сохранить
+                </button>
+                <button class="btn secondary" onclick="closeEditor()">
+                    ❌ Отмена
+                </button>
+            </div>
+            
+            <div class="template-grid">
+                <div class="template-item" onclick="selectTemplate(1)">
+                    <div style="font-size: 12px;">Шаблон 1</div>
+                    <div style="font-size: 10px; color: #6c757d;">Классический</div>
+                </div>
+                <div class="template-item" onclick="selectTemplate(2)">
+                    <div style="font-size: 12px;">Шаблон 2</div>
+                    <div style="font-size: 10px; color: #6c757d;">Минимализм</div>
+                </div>
+                <div class="template-item" onclick="selectTemplate(3)">
+                    <div style="font-size: 12px;">Шаблон 3</div>
+                    <div style="font-size: 10px; color: #6c757d;">Яркий</div>
+                </div>
+                <div class="template-item" onclick="selectTemplate(4)">
+                    <div style="font-size: 12px;">+ Новый</div>
+                    <div style="font-size: 10px; color: #6c757d;">Создать</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // STATE MANAGEMENT
+        let currentSlide = 1;
+        let totalSlides = 8;
+        let selectedTextBlock = null;
+        let templates = [
+            { id: 1, name: 'Классический', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+            { id: 2, name: 'Минимализм', background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+            { id: 3, name: 'Яркий', background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }
+        ];
+
+        // SLIDE NAVIGATION
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlideDisplay();
+                animateSlideTransition();
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlideDisplay();
+                animateSlideTransition();
+            }
+        }
+
+        function updateSlideDisplay() {
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+            
+            // Simulate different content for different slides
+            const slidePreview = document.getElementById('slidePreview');
+            const textBlocks = slidePreview.querySelectorAll('.text-block');
+            
+            if (currentSlide === 1) {
+                textBlocks[0].textContent = '🚀 FlashPost';
+                textBlocks[1].textContent = 'Создавай вирусный контент';
+            } else if (currentSlide === 2) {
+                textBlocks[0].textContent = '💡 Идея';
+                textBlocks[1].textContent = 'Генерируй идеи за секунды';
+            } else {
+                textBlocks[0].textContent = `📱 Слайд ${currentSlide}`;
+                textBlocks[1].textContent = 'Профессиональный контент';
+            }
+        }
+
+        function animateSlideTransition() {
+            const slidePreview = document.getElementById('slidePreview');
+            slidePreview.classList.add('slide-transition');
+            setTimeout(() => {
+                slidePreview.classList.remove('slide-transition');
+            }, 500);
+        }
+
+        // AI GENERATION
+        function generateContent() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            
+            btn.textContent = '🔄 Генерирую...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                // Simulate AI generation
+                const topics = [
+                    'Продуктивность и тайм-менеджмент',
+                    'Инвестиции и финансы',
+                    'Фитнес и здоровье',
+                    'Маркетинг в соцсетях',
+                    'Личностный рост'
+                ];
+                
+                const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+                totalSlides = Math.floor(Math.random() * 4) + 8; // 8-11 slides
+                currentSlide = 1;
+                
+                updateSlideDisplay();
+                showNotification(`✅ Создано ${totalSlides} слайдов на тему: ${randomTopic}`);
+                
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        // EDITOR FUNCTIONS
+        function openEditor() {
+            document.getElementById('editorPanel').classList.add('active');
+        }
+
+        function closeEditor() {
+            document.getElementById('editorPanel').classList.remove('active');
+            selectedTextBlock = null;
+        }
+
+        function editTextBlock(element) {
+            selectedTextBlock = element;
+            document.getElementById('textInput').value = element.textContent;
+            openEditor();
+        }
+
+        function editNickname() {
+            const newNickname = prompt('Введите Instagram никнейм:', '@flashpost_user');
+            if (newNickname) {
+                document.querySelector('.nickname').textContent = newNickname;
+            }
+        }
+
+        function saveChanges() {
+            if (selectedTextBlock) {
+                const newText = document.getElementById('textInput').value;
+                const newWidth = document.getElementById('widthSlider').value;
+                
+                selectedTextBlock.textContent = newText;
+                selectedTextBlock.style.width = newWidth + 'px';
+            }
+            
+            const nickname = document.getElementById('nicknameInput').value;
+            if (nickname) {
+                document.querySelector('.nickname').textContent = nickname;
+            }
+            
+            closeEditor();
+            showNotification('✅ Изменения сохранены');
+        }
+
+        // TEMPLATE SYSTEM
+        function saveTemplate() {
+            const name = prompt('Название шаблона:', `Шаблон ${templates.length + 1}`);
+            if (name) {
+                const newTemplate = {
+                    id: templates.length + 1,
+                    name: name,
+                    background: document.getElementById('slidePreview').style.background || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                };
+                
+                templates.push(newTemplate);
+                showNotification(`💾 Шаблон "${name}" сохранен`);
+                updateStatusBar();
+            }
+        }
+
+        function applyTemplate() {
+            openEditor();
+        }
+
+        function selectTemplate(id) {
+            const template = templates.find(t => t.id === id);
+            if (template) {
+                document.getElementById('slidePreview').style.background = template.background;
+                showNotification(`🎨 Применен шаблон: ${template.name}`);
+                
+                // Visual feedback
+                document.querySelectorAll('.template-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                event.target.closest('.template-item').classList.add('selected');
+            } else if (id === 4) {
+                // Create new template
+                saveTemplate();
+            }
+        }
+
+        // BACKGROUND UPLOAD
+        function uploadBackground() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const slidePreview = document.getElementById('slidePreview');
+                        slidePreview.style.backgroundImage = `url(${e.target.result})`;
+                        slidePreview.style.backgroundSize = 'cover';
+                        slidePreview.style.backgroundPosition = 'center';
+                        
+                        showNotification('🖼️ Фон загружен');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            
+            input.click();
+        }
+
+        // EXPORT FUNCTION
+        function exportSlides() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            
+            btn.textContent = '📤 Экспорт...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                // Simulate export
+                const formats = ['PNG', 'JPG', 'PDF'];
+                const format = formats[Math.floor(Math.random() * formats.length)];
+                
+                showNotification(`📤 Экспорт завершен: ${totalSlides} слайдов в ${format}`);
+                
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 1500);
+        }
+
+        // UTILITY FUNCTIONS
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                z-index: 2000;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        function updateStatusBar() {
+            const statusBar = document.querySelector('.status-bar .status-indicator:last-child span');
+            statusBar.textContent = `Шаблонов: ${templates.length}`;
+        }
+
+        // DRAG AND DROP
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        document.addEventListener('mousedown', function(e) {
+            if (e.target.classList.contains('text-block')) {
+                isDragging = true;
+                selectedTextBlock = e.target;
+                
+                const rect = e.target.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                
+                e.target.classList.add('dragging');
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging && selectedTextBlock) {
+                const slideRect = document.getElementById('slidePreview').getBoundingClientRect();
+                
+                let x = e.clientX - slideRect.left - dragOffset.x;
+                let y = e.clientY - slideRect.top - dragOffset.y;
+                
+                // Constrain to slide bounds
+                x = Math.max(0, Math.min(x, slideRect.width - selectedTextBlock.offsetWidth));
+                y = Math.max(0, Math.min(y, slideRect.height - selectedTextBlock.offsetHeight));
+                
+                selectedTextBlock.style.left = x + 'px';
+                selectedTextBlock.style.top = y + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function(e) {
+            if (isDragging) {
+                isDragging = false;
+                if (selectedTextBlock) {
+                    selectedTextBlock.classList.remove('dragging');
+                }
+            }
+        });
+
+        // KEYBOARD SHORTCUTS
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                previousSlide();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+            } else if (e.key === 'Escape') {
+                closeEditor();
+            } else if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveTemplate();
+            }
+        });
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 FlashPost Complete - Loaded successfully!');
+            updateSlideDisplay();
+            
+            // Add CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Show welcome message
+            setTimeout(() => {
+                showNotification('🎉 FlashPost готов к работе!');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

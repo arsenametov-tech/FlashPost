@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест интеграции системы ключевых слов</title>
+    <link rel="stylesheet" href="../app.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-slide {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+            border-radius: 12px;
+            padding: 40px;
+            margin: 20px 0;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .test-text-block {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            line-height: 1.4;
+            max-width: 80%;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .control-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .control-group input[type="color"] {
+            width: 50px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+
+        .btn {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #6a2c91;
+        }
+
+        .test-results {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .test-results h4 {
+            color: #2e7d32;
+            margin-top: 0;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🔗 Тест интеграции системы ключевых слов</h1>
+            <p>Проверка работы с реальными модулями FlashPost</p>
+        </div>
+
+        <div class="test-slide">
+            <div class="test-text-block" id="integrationTestBlock">
+                Изучайте *рынок* и делайте инвестиции для получения прибыли от бизнеса
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="autoHighlightToggle" checked>
+                    Автоподсветка AI
+                </label>
+            </div>
+            <div class="control-group">
+                <label>Цвет ручных (*слово*):</label>
+                <input type="color" id="manualColorPicker" value="#E74C3C">
+            </div>
+            <div class="control-group">
+                <label>Цвет AI ключевых слов:</label>
+                <input type="color" id="autoColorPicker" value="#4A90E2">
+            </div>
+            <div class="control-group">
+                <label>Интенсивность свечения: <span id="glowValue">30%</span></label>
+                <input type="range" id="glowIntensityRange" min="0" max="1" step="0.1" value="0.3">
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="btn" onclick="testIntegration()">🧪 Тест интеграции</button>
+            <button class="btn" onclick="testStateManager()">📊 Тест StateManager</button>
+            <button class="btn" onclick="testRenderer()">🎨 Тест Renderer</button>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <!-- Загружаем модули FlashPost -->
+    <script src="../src/state.js"></script>
+    <script src="../src/renderer.js"></script>
+    <script src="../src/ai.js"></script>
+
+    <script>
+        let state, renderer, ai;
+        const testResults = document.getElementById('testResults');
+
+        // Инициализация модулей
+        function initializeModules() {
+            try {
+                state = new StateManager();
+                renderer = new Renderer(state);
+                ai = new AIManager(state);
+                
+                showStatus('✅ Модули успешно инициализированы', 'success');
+                return true;
+            } catch (error) {
+                showStatus(`❌ Ошибка инициализации модулей: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Показ статуса
+        function showStatus(message, type) {
+            const status = document.createElement('div');
+            status.className = `status ${type}`;
+            status.textContent = message;
+            testResults.appendChild(status);
+        }
+
+        // Тест интеграции
+        function testIntegration() {
+            testResults.innerHTML = '';
+            
+            if (!initializeModules()) return;
+
+            try {
+                // Создаем слайд с текстовыми блоками
+                const slide = state.createSlide({
+                    title: 'Тестовый слайд',
+                    text: 'Тест интеграции'
+                });
+
+                showStatus(`✅ Слайд создан: ${slide.id}`, 'success');
+
+                // Создаем текстовый блок с ключевыми словами
+                const block = state.createTextBlock(slide.id, {
+                    text: 'Изучайте *рынок* и делайте инвестиции для получения прибыли от бизнеса',
+                    keywordHighlighting: {
+                        autoHighlight: true,
+                        keywordColor: '#E74C3C',
+                        autoKeywordColor: '#4A90E2',
+                        glowEnabled: true,
+                        glowIntensity: 0.3
+                    }
+                });
+
+                showStatus(`✅ Текстовый блок создан: ${block.id}`, 'success');
+
+                // Тестируем рендеринг с ключевыми словами
+                const testElement = document.getElementById('integrationTestBlock');
+                const autoKeywords = ['инвестиции', 'прибыли', 'бизнеса'];
+                
+                renderer.setTextWithKeywords(testElement, block.text, autoKeywords, block.keywordHighlighting);
+
+                // Проверяем результат
+                const manualKeywords = testElement.querySelectorAll('.manual-keyword');
+                const autoKeywords_found = testElement.querySelectorAll('.auto-keyword');
+
+                showStatus(`✅ Рендеринг завершен. Ручных: ${manualKeywords.length}, Автоматических: ${autoKeywords_found.length}`, 'success');
+
+                if (manualKeywords.length > 0 && autoKeywords_found.length > 0) {
+                    showStatus('🎉 Интеграция работает корректно!', 'success');
+                } else {
+                    showStatus('⚠️ Не все ключевые слова подсвечены', 'error');
+                }
+
+            } catch (error) {
+                showStatus(`❌ Ошибка интеграции: ${error.message}`, 'error');
+            }
+        }
+
+        // Тест StateManager
+        function testStateManager() {
+            testResults.innerHTML = '';
+            
+            if (!initializeModules()) return;
+
+            try {
+                // Тест создания слайда
+                const slide = state.createSlide();
+                showStatus(`✅ StateManager: Слайд создан`, 'success');
+
+                // Тест создания блока с ключевыми словами
+                const block = state.createTextBlock(slide.id, {
+                    text: 'Тест *ключевых* слов',
+                    keywordHighlighting: {
+                        autoHighlight: true,
+                        keywordColor: '#FF5722',
+                        autoKeywordColor: '#2196F3'
+                    }
+                });
+
+                showStatus(`✅ StateManager: Блок с ключевыми словами создан`, 'success');
+
+                // Тест обновления настроек ключевых слов
+                state.updateTextBlockProperty(block.id, 'keywordHighlighting.glowIntensity', 0.8);
+                
+                const updatedBlock = state.getActiveSlide().textBlocks.find(b => b.id === block.id);
+                if (updatedBlock.keywordHighlighting.glowIntensity === 0.8) {
+                    showStatus(`✅ StateManager: Настройки ключевых слов обновлены`, 'success');
+                } else {
+                    showStatus(`❌ StateManager: Ошибка обновления настроек`, 'error');
+                }
+
+            } catch (error) {
+                showStatus(`❌ Ошибка StateManager: ${error.message}`, 'error');
+            }
+        }
+
+        // Тест Renderer
+        function testRenderer() {
+            testResults.innerHTML = '';
+            
+            if (!initializeModules()) return;
+
+            try {
+                const testElement = document.createElement('div');
+                const testText = 'Проверка *ручных* ключевых слов и автоматических';
+                const autoKeywords = ['автоматических', 'проверка'];
+                const settings = {
+                    autoHighlight: true,
+                    keywordColor: '#E91E63',
+                    autoKeywordColor: '#9C27B0',
+                    glowEnabled: true,
+                    glowIntensity: 0.5
+                };
+
+                renderer.setTextWithKeywords(testElement, testText, autoKeywords, settings);
+
+                const manualKeywords = testElement.querySelectorAll('.manual-keyword');
+                const autoKeywords_found = testElement.querySelectorAll('.auto-keyword');
+
+                showStatus(`✅ Renderer: Обработано ручных: ${manualKeywords.length}, автоматических: ${autoKeywords_found.length}`, 'success');
+
+                // Проверяем применение пользовательских цветов
+                if (manualKeywords.length > 0) {
+                    const manualStyle = manualKeywords[0].style.background;
+                    if (manualStyle.includes('rgb')) {
+                        showStatus(`✅ Renderer: Пользовательские цвета применены`, 'success');
+                    }
+                }
+
+                if (manualKeywords.length > 0 && autoKeywords_found.length > 0) {
+                    showStatus('🎉 Renderer работает корректно!', 'success');
+                }
+
+            } catch (error) {
+                showStatus(`❌ Ошибка Renderer: ${error.message}`, 'error');
+            }
+        }
+
+        // Обновление блока в реальном времени
+        function updateBlock() {
+            const testElement = document.getElementById('integrationTestBlock');
+            const settings = {
+                autoHighlight: document.getElementById('autoHighlightToggle').checked,
+                keywordColor: document.getElementById('manualColorPicker').value,
+                autoKeywordColor: document.getElementById('autoColorPicker').value,
+                glowEnabled: true,
+                glowIntensity: parseFloat(document.getElementById('glowIntensityRange').value)
+            };
+
+            const autoKeywords = ['инвестиции', 'прибыли', 'бизнеса'];
+            const text = 'Изучайте *рынок* и делайте инвестиции для получения прибыли от бизнеса';
+
+            if (renderer) {
+                renderer.setTextWithKeywords(testElement, text, autoKeywords, settings);
+            }
+
+            // Обновляем значение интенсивности
+            document.getElementById('glowValue').textContent = Math.round(settings.glowIntensity * 100) + '%';
+        }
+
+        // Привязка событий
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('autoHighlightToggle').addEventListener('change', updateBlock);
+            document.getElementById('manualColorPicker').addEventListener('change', updateBlock);
+            document.getElementById('autoColorPicker').addEventListener('change', updateBlock);
+            document.getElementById('glowIntensityRange').addEventListener('input', updateBlock);
+
+            // Инициализируем блок
+            setTimeout(updateBlock, 100);
+        });
+    </script>
+</body>
+</html>

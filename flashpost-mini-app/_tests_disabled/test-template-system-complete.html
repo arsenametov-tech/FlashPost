@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Template System Test - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        .slide-preview {
+            width: 100%;
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            margin-bottom: 20px;
+        }
+        
+        .slide-text-block {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .slide-text-block:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .test-button.secondary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+        
+        .test-button.success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .test-log {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #17a2b8; }
+        .log-warning { color: #ffc107; }
+        
+        .template-preview {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .template-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .template-name {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .template-date {
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .template-details {
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .slide-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .slide-tab {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .slide-tab.active {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            border-color: transparent;
+        }
+        
+        .slide-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎨 Complete Template System Test</h1>
+            <p>Тестирование полной системы шаблонов: сохранение стилей, применение без перезаписи текста</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Template System Requirements</h2>
+            <ul>
+                <li>✅ Save: background, textBlocks styles (not text), effects</li>
+                <li>✅ Apply: copies styles into target slide, does NOT overwrite text</li>
+                <li>✅ Template management: save, load, delete templates</li>
+                <li>✅ UI integration: modal dialogs, template selection</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Interactive Template Test</h2>
+            <div class="test-grid">
+                <!-- Slide Preview -->
+                <div>
+                    <h3>Slide Preview</h3>
+                    <div class="slide-selector" id="slideSelector">
+                        <div class="slide-tab active" data-slide="0">Slide 1</div>
+                        <div class="slide-tab" data-slide="1">Slide 2</div>
+                        <div class="slide-tab" data-slide="2">Slide 3</div>
+                    </div>
+                    <div class="slide-preview" id="testSlide">
+                        <div class="slide-text-block" id="block1" style="top: 20%; left: 10%; font-size: 24px; font-family: 'Inter', sans-serif;">
+                            Sample Title Text
+                        </div>
+                        <div class="slide-text-block" id="block2" style="bottom: 30%; right: 10%; font-size: 16px; font-family: 'Playfair Display', serif;">
+                            Sample description text with more content
+                        </div>
+                        <div class="slide-text-block" id="block3" style="bottom: 10%; left: 10%; font-size: 14px; font-family: 'Space Grotesk', sans-serif;">
+                            Additional text block
+                        </div>
+                    </div>
+                    <div class="status-indicator status-info" id="slideStatus">
+                        Slide 1 Active
+                    </div>
+                </div>
+
+                <!-- Template Controls -->
+                <div>
+                    <h3>Template Controls</h3>
+                    <div class="controls-panel">
+                        <h4>Style Modification</h4>
+                        <div style="margin-bottom: 20px;">
+                            <button class="test-button" onclick="changeBackground()">
+                                🎨 Change Background
+                            </button>
+                            <button class="test-button" onclick="changeTextStyles()">
+                                ✏️ Change Text Styles
+                            </button>
+                            <button class="test-button" onclick="addEffects()">
+                                ✨ Add Effects
+                            </button>
+                        </div>
+                        
+                        <h4>Template Actions</h4>
+                        <div style="margin-bottom: 20px;">
+                            <button class="test-button success" onclick="saveTemplate()">
+                                💾 Save Template
+                            </button>
+                            <button class="test-button secondary" onclick="applyTemplate()">
+                                🎯 Apply Template
+                            </button>
+                            <button class="test-button secondary" onclick="applyToAll()">
+                                📄 Apply to All
+                            </button>
+                        </div>
+                        
+                        <h4>Test Actions</h4>
+                        <div>
+                            <button class="test-button" onclick="testTemplateSystem()">
+                                🧪 Test Template System
+                            </button>
+                            <button class="test-button" onclick="clearTemplates()">
+                                🗑️ Clear Templates
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Saved Templates</h2>
+            <div id="templatesDisplay">
+                <p>No templates saved yet...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📈 Test Results</h2>
+            <div id="testResults">
+                <p>Run tests to see results...</p>
+            </div>
+            
+            <div class="test-log" id="testLog">
+                <div class="log-entry log-info">🔄 Template system test initialized...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загружаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+    <script src="src/drag.js"></script>
+    <script src="src/export.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/template-manager.js"></script>
+    <script src="src/app.js"></script>
+
+    <script>
+        // Test state
+        let state, renderer, editor, templateManager;
+        let currentSlideIndex = 0;
+        let testSlides = [];
+
+        // Initialize test data
+        function initializeTestData() {
+            // Create test slides with different content
+            testSlides = [
+                {
+                    id: 'slide-1',
+                    background: {
+                        type: 'color',
+                        color: 'linear-gradient(45deg, #833ab4, #fd1d1d)',
+                        image: null,
+                        x: 50,
+                        y: 50,
+                        brightness: 100
+                    },
+                    textBlocks: [
+                        {
+                            id: 'block-1-1',
+                            text: 'Welcome to FlashPost',
+                            x: 10, y: 20,
+                            font: 'Inter',
+                            size: 24,
+                            weight: 'bold',
+                            color: '#ffffff',
+                            effects: { shadow: { enabled: true, blur: 4, color: '#000000' } }
+                        },
+                        {
+                            id: 'block-1-2',
+                            text: 'Create amazing carousels with AI',
+                            x: 10, y: 70,
+                            font: 'Playfair Display',
+                            size: 16,
+                            weight: 'normal',
+                            color: '#ffffff'
+                        }
+                    ]
+                },
+                {
+                    id: 'slide-2',
+                    background: {
+                        type: 'color',
+                        color: 'linear-gradient(45deg, #667eea, #764ba2)',
+                        image: null,
+                        x: 50,
+                        y: 50,
+                        brightness: 100
+                    },
+                    textBlocks: [
+                        {
+                            id: 'block-2-1',
+                            text: 'Different Content Here',
+                            x: 15, y: 25,
+                            font: 'Space Grotesk',
+                            size: 20,
+                            weight: '600',
+                            color: '#ffffff'
+                        },
+                        {
+                            id: 'block-2-2',
+                            text: 'This text should be preserved when applying templates',
+                            x: 15, y: 75,
+                            font: 'Inter',
+                            size: 14,
+                            weight: 'normal',
+                            color: '#ffffff'
+                        }
+                    ]
+                },
+                {
+                    id: 'slide-3',
+                    background: {
+                        type: 'color',
+                        color: 'linear-gradient(45deg, #f093fb, #f5576c)',
+                        image: null,
+                        x: 50,
+                        y: 50,
+                        brightness: 100
+                    },
+                    textBlocks: [
+                        {
+                            id: 'block-3-1',
+                            text: 'Third Slide Content',
+                            x: 20, y: 30,
+                            font: 'Bebas Neue',
+                            size: 28,
+                            weight: 'normal',
+                            color: '#ffffff'
+                        }
+                    ]
+                }
+            ];
+        }
+
+        // Logging function
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('testLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Initialize modules
+        function initializeModules() {
+            try {
+                state = new StateManager();
+                renderer = new Renderer(state);
+                editor = new Editor(state, renderer);
+                templateManager = new TemplateManager(state);
+                
+                // Make templateManager globally available
+                window.templateManager = templateManager;
+                
+                // Initialize test data
+                initializeTestData();
+                
+                // Set up test slides in state
+                state.clearProject();
+                testSlides.forEach(slide => {
+                    state.addSlide(slide);
+                });
+                state.setActiveSlideByIndex(0);
+                
+                log('✅ All modules initialized successfully', 'success');
+                return true;
+                
+            } catch (error) {
+                log(`❌ Module initialization error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Switch slide
+        function switchSlide(index) {
+            if (index < 0 || index >= testSlides.length) return;
+            
+            currentSlideIndex = index;
+            
+            // Update slide tabs
+            document.querySelectorAll('.slide-tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            
+            // Update slide display
+            updateSlideDisplay();
+            
+            // Update status
+            document.getElementById('slideStatus').textContent = `Slide ${index + 1} Active`;
+            
+            log(`📄 Switched to slide ${index + 1}`, 'info');
+        }
+
+        // Update slide display
+        function updateSlideDisplay() {
+            const slideEl = document.getElementById('testSlide');
+            const slide = testSlides[currentSlideIndex];
+            
+            if (!slide) return;
+            
+            // Update background
+            const bg = slide.background;
+            if (bg.type === 'image' && bg.image) {
+                slideEl.style.backgroundImage = `url(${bg.image})`;
+                slideEl.style.backgroundSize = 'cover';
+                slideEl.style.backgroundRepeat = 'no-repeat';
+                slideEl.style.backgroundPosition = `${bg.x}% ${bg.y}%`;
+                slideEl.style.filter = `brightness(${bg.brightness}%)`;
+            } else {
+                slideEl.style.backgroundImage = 'none';
+                slideEl.style.background = bg.color;
+                slideEl.style.filter = 'none';
+            }
+            
+            // Update text blocks
+            const blocks = slideEl.querySelectorAll('.slide-text-block');
+            blocks.forEach((blockEl, index) => {
+                const block = slide.textBlocks[index];
+                if (block) {
+                    blockEl.textContent = block.text;
+                    blockEl.style.left = block.x + '%';
+                    blockEl.style.top = block.y + '%';
+                    blockEl.style.fontSize = block.size + 'px';
+                    blockEl.style.fontFamily = block.font;
+                    blockEl.style.fontWeight = block.weight;
+                    blockEl.style.color = block.color;
+                    
+                    // Apply effects
+                    if (block.effects?.shadow?.enabled) {
+                        blockEl.style.textShadow = `2px 2px ${block.effects.shadow.blur}px ${block.effects.shadow.color}`;
+                    }
+                    
+                    blockEl.style.display = 'block';
+                } else {
+                    blockEl.style.display = 'none';
+                }
+            });
+        }
+
+        // Change background
+        function changeBackground() {
+            const slide = testSlides[currentSlideIndex];
+            const backgrounds = [
+                'linear-gradient(45deg, #833ab4, #fd1d1d)',
+                'linear-gradient(45deg, #667eea, #764ba2)',
+                'linear-gradient(45deg, #f093fb, #f5576c)',
+                'linear-gradient(45deg, #4facfe, #00f2fe)',
+                'linear-gradient(45deg, #43e97b, #38f9d7)'
+            ];
+            
+            const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            slide.background.color = randomBg;
+            
+            updateSlideDisplay();
+            log('🎨 Background changed', 'info');
+        }
+
+        // Change text styles
+        function changeTextStyles() {
+            const slide = testSlides[currentSlideIndex];
+            const fonts = ['Inter', 'Playfair Display', 'Space Grotesk', 'Bebas Neue', 'IBM Plex Mono'];
+            const colors = ['#ffffff', '#ffff00', '#ff6b6b', '#4ecdc4', '#45b7d1'];
+            
+            slide.textBlocks.forEach(block => {
+                block.font = fonts[Math.floor(Math.random() * fonts.length)];
+                block.color = colors[Math.floor(Math.random() * colors.length)];
+                block.size = 14 + Math.floor(Math.random() * 20);
+            });
+            
+            updateSlideDisplay();
+            log('✏️ Text styles changed', 'info');
+        }
+
+        // Add effects
+        function addEffects() {
+            const slide = testSlides[currentSlideIndex];
+            
+            slide.textBlocks.forEach(block => {
+                block.effects = {
+                    shadow: {
+                        enabled: true,
+                        blur: 2 + Math.floor(Math.random() * 8),
+                        color: '#000000'
+                    },
+                    glow: {
+                        enabled: Math.random() > 0.5,
+                        intensity: 0.3 + Math.random() * 0.7,
+                        color: '#ffffff'
+                    }
+                };
+            });
+            
+            updateSlideDisplay();
+            log('✨ Effects added', 'info');
+        }
+
+        // Save template
+        function saveTemplate() {
+            if (!templateManager) {
+                log('❌ Template manager not initialized', 'error');
+                return;
+            }
+            
+            const templateName = `Template ${Date.now()}`;
+            const slide = testSlides[currentSlideIndex];
+            
+            // Update state with current slide
+            state.setActiveSlideByIndex(currentSlideIndex);
+            const activeSlide = state.getActiveSlide();
+            if (activeSlide) {
+                Object.assign(activeSlide, slide);
+            }
+            
+            const success = templateManager.saveCurrentSlideAsTemplate(templateName);
+            
+            if (success) {
+                log(`💾 Template "${templateName}" saved successfully`, 'success');
+                updateTemplatesDisplay();
+            } else {
+                log('❌ Failed to save template', 'error');
+            }
+        }
+
+        // Apply template
+        function applyTemplate() {
+            const templates = templateManager ? templateManager.getTemplatesFromStorage() : [];
+            
+            if (templates.length === 0) {
+                log('⚠️ No templates available to apply', 'warning');
+                return;
+            }
+            
+            // Apply the first template for testing
+            const template = templates[0];
+            const slide = testSlides[currentSlideIndex];
+            
+            // Store original text content
+            const originalTexts = slide.textBlocks.map(block => block.text);
+            
+            // Update state
+            state.setActiveSlideByIndex(currentSlideIndex);
+            const activeSlide = state.getActiveSlide();
+            if (activeSlide) {
+                Object.assign(activeSlide, slide);
+            }
+            
+            const success = templateManager.applyTemplateToCurrentSlide(template.id, true);
+            
+            if (success) {
+                // Get updated slide from state
+                const updatedSlide = state.getActiveSlide();
+                Object.assign(slide, updatedSlide);
+                
+                // Verify text preservation
+                let textPreserved = true;
+                slide.textBlocks.forEach((block, index) => {
+                    if (originalTexts[index] && block.text !== originalTexts[index]) {
+                        textPreserved = false;
+                    }
+                });
+                
+                updateSlideDisplay();
+                
+                if (textPreserved) {
+                    log(`🎯 Template "${template.name}" applied successfully (text preserved)`, 'success');
+                } else {
+                    log(`🎯 Template "${template.name}" applied (some text may have changed)`, 'warning');
+                }
+            } else {
+                log('❌ Failed to apply template', 'error');
+            }
+        }
+
+        // Apply to all slides
+        function applyToAll() {
+            const templates = templateManager ? templateManager.getTemplatesFromStorage() : [];
+            
+            if (templates.length === 0) {
+                log('⚠️ No templates available to apply', 'warning');
+                return;
+            }
+            
+            // Apply the first template to all slides
+            const template = templates[0];
+            
+            // Store original texts for all slides
+            const originalTexts = testSlides.map(slide => 
+                slide.textBlocks.map(block => block.text)
+            );
+            
+            // Update state with all slides
+            state.clearProject();
+            testSlides.forEach(slide => {
+                state.addSlide(slide);
+            });
+            
+            const success = templateManager.applyTemplateToAllSlides(template.id, true);
+            
+            if (success) {
+                // Get updated slides from state
+                const updatedSlides = state.getAllSlides();
+                updatedSlides.forEach((updatedSlide, index) => {
+                    if (testSlides[index]) {
+                        Object.assign(testSlides[index], updatedSlide);
+                    }
+                });
+                
+                updateSlideDisplay();
+                log(`📄 Template "${template.name}" applied to all slides`, 'success');
+            } else {
+                log('❌ Failed to apply template to all slides', 'error');
+            }
+        }
+
+        // Test template system
+        function testTemplateSystem() {
+            log('🧪 Starting template system test...', 'info');
+            
+            let testsPassed = 0;
+            let totalTests = 0;
+            
+            // Test 1: Template creation
+            totalTests++;
+            const testTemplateName = 'Test Template';
+            const slide = testSlides[0];
+            
+            state.setActiveSlideByIndex(0);
+            const activeSlide = state.getActiveSlide();
+            if (activeSlide) {
+                Object.assign(activeSlide, slide);
+            }
+            
+            const saveSuccess = templateManager.saveCurrentSlideAsTemplate(testTemplateName);
+            if (saveSuccess) {
+                testsPassed++;
+                log('✅ Test 1: Template creation - PASSED', 'success');
+            } else {
+                log('❌ Test 1: Template creation - FAILED', 'error');
+            }
+            
+            // Test 2: Template retrieval
+            totalTests++;
+            const templates = templateManager.getTemplatesFromStorage();
+            const testTemplate = templates.find(t => t.name === testTemplateName);
+            if (testTemplate) {
+                testsPassed++;
+                log('✅ Test 2: Template retrieval - PASSED', 'success');
+            } else {
+                log('❌ Test 2: Template retrieval - FAILED', 'error');
+            }
+            
+            // Test 3: Template application with text preservation
+            totalTests++;
+            if (testTemplate) {
+                const targetSlide = testSlides[1];
+                const originalText = targetSlide.textBlocks[0].text;
+                
+                state.setActiveSlideByIndex(1);
+                const activeSlide2 = state.getActiveSlide();
+                if (activeSlide2) {
+                    Object.assign(activeSlide2, targetSlide);
+                }
+                
+                const applySuccess = templateManager.applyTemplateToCurrentSlide(testTemplate.id, true);
+                
+                if (applySuccess) {
+                    const updatedSlide = state.getActiveSlide();
+                    const textPreserved = updatedSlide.textBlocks[0].text === originalText;
+                    
+                    if (textPreserved) {
+                        testsPassed++;
+                        log('✅ Test 3: Text preservation - PASSED', 'success');
+                    } else {
+                        log('❌ Test 3: Text preservation - FAILED', 'error');
+                    }
+                } else {
+                    log('❌ Test 3: Template application - FAILED', 'error');
+                }
+            }
+            
+            // Update test results
+            const resultsEl = document.getElementById('testResults');
+            resultsEl.innerHTML = `
+                <h3>Template System Test Results</h3>
+                <div class="status-indicator ${testsPassed === totalTests ? 'status-success' : 'status-error'}">
+                    ${testsPassed}/${totalTests} tests passed
+                </div>
+                <ul>
+                    <li>Template Creation: ${saveSuccess ? '✅ PASSED' : '❌ FAILED'}</li>
+                    <li>Template Retrieval: ${testTemplate ? '✅ PASSED' : '❌ FAILED'}</li>
+                    <li>Text Preservation: ${testsPassed >= 3 ? '✅ PASSED' : '❌ FAILED'}</li>
+                </ul>
+            `;
+            
+            updateTemplatesDisplay();
+            log(`🎉 Template system test completed: ${testsPassed}/${totalTests} tests passed`, testsPassed === totalTests ? 'success' : 'warning');
+        }
+
+        // Clear templates
+        function clearTemplates() {
+            localStorage.removeItem('flashpost_templates');
+            updateTemplatesDisplay();
+            log('🗑️ All templates cleared', 'info');
+        }
+
+        // Update templates display
+        function updateTemplatesDisplay() {
+            const templatesEl = document.getElementById('templatesDisplay');
+            
+            if (!templateManager) {
+                templatesEl.innerHTML = '<p>Template manager not initialized</p>';
+                return;
+            }
+            
+            const templates = templateManager.getTemplatesFromStorage();
+            
+            if (templates.length === 0) {
+                templatesEl.innerHTML = '<p>No templates saved yet...</p>';
+                return;
+            }
+            
+            let html = '';
+            templates.forEach(template => {
+                html += `
+                    <div class="template-preview">
+                        <div class="template-info">
+                            <div class="template-name">${template.name}</div>
+                            <div class="template-date">${new Date(template.createdAt).toLocaleString()}</div>
+                        </div>
+                        <div class="template-details">
+                            Background: ${template.background.type} | 
+                            Text Blocks: ${template.textBlocksLayout.length} | 
+                            ID: ${template.id}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            templatesEl.innerHTML = html;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Template system test initialized', 'success');
+            
+            const initSuccess = initializeModules();
+            if (initSuccess) {
+                updateSlideDisplay();
+                updateTemplatesDisplay();
+                
+                // Bind slide selector events
+                document.querySelectorAll('.slide-tab').forEach((tab, index) => {
+                    tab.addEventListener('click', () => switchSlide(index));
+                });
+                
+                log('✅ All systems ready for testing', 'success');
+            } else {
+                log('❌ Initialization failed', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

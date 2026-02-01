@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashPost - Простой тест редактора</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Переопределяем проблемные CSS переменные */
+        :root {
+            --tg-bg: #ffffff;
+            --tg-text: #000000;
+            --primary: #833ab4;
+        }
+        
+        /* Исправляем основные стили редактора */
+        .editor-section {
+            background: #ffffff !important;
+            color: #333 !important;
+        }
+        
+        .editor-header {
+            background: #ffffff !important;
+            color: #333 !important;
+        }
+        
+        .editor-content {
+            background: #f8f9fa !important;
+        }
+        
+        .editor-preview {
+            background: #ffffff !important;
+        }
+        
+        .editor-tools {
+            background: #ffffff !important;
+        }
+        
+        .slide-preview {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%) !important;
+        }
+        
+        .preview-text {
+            color: white !important;
+        }
+        
+        .tool-label {
+            color: #333 !important;
+        }
+        
+        .text-editor {
+            background: #f8f9fa !important;
+            color: #333 !important;
+            border: 1px solid #e5e5e5 !important;
+        }
+        
+        .text-editor:focus {
+            border-color: #833ab4 !important;
+            background: #ffffff !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Контент будет загружен через JS -->
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Инициализация приложения
+        const app = new FlashPostApp();
+        
+        // Тестовые данные
+        const testSlides = [
+            {
+                title: "Hook",
+                text: "🔥 Секрет успешных предпринимателей:\n\nОни не работают больше — они работают умнее.\n\nВ то время как 95% людей тратят 12 часов на рутину, топ-менеджеры делегируют 80% задач."
+            },
+            {
+                title: "Problem", 
+                text: "❌ Ты работаешь 10-12 часов в день, но результата нет.\n\nПостоянно отвлекаешься на мелочи: письма, звонки, встречи.\n\nВажные проекты откладываются на месяцы."
+            },
+            {
+                title: "Solution",
+                text: "✅ Система 4D: Delete, Delegate, Defer, Do.\n\n• Delete — удаляй ненужные задачи (30%)\n• Delegate — делегируй рутину (40%)\n• Defer — откладывай несрочное (20%)\n• Do — делай только важное (10%)"
+            }
+        ];
+
+        // Устанавливаем тестовые данные
+        app.slides = testSlides;
+        app.initializeSlideStyles();
+        
+        // Добавляем Instagram для тестирования
+        const instagramInput = document.createElement('input');
+        instagramInput.id = 'instagramInput';
+        instagramInput.value = '@test_instagram';
+        instagramInput.style.display = 'none';
+        document.body.appendChild(instagramInput);
+        
+        // Показываем редактор
+        setTimeout(() => {
+            console.log('🚀 Показываем редактор...');
+            app.showEditor();
+        }, 1000);
+        
+        console.log('✅ Тест инициализирован');
+    </script>
+</body>
+</html>

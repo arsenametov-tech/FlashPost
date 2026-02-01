@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Background Test - FlashPost</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        body {
+            background: #0f0f14;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .slide-preview {
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            margin-bottom: 20px;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(131, 58, 180, 0.3);
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .status-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        
+        .status-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        
+        .status-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-section">
+            <h1>🖼️ Quick Background Test</h1>
+            <p>Быстрый тест функциональности фоновых изображений</p>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Module Status</h2>
+            <div id="moduleStatus">Проверяем модули...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Background Controls Test</h2>
+            <div id="backgroundControlsContainer"></div>
+            <div id="controlsStatus" class="status status-info">Контролы не созданы</div>
+        </div>
+
+        <div class="test-section">
+            <h2>🖼️ Slide Preview</h2>
+            <div class="slide-preview" id="testSlide"></div>
+            <div>
+                <button class="test-button" onclick="createBackgroundControls()">
+                    🔧 Create Background Controls
+                </button>
+                <button class="test-button" onclick="testBackgroundFunctions()">
+                    🧪 Test Background Functions
+                </button>
+                <button class="test-button" onclick="simulateImageUpload()">
+                    📁 Simulate Image Upload
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загружаем модули -->
+    <script src="src/state.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/editor.js"></script>
+
+    <script>
+        let state, renderer, editor;
+        
+        // Initialize modules
+        function initializeModules() {
+            try {
+                state = new StateManager();
+                renderer = new Renderer(state);
+                editor = new Editor(state, renderer);
+                
+                // Initialize default state
+                state.clearProject();
+                
+                return true;
+            } catch (error) {
+                console.error('Module initialization error:', error);
+                return false;
+            }
+        }
+        
+        // Check module status
+        function checkModuleStatus() {
+            const statusEl = document.getElementById('moduleStatus');
+            const modules = [
+                { name: 'StateManager', class: StateManager },
+                { name: 'Renderer', class: Renderer },
+                { name: 'Editor', class: Editor }
+            ];
+            
+            let statusHTML = '<ul>';
+            let allLoaded = true;
+            
+            modules.forEach(module => {
+                if (typeof module.class !== 'undefined') {
+                    statusHTML += `<li>✅ ${module.name} - Loaded</li>`;
+                } else {
+                    statusHTML += `<li>❌ ${module.name} - Not Found</li>`;
+                    allLoaded = false;
+                }
+            });
+            
+            statusHTML += '</ul>';
+            
+            if (allLoaded) {
+                const initSuccess = initializeModules();
+                if (initSuccess) {
+                    statusHTML += '<div class="status status-success">✅ All modules loaded and initialized successfully</div>';
+                } else {
+                    statusHTML += '<div class="status status-error">❌ Module initialization failed</div>';
+                }
+            } else {
+                statusHTML += '<div class="status status-error">❌ Some modules are missing</div>';
+            }
+            
+            statusEl.innerHTML = statusHTML;
+        }
+        
+        // Create background controls
+        function createBackgroundControls() {
+            const container = document.getElementById('backgroundControlsContainer');
+            const statusEl = document.getElementById('controlsStatus');
+            
+            try {
+                if (!renderer) {
+                    throw new Error('Renderer not initialized');
+                }
+                
+                // Create background properties group
+                const backgroundGroup = renderer.createBackgroundPropertiesGroup();
+                
+                // Clear container and add controls
+                container.innerHTML = '';
+                container.appendChild(backgroundGroup);
+                
+                statusEl.className = 'status status-success';
+                statusEl.textContent = '✅ Background controls created successfully';
+                
+                // Bind events
+                bindBackgroundEvents();
+                
+            } catch (error) {
+                console.error('Error creating background controls:', error);
+                statusEl.className = 'status status-error';
+                statusEl.textContent = `❌ Error creating controls: ${error.message}`;
+            }
+        }
+        
+        // Bind background events
+        function bindBackgroundEvents() {
+            try {
+                // Position X
+                const xRange = document.getElementById('backgroundXRange');
+                if (xRange) {
+                    xRange.addEventListener('input', (e) => {
+                        updateSlideBackground('x', parseInt(e.target.value));
+                        updateRangeValue('backgroundXValue', e.target.value + '%');
+                    });
+                }
+                
+                // Position Y
+                const yRange = document.getElementById('backgroundYRange');
+                if (yRange) {
+                    yRange.addEventListener('input', (e) => {
+                        updateSlideBackground('y', parseInt(e.target.value));
+                        updateRangeValue('backgroundYValue', e.target.value + '%');
+                    });
+                }
+                
+                // Brightness
+                const brightnessRange = document.getElementById('backgroundBrightnessRange');
+                if (brightnessRange) {
+                    brightnessRange.addEventListener('input', (e) => {
+                        updateSlideBackground('brightness', parseInt(e.target.value));
+                        updateRangeValue('backgroundBrightnessValue', e.target.value + '%');
+                    });
+                }
+                
+                console.log('✅ Background events bound');
+                
+            } catch (error) {
+                console.error('Error binding background events:', error);
+            }
+        }
+        
+        // Update range value display
+        function updateRangeValue(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+        
+        // Update slide background
+        function updateSlideBackground(property, value) {
+            try {
+                const activeSlide = state.getActiveSlide();
+                if (!activeSlide) return;
+                
+                // Initialize background if not exists
+                if (!activeSlide.background) {
+                    activeSlide.background = {
+                        type: 'color',
+                        color: '#833ab4',
+                        image: null,
+                        x: 50,
+                        y: 50,
+                        brightness: 100
+                    };
+                }
+                
+                // Update property
+                activeSlide.background[property] = value;
+                
+                // Update display
+                updateSlideDisplay();
+                
+                console.log(`Background ${property} updated to ${value}`);
+                
+            } catch (error) {
+                console.error('Error updating slide background:', error);
+            }
+        }
+        
+        // Update slide display
+        function updateSlideDisplay() {
+            const slideEl = document.getElementById('testSlide');
+            const activeSlide = state.getActiveSlide();
+            
+            if (!slideEl || !activeSlide || !activeSlide.background) return;
+            
+            const bg = activeSlide.background;
+            
+            if (bg.type === 'image' && bg.image) {
+                slideEl.style.backgroundImage = `url(${bg.image})`;
+                slideEl.style.backgroundSize = 'cover';
+                slideEl.style.backgroundRepeat = 'no-repeat';
+                slideEl.style.backgroundPosition = `${bg.x}% ${bg.y}%`;
+                slideEl.style.filter = `brightness(${bg.brightness}%)`;
+            } else {
+                slideEl.style.backgroundImage = 'none';
+                slideEl.style.background = bg.color || 'linear-gradient(45deg, #833ab4, #fd1d1d)';
+                slideEl.style.filter = 'none';
+            }
+        }
+        
+        // Test background functions
+        function testBackgroundFunctions() {
+            try {
+                if (!editor) {
+                    throw new Error('Editor not initialized');
+                }
+                
+                // Test if background methods exist
+                const methods = [
+                    'handleBackgroundImageUpload',
+                    'removeBackgroundImage',
+                    'updateSlideBackground',
+                    'updateBackgroundControls',
+                    'updateAllControls'
+                ];
+                
+                let allMethodsExist = true;
+                methods.forEach(method => {
+                    if (typeof editor[method] !== 'function') {
+                        console.error(`Method ${method} not found`);
+                        allMethodsExist = false;
+                    }
+                });
+                
+                if (allMethodsExist) {
+                    alert('✅ All background functions are available!');
+                } else {
+                    alert('❌ Some background functions are missing!');
+                }
+                
+            } catch (error) {
+                console.error('Error testing background functions:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        // Simulate image upload
+        function simulateImageUpload() {
+            try {
+                // Create a simple test image (1x1 pixel red)
+                const canvas = document.createElement('canvas');
+                canvas.width = 100;
+                canvas.height = 100;
+                const ctx = canvas.getContext('2d');
+                
+                // Create gradient
+                const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+                gradient.addColorStop(0, '#833ab4');
+                gradient.addColorStop(1, '#fd1d1d');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 100, 100);
+                
+                // Convert to data URL
+                const imageData = canvas.toDataURL('image/png');
+                
+                // Update slide background
+                updateSlideBackground('type', 'image');
+                updateSlideBackground('image', imageData);
+                
+                alert('✅ Test image uploaded successfully!');
+                
+            } catch (error) {
+                console.error('Error simulating image upload:', error);
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkModuleStatus();
+        });
+    </script>
+</body>
+</html>

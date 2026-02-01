@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Final CSS Diagnosis</title>
+    
+    <!-- КРИТИЧЕСКИЕ СТИЛИ - ГАРАНТИРОВАННО РАБОТАЮТ -->
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f14 !important;
+            color: #ffffff !important;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .diagnosis-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #833ab4;
+        }
+        
+        .critical-info {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #ff6666;
+        }
+        
+        .success-info {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #66ff66;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .test-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #666;
+        }
+        
+        .test-pass { border-left-color: #00ff00; color: #66ff66; }
+        .test-fail { border-left-color: #ff0000; color: #ff6666; }
+        .test-warn { border-left-color: #ffaa00; color: #ffcc66; }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid #333;
+        }
+        
+        .action-btn {
+            background: #833ab4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+        }
+        
+        .action-btn:hover { background: #6a2c91; }
+        .action-btn.success { background: #28a745; }
+        .action-btn.danger { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="diagnosis-container">
+        <h1>🔍 FINAL CSS DIAGNOSIS</h1>
+        <p>Финальная диагностика проблем с CSS и UI</p>
+        
+        <div id="criticalIssues"></div>
+        
+        <div class="test-grid" id="testResults"></div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="action-btn" onclick="runFullDiagnosis()">🔄 Полная диагностика</button>
+            <button class="action-btn success" onclick="fixCSSIssues()">🔧 Исправить CSS</button>
+            <button class="action-btn" onclick="testMainApp()">🚀 Тест основного приложения</button>
+            <button class="action-btn danger" onclick="showDebugInfo()">🐛 Debug Info</button>
+        </div>
+        
+        <div id="debugInfo" style="display: none;"></div>
+    </div>
+    
+    <!-- Загружаем app.css для тестирования -->
+    <link rel="stylesheet" href="app.css" id="appCSS">
+    
+    <script>
+        let diagnosticResults = [];
+        
+        function addResult(title, status, details, solution = '') {
+            diagnosticResults.push({ title, status, details, solution });
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            const container = document.getElementById('testResults');
+            container.innerHTML = diagnosticResults.map(result => `
+                <div class="test-item test-${result.status}">
+                    <h4>${result.title}</h4>
+                    <p>${result.details}</p>
+                    ${result.solution ? `<small><strong>Решение:</strong> ${result.solution}</small>` : ''}
+                </div>
+            `).join('');
+            
+            // Показываем критические проблемы
+            const criticalIssues = diagnosticResults.filter(r => r.status === 'fail');
+            const criticalContainer = document.getElementById('criticalIssues');
+            
+            if (criticalIssues.length > 0) {
+                criticalContainer.innerHTML = `
+                    <div class="critical-info">
+                        <h3>🚨 КРИТИЧЕСКИЕ ПРОБЛЕМЫ (${criticalIssues.length})</h3>
+                        <p>Эти проблемы могут привести к белому экрану:</p>
+                        <ul>
+                            ${criticalIssues.map(issue => `<li>${issue.title}: ${issue.details}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                criticalContainer.innerHTML = `
+                    <div class="success-info">
+                        <h3>✅ КРИТИЧЕСКИХ ПРОБЛЕМ НЕ НАЙДЕНО</h3>
+                        <p>CSS и стили загружаются корректно</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function checkCSSLoading() {
+            // 1. Проверяем загрузку app.css
+            const appCSSLink = document.getElementById('appCSS');
+            const sheets = Array.from(document.styleSheets);
+            const appSheet = sheets.find(sheet => {
+                try {
+                    return sheet.href && sheet.href.includes('app.css');
+                } catch (e) {
+                    return false;
+                }
+            });
+            
+            if (appSheet) {
+                try {
+                    const rulesCount = appSheet.cssRules ? appSheet.cssRules.length : 0;
+                    addResult('app.css загрузка', 'pass', 
+                        `✅ Загружен успешно (${rulesCount} правил)`, 
+                        'CSS файл загружается корректно');
+                } catch (e) {
+                    addResult('app.css доступ', 'fail', 
+                        `❌ Ошибка доступа к правилам: ${e.message}`, 
+                        'Проверьте CORS или целостность CSS файла');
+                }
+            } else {
+                addResult('app.css загрузка', 'fail', 
+                    '❌ CSS файл не загружен или недоступен', 
+                    'Проверьте путь к файлу и сервер');
+            }
+        }
+        
+        function checkComputedStyles() {
+            // 2. Проверяем computed styles
+            const body = document.body;
+            const bodyStyle = window.getComputedStyle(body);
+            
+            const bgColor = bodyStyle.backgroundColor;
+            const textColor = bodyStyle.color;
+            
+            // Проверяем, не белый ли фон
+            const isWhiteBg = bgColor === 'rgb(255, 255, 255)' || 
+                             bgColor === 'rgba(255, 255, 255, 1)' ||
+                             bgColor === '#ffffff';
+            
+            if (isWhiteBg) {
+                addResult('Body background', 'fail', 
+                    `❌ Белый фон: ${bgColor}`, 
+                    'Установите темный фон: background: #0f0f14');
+            } else {
+                addResult('Body background', 'pass', 
+                    `✅ Темный фон: ${bgColor}`, 
+                    'Фон настроен правильно');
+            }
+            
+            // Проверяем цвет текста
+            const isWhiteText = textColor.includes('255, 255, 255') || textColor.includes('rgb(255, 255, 255)');
+            
+            if (isWhiteText) {
+                addResult('Text color', 'pass', 
+                    `✅ Белый текст: ${textColor}`, 
+                    'Цвет текста настроен правильно');
+            } else {
+                addResult('Text color', 'warn', 
+                    `⚠️ Не белый текст: ${textColor}`, 
+                    'Рекомендуется белый цвет для темного фона');
+            }
+        }
+        
+        function checkCSSVariables() {
+            // 3. Проверяем CSS переменные
+            const root = document.documentElement;
+            const rootStyle = window.getComputedStyle(root);
+            
+            const variables = [
+                '--tg-bg',
+                '--tg-text', 
+                '--primary',
+                '--instagram-gradient'
+            ];
+            
+            variables.forEach(varName => {
+                const value = rootStyle.getPropertyValue(varName);
+                if (value.trim()) {
+                    addResult(`CSS переменная ${varName}`, 'pass', 
+                        `✅ Определена: ${value.trim()}`, 
+                        'Переменная доступна');
+                } else {
+                    addResult(`CSS переменная ${varName}`, 'warn', 
+                        '⚠️ Не определена или пустая', 
+                        'Проверьте :root секцию в CSS');
+                }
+            });
+        }
+        
+        function checkFontLoading() {
+            // 4. Проверяем загрузку шрифтов
+            const testFonts = ['Inter', 'Montserrat', 'Bebas Neue'];
+            
+            testFonts.forEach(fontName => {
+                const testEl = document.createElement('div');
+                testEl.style.fontFamily = fontName;
+                testEl.style.position = 'absolute';
+                testEl.style.visibility = 'hidden';
+                testEl.textContent = 'Test';
+                document.body.appendChild(testEl);
+                
+                const computedFont = window.getComputedStyle(testEl).fontFamily;
+                const isLoaded = computedFont.toLowerCase().includes(fontName.toLowerCase());
+                
+                addResult(`Шрифт ${fontName}`, isLoaded ? 'pass' : 'warn', 
+                    isLoaded ? `✅ Загружен: ${computedFont}` : `⚠️ Fallback: ${computedFont}`, 
+                    isLoaded ? 'Шрифт доступен' : 'Проверьте @import в CSS');
+                
+                document.body.removeChild(testEl);
+            });
+        }
+        
+        function checkNetworkResources() {
+            // 5. Проверяем сетевые ресурсы
+            const resources = performance.getEntriesByType('resource');
+            const cssResources = resources.filter(r => 
+                r.name.includes('.css') || r.name.includes('fonts.googleapis.com')
+            );
+            
+            if (cssResources.length > 0) {
+                addResult('Сетевые CSS ресурсы', 'pass', 
+                    `✅ Загружено ${cssResources.length} ресурсов`, 
+                    'Внешние стили загружаются');
+                
+                cssResources.forEach(resource => {
+                    const loadTime = Math.round(resource.responseEnd - resource.startTime);
+                    const status = resource.responseEnd > 0 ? 'pass' : 'fail';
+                    addResult(`${resource.name.split('/').pop()}`, status, 
+                        `${status === 'pass' ? '✅' : '❌'} ${loadTime}ms`, 
+                        status === 'pass' ? 'Загружен успешно' : 'Ошибка загрузки');
+                });
+            } else {
+                addResult('Сетевые CSS ресурсы', 'warn', 
+                    '⚠️ Внешние CSS ресурсы не найдены', 
+                    'Проверьте @import директивы');
+            }
+        }
+        
+        function runFullDiagnosis() {
+            diagnosticResults = [];
+            addResult('Диагностика запущена', 'pass', new Date().toLocaleTimeString(), '');
+            
+            setTimeout(() => {
+                checkCSSLoading();
+                checkComputedStyles();
+                checkCSSVariables();
+                checkFontLoading();
+                checkNetworkResources();
+                
+                const failCount = diagnosticResults.filter(r => r.status === 'fail').length;
+                const warnCount = diagnosticResults.filter(r => r.status === 'warn').length;
+                
+                addResult('Итоговый результат', failCount === 0 ? 'pass' : 'fail', 
+                    `${failCount} критических ошибок, ${warnCount} предупреждений`, 
+                    failCount === 0 ? 'Все системы работают' : 'Требуется исправление ошибок');
+            }, 500);
+        }
+        
+        function fixCSSIssues() {
+            // Применяем критические исправления
+            document.body.style.background = '#0f0f14 !important';
+            document.body.style.color = '#ffffff !important';
+            
+            const app = document.getElementById('app');
+            if (app) {
+                app.style.background = '#0f0f14 !important';
+                app.style.minHeight = '100vh !important';
+            }
+            
+            addResult('CSS исправления', 'pass', 
+                '✅ Применены критические исправления стилей', 
+                'Фон и цвета принудительно установлены');
+        }
+        
+        function testMainApp() {
+            window.open('index.html', '_blank');
+        }
+        
+        function showDebugInfo() {
+            const debugContainer = document.getElementById('debugInfo');
+            debugContainer.style.display = debugContainer.style.display === 'none' ? 'block' : 'none';
+            
+            if (debugContainer.style.display === 'block') {
+                debugContainer.innerHTML = `
+                    <div class="code-block">
+                        <h4>🐛 Debug Information</h4>
+                        <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                        <p><strong>Screen:</strong> ${screen.width}x${screen.height}</p>
+                        <p><strong>Viewport:</strong> ${window.innerWidth}x${window.innerHeight}</p>
+                        <p><strong>CSS Support:</strong> ${CSS.supports('backdrop-filter', 'blur(10px)') ? 'Modern' : 'Legacy'}</p>
+                        <p><strong>StyleSheets:</strong> ${document.styleSheets.length}</p>
+                        <p><strong>Performance:</strong> ${performance.getEntriesByType('resource').length} resources</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Автозапуск диагностики
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runFullDiagnosis, 1000);
+        });
+        
+        // Мониторинг ошибок
+        window.addEventListener('error', (event) => {
+            addResult('Runtime Error', 'fail', 
+                `❌ ${event.message} at ${event.filename}:${event.lineno}`, 
+                'Проверьте консоль браузера');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Тест загрузки модулей</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .module-status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .loaded {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Тест загрузки модулей Single Source of Truth</h1>
+    <div id="moduleStatus"></div>
+    <div id="testResults"></div>
+
+    <script>
+        const modules = [
+            'StateManager',
+            'Renderer', 
+            'Editor',
+            'DragManager',
+            'ExportManager',
+            'AIManager',
+            'TemplateManager',
+            'FlashPostApp'
+        ];
+
+        function updateStatus(module, status, message) {
+            const statusDiv = document.getElementById('moduleStatus');
+            const className = status === 'loaded' ? 'loaded' : status === 'error' ? 'error' : 'loading';
+            const icon = status === 'loaded' ? '✅' : status === 'error' ? '❌' : '⏳';
+            
+            statusDiv.innerHTML += `
+                <div class="module-status ${className}">
+                    ${icon} ${module}: ${message}
+                </div>
+            `;
+        }
+
+        // Проверяем загрузку каждого модуля
+        modules.forEach(module => {
+            updateStatus(module, 'loading', 'Загрузка...');
+        });
+    </script>
+
+    <!-- Загружаем модули по порядку -->
+    <script src="src/state.js" onload="updateStatus('StateManager', 'loaded', 'Загружен успешно')" onerror="updateStatus('StateManager', 'error', 'Ошибка загрузки')"></script>
+    <script src="src/renderer.js" onload="updateStatus('Renderer', 'loaded', 'Загружен успешно')" onerror="updateStatus('Renderer', 'error', 'Ошибка загрузки')"></script>
+    <script src="src/editor.js" onload="updateStatus('Editor', 'loaded', 'Загружен успешно')" onerror="updateStatus('Editor', 'error', 'Ошибка загрузки')"></script>
+    <script src="src/drag.js" onload="updateStatus('DragManager', 'loaded', 'Загружен успешно')" onerror="updateStatus('DragManager', 'error', 'Ошибка загрузки')"></script>
+    <script src="src/export.js" onload="updateStatus('ExportManager', 'loaded', 'Загружен успешно')" onerror="updateStatus('ExportManager', 'error', 'Ошибка загрузки')"></script>
+    <script src="src/ai.js" onload="updateStatus('AIManager', 'loaded', 'Загружен успешно')" onerror="updateStatus('AIManager', 'error', 'Ошибка загрузки')"></script>
+    <script src="src/templates.js" onload="updateStatus('TemplateManager', 'loaded', 'Загружен успешно')" onerror="updateStatus('TemplateManager', 'error', 'Ошибка загрузки')"></script>
+    <script src="src/app.js" onload="updateStatus('FlashPostApp', 'loaded', 'Загружен успешно')" onerror="updateStatus('FlashPostApp', 'error', 'Ошибка загрузки')"></script>
+
+    <script>
+        // Проверяем инициализацию после загрузки всех модулей
+        setTimeout(() => {
+            const resultsDiv = document.getElementById('testResults');
+            
+            try {
+                // Проверяем, что все классы доступны
+                const checks = [
+                    { name: 'StateManager', available: typeof StateManager !== 'undefined' },
+                    { name: 'Renderer', available: typeof Renderer !== 'undefined' },
+                    { name: 'Editor', available: typeof Editor !== 'undefined' },
+                    { name: 'DragManager', available: typeof DragManager !== 'undefined' },
+                    { name: 'ExportManager', available: typeof ExportManager !== 'undefined' },
+                    { name: 'AIManager', available: typeof AIManager !== 'undefined' },
+                    { name: 'TemplateManager', available: typeof TemplateManager !== 'undefined' },
+                    { name: 'FlashPostApp', available: typeof FlashPostApp !== 'undefined' },
+                    { name: 'App Instance', available: typeof window.flashPostApp !== 'undefined' }
+                ];
+
+                resultsDiv.innerHTML = '<h2>🧪 Результаты проверки:</h2>';
+                
+                let allGood = true;
+                checks.forEach(check => {
+                    const status = check.available ? 'loaded' : 'error';
+                    const icon = check.available ? '✅' : '❌';
+                    const message = check.available ? 'Доступен' : 'Недоступен';
+                    
+                    resultsDiv.innerHTML += `
+                        <div class="module-status ${status}">
+                            ${icon} ${check.name}: ${message}
+                        </div>
+                    `;
+                    
+                    if (!check.available) allGood = false;
+                });
+
+                if (allGood) {
+                    resultsDiv.innerHTML += `
+                        <div class="module-status loaded">
+                            🎉 Все модули загружены успешно! Single Source of Truth готов к работе.
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML += `
+                        <div class="module-status error">
+                            ⚠️ Некоторые модули не загрузились. Проверьте консоль для деталей.
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="module-status error">
+                        ❌ Ошибка при проверке модулей: ${error.message}
+                    </div>
+                `;
+            }
+        }, 2000);
+
+        // Глобальный обработчик ошибок
+        window.addEventListener('error', (event) => {
+            console.error('Глобальная ошибка:', event.error);
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML += `
+                <div class="module-status error">
+                    ❌ Глобальная ошибка: ${event.error?.message || 'Неизвестная ошибка'}
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
