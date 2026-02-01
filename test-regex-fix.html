@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Тест исправления RegExp ошибки</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f14 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .test-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #4CAF50;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(131, 58, 180, 0.4);
+        }
+        
+        .result {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .error {
+            color: #ff4444;
+        }
+        
+        .success {
+            color: #44ff44;
+        }
+        
+        .input-field {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            margin: 10px 0;
+        }
+        
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔧 Тест исправления RegExp ошибки</h1>
+        
+        <!-- Тест проблемных ключевых слов -->
+        <div class="test-section">
+            <div class="test-title">🚨 Тест проблемных ключевых слов</div>
+            <p>Тестируем ключевые слова со специальными символами, которые вызывали ошибку:</p>
+            <textarea class="input-field" id="testKeywords" rows="3" placeholder="Введите ключевые слова через запятую...">+250% роста, $100, (важно), [новое], {секрет}, *бонус*, ?вопрос?, ^начало, |или|, \обратный</textarea>
+            <button class="btn" onclick="testProblematicKeywords()">🧪 Тест проблемных символов</button>
+            <div class="result" id="problematicResult"></div>
+        </div>
+        
+        <!-- Тест старой функции (без исправления) -->
+        <div class="test-section">
+            <div class="test-title">❌ Старая функция (БЕЗ исправления)</div>
+            <button class="btn" onclick="testOldFunction()">❌ Тест старой функции</button>
+            <div class="result" id="oldResult"></div>
+        </div>
+        
+        <!-- Тест новой функции (с исправлением) -->
+        <div class="test-section">
+            <div class="test-title">✅ Новая функция (С исправлением)</div>
+            <button class="btn" onclick="testNewFunction()">✅ Тест новой функции</button>
+            <div class="result" id="newResult"></div>
+        </div>
+        
+        <!-- Тест в реальном контексте -->
+        <div class="test-section">
+            <div class="test-title">🎯 Тест в реальном контексте</div>
+            <textarea class="input-field" id="testText" rows="4" placeholder="Введите текст для выделения...">Компания А показала +250% роста за год. Инвестиции в размере $100,000 принесли отличные результаты. Это (важно) для всех инвесторов!</textarea>
+            <button class="btn" onclick="testRealContext()">🎯 Тест в контексте</button>
+            <div class="result" id="contextResult"></div>
+        </div>
+        
+        <!-- Ссылка на основное приложение -->
+        <div class="test-section">
+            <div class="test-title">🚀 Проверить в основном приложении</div>
+            <p>После исправления проверьте генерацию в основном приложении:</p>
+            <button class="btn" onclick="openMainApp()">🚀 Открыть FlashPost Ultimate</button>
+        </div>
+    </div>
+
+    <script>
+        // Функция экранирования специальных символов (исправленная версия)
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        // Старая функция (БЕЗ экранирования) - для демонстрации проблемы
+        function oldApplyKeywordHighlight(text, keywords) {
+            let highlightedText = text;
+            
+            keywords.forEach(keyword => {
+                try {
+                    // ПРОБЛЕМА: не экранируем специальные символы
+                    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                    highlightedText = highlightedText.replace(regex, (match) => {
+                        return `<span style="background: yellow; color: black;">${match}</span>`;
+                    });
+                } catch (error) {
+                    throw new Error(`Ошибка в regex для "${keyword}": ${error.message}`);
+                }
+            });
+            
+            return highlightedText;
+        }
+        
+        // Новая функция (С экранированием) - исправленная версия
+        function newApplyKeywordHighlight(text, keywords) {
+            let highlightedText = text;
+            
+            keywords.forEach(keyword => {
+                try {
+                    // ИСПРАВЛЕНИЕ: экранируем специальные символы
+                    const escapedKeyword = escapeRegex(keyword);
+                    const regex = new RegExp(`\\b(${escapedKeyword})\\b`, 'gi');
+                    highlightedText = highlightedText.replace(regex, (match) => {
+                        return `<span style="background: lime; color: black;">${match}</span>`;
+                    });
+                } catch (error) {
+                    throw new Error(`Ошибка в regex для "${keyword}": ${error.message}`);
+                }
+            });
+            
+            return highlightedText;
+        }
+        
+        // Тест проблемных ключевых слов
+        function testProblematicKeywords() {
+            const keywords = document.getElementById('testKeywords').value;
+            const result = document.getElementById('problematicResult');
+            
+            result.innerHTML = '🧪 Анализируем проблемные символы...\n';
+            
+            const keywordList = keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+            
+            result.innerHTML += `📊 Найдено ключевых слов: ${keywordList.length}\n`;
+            result.innerHTML += `🔍 Список: ${keywordList.join(', ')}\n\n`;
+            
+            // Проверяем каждое ключевое слово на проблемные символы
+            const problematicChars = /[.*+?^${}()|[\]\\]/;
+            
+            keywordList.forEach((keyword, index) => {
+                const hasProblematic = problematicChars.test(keyword);
+                const problematicMatches = keyword.match(/[.*+?^${}()|[\]\\]/g) || [];
+                
+                result.innerHTML += `${index + 1}. "${keyword}": ${hasProblematic ? '⚠️ ПРОБЛЕМНЫЙ' : '✅ БЕЗОПАСНЫЙ'}\n`;
+                
+                if (hasProblematic) {
+                    result.innerHTML += `   Проблемные символы: ${problematicMatches.join(', ')}\n`;
+                    result.innerHTML += `   Экранированный: "${escapeRegex(keyword)}"\n`;
+                }
+            });
+            
+            result.innerHTML += `\n✅ Анализ завершен!`;
+        }
+        
+        // Тест старой функции
+        function testOldFunction() {
+            const result = document.getElementById('oldResult');
+            const testText = "Компания показала +250% роста и получила $100 прибыли!";
+            const keywords = ['+250% роста', '$100'];
+            
+            result.innerHTML = '❌ Тестируем СТАРУЮ функцию (без экранирования)...\n';
+            result.innerHTML += `📝 Текст: "${testText}"\n`;
+            result.innerHTML += `🔑 Ключевые слова: ${keywords.join(', ')}\n\n`;
+            
+            try {
+                const highlighted = oldApplyKeywordHighlight(testText, keywords);
+                result.innerHTML += `<span class="success">✅ НЕОЖИДАННО: Старая функция сработала!</span>\n`;
+                result.innerHTML += `📄 Результат: ${highlighted}\n`;
+            } catch (error) {
+                result.innerHTML += `<span class="error">❌ ОШИБКА (ожидаемо): ${error.message}</span>\n`;
+                result.innerHTML += `🔧 Это именно та ошибка, которую мы исправили!\n`;
+            }
+        }
+        
+        // Тест новой функции
+        function testNewFunction() {
+            const result = document.getElementById('newResult');
+            const testText = "Компания показала +250% роста и получила $100 прибыли!";
+            const keywords = ['+250% роста', '$100'];
+            
+            result.innerHTML = '✅ Тестируем НОВУЮ функцию (с экранированием)...\n';
+            result.innerHTML += `📝 Текст: "${testText}"\n`;
+            result.innerHTML += `🔑 Ключевые слова: ${keywords.join(', ')}\n\n`;
+            
+            try {
+                const highlighted = newApplyKeywordHighlight(testText, keywords);
+                result.innerHTML += `<span class="success">✅ УСПЕХ: Новая функция работает!</span>\n`;
+                result.innerHTML += `📄 Результат: ${highlighted}\n`;
+                result.innerHTML += `🔧 Специальные символы корректно экранированы!\n`;
+            } catch (error) {
+                result.innerHTML += `<span class="error">❌ ОШИБКА: ${error.message}</span>\n`;
+            }
+        }
+        
+        // Тест в реальном контексте
+        function testRealContext() {
+            const text = document.getElementById('testText').value;
+            const keywords = ['+250% роста', '$100,000', '(важно)'];
+            const result = document.getElementById('contextResult');
+            
+            result.innerHTML = '🎯 Тестируем в реальном контексте...\n';
+            result.innerHTML += `📝 Исходный текст: "${text}"\n`;
+            result.innerHTML += `🔑 Ключевые слова: ${keywords.join(', ')}\n\n`;
+            
+            try {
+                const highlighted = newApplyKeywordHighlight(text, keywords);
+                result.innerHTML += `<span class="success">✅ УСПЕХ: Выделение работает!</span>\n`;
+                result.innerHTML += `📄 Результат с выделением:\n`;
+                result.innerHTML += `${highlighted}\n\n`;
+                result.innerHTML += `🔧 Все специальные символы обработаны корректно!\n`;
+            } catch (error) {
+                result.innerHTML += `<span class="error">❌ ОШИБКА: ${error.message}</span>\n`;
+            }
+        }
+        
+        // Открыть основное приложение
+        function openMainApp() {
+            window.open('flashpost-ultimate-edition.html', '_blank');
+        }
+        
+        // Автозапуск при загрузке
+        window.onload = function() {
+            console.log('🔧 Тест исправления RegExp ошибки загружен');
+            console.log('🚨 Проблема: Invalid regular expression: /(+250% роста)/gi: Nothing to repeat');
+            console.log('✅ Решение: Экранирование специальных символов regex');
+        };
+    </script>
+</body>
+</html>

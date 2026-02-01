@@ -3071,7 +3071,9 @@
             let highlightedText = text;
             
             autoKeywords.forEach(keyword => {
-                const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                // Экранируем специальные символы regex
+                const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`\\b(${escapedKeyword})\\b`, 'gi');
                 highlightedText = highlightedText.replace(regex, (match) => {
                     return `<span class="keyword-highlight keyword-glow" style="color: #ffff00;">${match}</span>`;
                 });
@@ -3136,7 +3138,9 @@
                 let highlightedText = element.originalText;
                 
                 keywordList.forEach(keyword => {
-                    const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+                    // Экранируем специальные символы regex
+                    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`\\b(${escapedKeyword})\\b`, 'gi');
                     highlightedText = highlightedText.replace(regex, (match) => {
                         return `<span class="keyword-highlight keyword-${highlightType}" style="color: ${highlightColor};">${match}</span>`;
                     });
